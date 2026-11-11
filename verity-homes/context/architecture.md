@@ -85,6 +85,24 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
 - **Users and sessions** live in Clerk. Rows store the Clerk user id as a
   plain string in `createdBy`.
 
+## Environment variables
+
+`lib/env.ts` validates the environment in groups, so a service that is not set up
+yet never breaks the build or pages that don't use it:
+
+| Group | Variables | Validated | Who may read it |
+| --- | --- | --- | --- |
+| Core: `env` | `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`, `IP_HASH_SALT`, optional `DIRECT_URL` | At import; the build fails if invalid | Anything server-side |
+| `emailEnv()` | `RESEND_API_KEY`, `ENQUIRY_NOTIFY_TO`, `ENQUIRY_FROM` | First call (Unit 7) | `lib/email` only |
+| `clerkEnv()` | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | First call (Unit 12) | `lib/auth` only |
+| `blobEnv()` | `BLOB_READ_WRITE_TOKEN` | First call (Unit 15) | `lib/storage` only |
+
+- A feature getter throws an error that names the missing variables (never their
+  values). There are no defaults or dummy values.
+- An ESLint `no-restricted-imports` rule enforces who may import the feature getters.
+- Vercel needs only the core group until each feature unit ships; add that unit's
+  variables to Vercel in the same unit.
+
 ## Caching
 
 - `cacheComponents` is on. Public reads use `"use cache"` and a tag, with
