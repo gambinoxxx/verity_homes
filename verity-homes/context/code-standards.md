@@ -88,6 +88,9 @@
   - `DIRECT_URL` (unpooled), in `prisma.config.ts`, for migrations
   - `DATABASE_URL` (pooled), through `@prisma/adapter-neon`, in
     `lib/db/client.ts`, at runtime
+  - Prisma 7 does not read env files. `prisma.config.ts` and
+    `prisma/seed.ts` load `.env.local`, or the file named in `ENV_FILE`
+    (e.g. `ENV_FILE=.env.test`, used by `npm run db:test:reset`).
 - Slugs are generated on create (`slugify(title)`, made unique with `-2`,
   `-3`…). Renaming a published slug adds a `SlugRedirect`.
 

@@ -1,0 +1,15 @@
+# Reference material and generated output — never reformat
+design/
+backend/
+testing/
+brand/
+prompts/
+context/
+lib/generated/
+.next/
+node_modules/
+test-results/
+playwright-report/
+package-lock.json
+*.md
+prisma/migrations/

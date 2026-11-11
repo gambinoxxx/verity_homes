@@ -1,0 +1,330 @@
+// Verity Homes and Properties — database schema
+// Prisma 7 (pin prisma@7.10.x and @prisma/client@7.10.x). The connection URL lives in
+// prisma.config.ts, not here. Money is stored in kobo (BigInt). Images live in Vercel Blob;
+// the database keeps only their URL + pathname.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------- enums
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ListingType {
+  SALE
+  RENT
+  LAND
+  OFF_PLAN
+}
+
+enum PropertyType {
+  DETACHED
+  SEMI_DETACHED
+  TERRACE
+  APARTMENT
+  BUNGALOW
+  LAND
+  COMMERCIAL
+}
+
+enum PricePeriod {
+  ONE_OFF
+  PER_YEAR
+  PER_MONTH
+}
+
+enum TitleDocument {
+  C_OF_O
+  GOVERNORS_CONSENT
+  REGISTERED_DEED
+  EXCISION
+  OTHER
+}
+
+enum ProjectStatus {
+  SELLING_NOW
+  OFF_PLAN
+  UNDER_CONSTRUCTION
+  COMPLETED
+}
+
+enum PayoutFrequency {
+  MONTHLY
+  QUARTERLY
+  AT_MATURITY
+}
+
+enum EnquiryInterest {
+  BUYING
+  RENTING
+  LAND
+  INVESTING
+  MANAGEMENT
+  DEVELOPMENT
+  LISTING
+  OTHER
+}
+
+enum EnquirySource {
+  HOME_PAGE
+  PROPERTY_PAGE
+  INVEST_PAGE
+  CONTACT_PAGE
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+enum FaqPage {
+  INVEST
+  GENERAL
+}
+
+enum RedirectEntity {
+  PROPERTY
+  POST
+}
+
+// ---------------------------------------------------------------- properties
+
+model Property {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  title        String
+  listingType  ListingType
+  propertyType PropertyType
+  status       PublishStatus @default(DRAFT)
+  featured     Boolean       @default(false) // home page "Featured properties"
+  showcase     Boolean       @default(false) // home page "Developments we're proud of"
+  projectStatus ProjectStatus?               // status pill in the showcase
+
+  priceKobo      BigInt?
+  pricePeriod    PricePeriod @default(ONE_OFF)
+  priceOnRequest Boolean     @default(false)
+
+  bedrooms       Int?
+  bathrooms      Int?
+  sizeSqm        Int?
+  parkingSpaces  Int?
+  titleDocument  TitleDocument?
+  completionDate DateTime?     @db.Date // off-plan only
+  description    String        @default("") @db.Text
+  features       String[]      @default([])
+
+  // location — the public map uses lat/lng; if showExactLocation is false
+  // the public map is centred on "area, city" instead of the exact pin.
+  address           String? // private unless showExactLocation
+  area              String  // e.g. "Lekki"
+  city              String  @default("Lagos")
+  latitude          Decimal? @db.Decimal(9, 6)
+  longitude         Decimal? @db.Decimal(9, 6)
+  showExactLocation Boolean  @default(false)
+  nearby            Json?    // [{ "place": "Lekki Toll Gate", "minutes": 5 }]
+
+  seoTitle       String?
+  seoDescription String?
+
+  images    PropertyImage[]
+  documents PropertyDocument[]
+  enquiries Enquiry[]
+
+  createdBy   String? // Clerk user id
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, listingType])
+  @@index([status, featured])
+  @@index([status, showcase])
+  @@index([area])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String   // public Blob URL
+  pathname   String   // Blob pathname, needed to delete the file
+  alt        String   @default("")
+  width      Int?
+  height     Int?
+  sortOrder  Int      @default(0) // 0 = cover photo
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId, sortOrder])
+}
+
+model PropertyDocument {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name       String   // e.g. "Certificate of Occupancy (C of O)"
+  verified   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+
+  @@index([propertyId])
+}
+
+// ---------------------------------------------------------------- investment
+
+model InvestmentPlan {
+  id                String          @id @default(cuid())
+  name              String
+  badge             String?         // "Starter", "Most popular"…
+  summary           String?
+  minimumKobo       BigInt
+  returnRatePercent Decimal         @db.Decimal(5, 2) // per annum, as approved
+  tenureMonths      Int
+  payoutFrequency   PayoutFrequency
+  highlighted       Boolean         @default(false) // the gold card
+  status            PublishStatus   @default(DRAFT)
+  sortOrder         Int             @default(0)
+  enquiries         Enquiry[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Faq {
+  id        String        @id @default(cuid())
+  page      FaqPage       @default(INVEST)
+  question  String
+  answer    String        @db.Text
+  status    PublishStatus @default(DRAFT)
+  sortOrder Int           @default(0)
+}
+
+// ---------------------------------------------------------------- blog
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  posts Post[]
+}
+
+model Post {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  excerpt        String        @default("")
+  content        String        @default("") @db.Text // Markdown
+  coverUrl       String?
+  coverPathname  String?
+  coverAlt       String        @default("")
+  categoryId     String?
+  category       Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorName     String        @default("Esther Ezenagu")
+  readingMinutes Int           @default(1)
+  status         PublishStatus @default(DRAFT)
+  seoTitle       String?
+  seoDescription String?
+  publishedAt    DateTime?
+  createdBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+}
+
+// ---------------------------------------------------------------- trust
+
+model Testimonial {
+  id               String        @id @default(cuid())
+  name             String
+  serviceUsed      String        // "Home buyer", "Investment plan client"
+  quote            String        @db.Text
+  rating           Int?          // 1–5
+  avatarUrl        String?
+  avatarPathname   String?
+  consentConfirmed Boolean       @default(false) // must be true to publish
+  status           PublishStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+}
+
+model Partner {
+  id               String        @id @default(cuid())
+  name             String
+  logoUrl          String?
+  logoPathname     String?
+  website          String?
+  consentConfirmed Boolean       @default(false) // permission to show the logo
+  status           PublishStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+}
+
+// ---------------------------------------------------------------- leads
+
+model Enquiry {
+  id              String          @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  interest        EnquiryInterest @default(OTHER)
+  message         String          @default("") @db.Text
+  source          EnquirySource
+  propertyId      String?
+  property        Property?       @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  planId          String?
+  plan            InvestmentPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  wantsInspection Boolean         @default(false)
+  amountKobo      BigInt?         // investment enquiries
+  status          EnquiryStatus   @default(NEW)
+  note            String?         @db.Text // private admin note
+  ipHash          String?         // sha256(ip + salt) for rate limiting, never the raw IP
+  emailSentAt     DateTime?       // null = notification email failed / pending
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([ipHash, createdAt])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- site
+
+model SiteSettings {
+  id              Int     @id @default(1) // single row
+  phone           String?
+  whatsapp        String? // international format, digits only: 234XXXXXXXXXX
+  email           String?
+  officeArea      String  @default("Onipanu, Lagos State")
+  officeAddress   String? // shown only if showFullAddress
+  showFullAddress Boolean @default(false)
+  mapQuery        String  @default("Onipanu, Lagos") // contact page map
+  rcNumber        String  @default("9971213")
+  companyName     String  @default("Verity Homes and Properties Ltd")
+  openingHours    String?
+  instagram       String?
+  facebook        String?
+  x               String?
+  linkedin        String?
+  updatedAt       DateTime @updatedAt
+}
+
+model SlugRedirect {
+  id        String         @id @default(cuid())
+  entity    RedirectEntity
+  fromSlug  String
+  toSlug    String
+  createdAt DateTime       @default(now())
+
+  @@unique([entity, fromSlug])
+}

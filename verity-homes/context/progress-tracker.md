@@ -6,14 +6,14 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 1: project setup.
+Unit 3: site shell (Units 1–2 done).
 
 ## Units
 
 | # | Unit | Status | Design reference | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Project setup: Next 16 + TS strict, Tailwind tokens, fonts, ESLint and Prettier, `lib/env.ts`, Vitest + Playwright installed, favicons | todo | `design/assets/verity.css` | |
-| 2 | Database: copy `prisma/schema.prisma`, Prisma 7 + Neon adapter, first migration, seed (`[SAMPLE]` content + SiteSettings), query layer skeleton | todo | — | |
+| 1 | Project setup: Next 16 + TS strict, Tailwind tokens, fonts, ESLint and Prettier, `lib/env.ts`, Vitest + Playwright installed, favicons | done | `design/assets/verity.css` | Done 2026-11-11: TS strict + noUncheckedIndexedAccess, tokens in `app/globals.css` `@theme`, Playfair/Manrope via next/font, Prettier, backend helpers + tests copied (25 unit tests pass), Vitest + Playwright installed, favicons. `build` is `next build` until Prisma lands — Unit 2 must change it to `prisma generate && next build`. |
+| 2 | Database: copy `prisma/schema.prisma`, Prisma 7 + Neon adapter, first migration, seed (`[SAMPLE]` content + SiteSettings), query layer skeleton | done | — | Done 2026-11-11: Prisma 7.10.1 + adapter-neon; migration `20261111140315_init` on dev and test branches, both seeded; `lib/db/queries/*` (PUBLISHED only, no `address`, no BigInt/Decimal out); 9 query tests on the Neon test branch. Env files loaded explicitly (`ENV_FILE`, default `.env.local`); `npm run db:test:reset` = reset + seed. |
 | 3 | Site shell: header, mobile drawer, footer, preloader, WhatsApp float, back-to-top, progress bar, 404 | todo | `index.html`, `404.html` | |
 | 4 | Home page wired to the database | todo | `index.html` | |
 | 5 | Properties list, filters in the URL, pagination | todo | `properties.html` | |
@@ -63,3 +63,7 @@ Unit 1: project setup.
 11. Admin users: Esther only, or staff too?
 12. Who owns the Clerk, Neon, Vercel and Resend accounts? Use a company
     email.
+13. `.env.local` has the real Neon values and `IP_HASH_SALT`. Clerk, Blob
+    and Resend values are still placeholders, needed from Units 7 and 12.
+14. ~~`seed.ts` failed typecheck on `titleDocument`.~~ Closed in Unit 2:
+    the guard is now `"titleDocument" in data && data.titleDocument`.

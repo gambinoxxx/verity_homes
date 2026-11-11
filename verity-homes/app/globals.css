@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — ported 1:1 from design/assets/verity.css (:root) and
+ * context/ui-context.md. Components use the Tailwind utilities generated
+ * from @theme below (e.g. bg-navy, text-gold-text, rounded-card), never raw hex.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-base: #ffffff;
+  --bg-subtle: #f5f6f8;
+  --bg-cream: #f6efdd;
+  --bg-navy: #0a1a33;
+  --bg-navy-deep: #071226;
+  --bg-navy-surface: #13294b;
+  --text-primary: #0a1a33;
+  --text-muted: #4a5568;
+  --text-on-navy: #ffffff;
+  --text-on-navy-muted: #c5cedd;
+  --accent-primary: #c8a24e;
+  --accent-soft: #e9d4a0;
+  --accent-text: #8a6a22;
+  --border-default: #e3e6eb;
+  --border-input: #d7dbe2;
+  --border-navy: #22395f;
+  --state-error: #b42318;
+  --state-success: #15803d;
+  --whatsapp: #1faf55;
+  --whatsapp-float: #25d366;
+  --container: 1280px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+/* Colours reference the variables above, so utilities and hand-written CSS stay in sync. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-base: var(--bg-base);
+  --color-subtle: var(--bg-subtle);
+  --color-cream: var(--bg-cream);
+  --color-navy: var(--bg-navy);
+  --color-navy-deep: var(--bg-navy-deep);
+  --color-navy-surface: var(--bg-navy-surface);
+  --color-ink: var(--text-primary);
+  --color-muted: var(--text-muted);
+  --color-on-navy: var(--text-on-navy);
+  --color-on-navy-muted: var(--text-on-navy-muted);
+  --color-gold: var(--accent-primary);
+  --color-gold-soft: var(--accent-soft);
+  --color-gold-text: var(--accent-text);
+  --color-line: var(--border-default);
+  --color-line-input: var(--border-input);
+  --color-line-navy: var(--border-navy);
+  --color-error: var(--state-error);
+  --color-success: var(--state-success);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-float: var(--whatsapp-float);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /*
+   * Fonts: next/font (app/layout.tsx) sets --font-display and --font-sans on <html>.
+   * Those unlayered declarations override these layered fallbacks.
+   */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
+
+  /* Radius scale (context/ui-context.md) */
+  --radius-pill: 999px;
+  --radius-input: 12px;
+  --radius-card: 18px;
+  --radius-panel: 24px;
+  --radius-box: 32px;
+  --radius-sheet: 44px;
+  --radius-sheet-mobile: 28px;
+  --radius-arch: 240px;
+
+  --container-site: 1280px;
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

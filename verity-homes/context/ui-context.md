@@ -39,6 +39,22 @@ look. There are no gradient washes and no emoji.
 Gold `#C8A24E` is never used as small text on white. Use `--accent-text`
 there instead.
 
+### Tailwind names (`app/globals.css`)
+
+The CSS variables above live in `:root`. `@theme` exposes them as utilities:
+`base`, `subtle`, `cream`, `navy`, `navy-deep`, `navy-surface`, `ink`
+(text-primary), `muted`, `on-navy`, `on-navy-muted`, `gold`
+(accent-primary), `gold-soft`, `gold-text`, `line`, `line-input`,
+`line-navy`, `error`, `success`, `whatsapp` and `whatsapp-float`. For
+example: `bg-navy`, `text-gold-text`, `border-line`.
+
+Radii: `rounded-pill` (999px), `rounded-input` (12px), `rounded-card`
+(18px), `rounded-panel` (24px), `rounded-box` (32px), `rounded-sheet`
+(44px), `rounded-sheet-mobile` (28px) and `rounded-arch` (240px).
+
+Other utilities: `max-w-site` (1280px), `ease-brand`, `font-display` and
+`font-sans`.
+
 ## Typography
 
 | Role | Font | Variable |
