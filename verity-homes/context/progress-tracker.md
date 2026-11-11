@@ -6,7 +6,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 3: site shell (Units 1–2 done).
+Unit 4: home page (Units 1–3 done).
 
 ## Units
 
@@ -14,7 +14,7 @@ Unit 3: site shell (Units 1–2 done).
 | --- | --- | --- | --- | --- |
 | 1 | Project setup: Next 16 + TS strict, Tailwind tokens, fonts, ESLint and Prettier, `lib/env.ts`, Vitest + Playwright installed, favicons | done | `design/assets/verity.css` | Done 2026-11-11: TS strict + noUncheckedIndexedAccess, tokens in `app/globals.css` `@theme`, Playfair/Manrope via next/font, Prettier, backend helpers + tests copied (25 unit tests pass), Vitest + Playwright installed, favicons. `build` is `next build` until Prisma lands — Unit 2 must change it to `prisma generate && next build`. |
 | 2 | Database: copy `prisma/schema.prisma`, Prisma 7 + Neon adapter, first migration, seed (`[SAMPLE]` content + SiteSettings), query layer skeleton | done | — | Done 2026-11-11: Prisma 7.10.1 + adapter-neon; migration `20261111140315_init` on dev and test branches, both seeded; `lib/db/queries/*` (PUBLISHED only, no `address`, no BigInt/Decimal out); 9 query tests on the Neon test branch. Env files loaded explicitly (`ENV_FILE`, default `.env.local`); `npm run db:test:reset` = reset + seed. |
-| 3 | Site shell: header, mobile drawer, footer, preloader, WhatsApp float, back-to-top, progress bar, 404 | todo | `index.html`, `404.html` | |
+| 3 | Site shell: header, mobile drawer, footer, preloader, WhatsApp float, back-to-top, progress bar, 404 | done | `index.html`, `404.html` | Done 2026-11-11: `components/site/*` + shared `<SiteChrome>` used by `app/(site)/layout.tsx` and `app/not-found.tsx` (HTTP 404). `getSiteSettings()` is `"use cache"` + `cacheTag("settings")` + `cacheLife("max")`; Unit 19 must call `updateTag("settings")`. Placeholders for phone/email; WhatsApp float hidden until a number is set. Drawer: focus in, Tab trap, Esc, focus return, scroll lock. Preloader: full loads only, reduced-motion skip, curtain up within 5s. Temp token page moved to `app/(site)/page.tsx` with a navy hero. Turbopack Tailwind rule now skips `*.module.css` (it was turning CSS modules global). `lib/nav.ts` `UNBUILT_ROUTES` turns off `<Link>` prefetch for pages not built yet: **remove each route from it in the unit that builds it.** |
 | 4 | Home page wired to the database | todo | `index.html` | |
 | 5 | Properties list, filters in the URL, pagination | todo | `properties.html` | |
 | 6 | Property detail: gallery, lightbox, facts, documents, **map**, similar, JSON-LD | todo | `property.html` | |
@@ -67,3 +67,17 @@ Unit 3: site shell (Units 1–2 done).
     and Resend values are still placeholders, needed from Units 7 and 12.
 14. ~~`seed.ts` failed typecheck on `titleDocument`.~~ Closed in Unit 2:
     the guard is now `"titleDocument" in data && data.titleDocument`.
+15. Footer "Privacy policy" and "Terms" links: `/privacy` is in the page list but in no
+    unit; no terms page is planned at all. Both link to routes that 404 for now (Terms is a
+    plain `<a>`). Write the pages, or drop "Terms" from the footer?
+16. Footer newsletter form: design only, submit does nothing yet (no fake "Subscribed").
+    Which unit saves `Subscriber` rows (public action + rate limit)? Suggest Unit 7
+    alongside enquiries.
+17. Manrope from `next/font` measures ~4% wider than the copy `design/` loads from the
+    Google Fonts CSS API (canvas `measureText` 78px vs 75px for "Properties", same CSS).
+    Layout matches, but on the 390px 404 page the two buttons wrap onto two rows instead
+    of one. Accept, or pin the exact font files?
+18. `tests/e2e/public.spec.ts` (Unit 3): the "no console errors" check now ignores the one
+    console message Chromium logs for the 404 *document* on `/this-page-does-not-exist`,
+    which that route has to return. All other errors still fail. `testing/e2e/` (the kit
+    copy) is unchanged.

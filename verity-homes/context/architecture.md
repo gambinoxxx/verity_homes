@@ -58,6 +58,9 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
   a property or the site settings.
 - `lib/format.ts` — Formats money, dates and enum labels.
 - `components/site/` — Public sections and cards, ported from `design/`.
+  `site-chrome.tsx` wraps every public page and the root `app/not-found.tsx`.
+- `lib/nav.ts` — Main nav links, active-link matching, and `UNBUILT_ROUTES`
+  (no `<Link>` prefetch for pages that don't exist yet).
 - `components/admin/` — Admin tables, forms and the map picker.
 - `components/ui/` — Generated shadcn primitives.
 
@@ -78,6 +81,16 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
 - **Coordinates** are `Decimal(9,6)` latitude and longitude on Property.
 - **Users and sessions** live in Clerk. Rows store the Clerk user id as a
   plain string in `createdBy`.
+
+## Caching
+
+- `cacheComponents` is on. Data read on every page uses `"use cache"` and a
+  tag: `getSiteSettings()` is tagged `"settings"` (`SETTINGS_TAG`) with
+  `cacheLife("max")`.
+- Admin actions that change cached data call `updateTag(tag)`, as well as
+  `revalidatePath` (Unit 19: settings).
+- Vitest aliases `next/cache` to a no-op stub, so cached queries run directly
+  in unit tests.
 
 ## Maps
 

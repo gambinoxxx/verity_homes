@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
 
 const settingsSelect = {
@@ -54,7 +55,17 @@ const DEFAULTS = {
   linkedin: null,
 };
 
+/** Cache tag for the settings row. The admin settings action (Unit 19) calls updateTag(it). */
+export const SETTINGS_TAG = "settings";
+
+/**
+ * Read on every public page (header, footer, WhatsApp float), so it is cached across
+ * requests and only refetched when the "settings" tag is invalidated.
+ */
 export async function getSiteSettings(): Promise<SiteSettingsView> {
+  "use cache";
+  cacheTag(SETTINGS_TAG);
+  cacheLife("max");
   const row =
     (await db.siteSettings.findUnique({ where: { id: 1 }, select: settingsSelect })) ?? DEFAULTS;
   return {

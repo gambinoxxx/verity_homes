@@ -2,6 +2,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+const NOT_FOUND_ROUTE = "/this-page-does-not-exist";
+
 // Add new public routes here as they are built. `slug` routes use seeded [SAMPLE] data.
 const ROUTES = [
   "/",
@@ -11,16 +13,21 @@ const ROUTES = [
   "/about",
   "/blog",
   "/contact",
-  "/this-page-does-not-exist",
+  NOT_FOUND_ROUTE,
 ];
 
-function watchErrors(page: Page) {
+function watchErrors(page: Page, route: string) {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
   page.on("console", (m) => {
+    if (m.type() !== "error") return;
     // third-party map iframes may log their own noise; ignore those only
-    if (m.type() === "error" && !/google|maps|gstatic/i.test(m.text()))
-      errors.push(`console: ${m.text()}`);
+    if (/google|maps|gstatic/i.test(m.text())) return;
+    // Chromium logs "Failed to load resource: 404" for the 404 document itself. That status
+    // is what this route must return, so ignore that one message (only for that exact URL).
+    if (route === NOT_FOUND_ROUTE && new URL(m.location().url || "about:blank").pathname === route)
+      return;
+    errors.push(`console: ${m.text()}`);
   });
   return errors;
 }
@@ -28,9 +35,9 @@ function watchErrors(page: Page) {
 for (const route of ROUTES) {
   test.describe(`public page ${route}`, () => {
     test("loads cleanly, one h1, no console errors", async ({ page }) => {
-      const errors = watchErrors(page);
+      const errors = watchErrors(page, route);
       const res = await page.goto(route);
-      const expected = route === "/this-page-does-not-exist" ? 404 : 200;
+      const expected = route === NOT_FOUND_ROUTE ? 404 : 200;
       expect(res?.status(), "HTTP status").toBe(expected);
       await page.waitForLoadState("networkidle");
       await expect(page.locator("h1")).toHaveCount(1);

@@ -1,0 +1,60 @@
+/* .wa-float, .to-top and .progress from design/assets/verity.css */
+.wa {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--whatsapp-float);
+  color: var(--text-on-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.25);
+  transition: transform 0.3s;
+}
+.wa:hover {
+  transform: scale(1.08);
+}
+.wa svg {
+  width: 30px;
+  height: 30px;
+}
+
+.toTop {
+  position: fixed;
+  right: 30px;
+  bottom: 96px;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--bg-navy);
+  color: var(--accent-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.4s;
+}
+.show {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-primary);
+  z-index: 70;
+  width: 0;
+}

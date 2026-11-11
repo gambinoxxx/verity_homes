@@ -1,0 +1,123 @@
+/* .footer, .foot-grid, .news, .socials and .foot-bottom from design/assets/verity.css */
+.footer {
+  background: var(--bg-navy-deep);
+  color: var(--text-on-navy-muted);
+  padding: 88px 0 32px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 48px;
+}
+.grid h2 {
+  margin: 0 0 18px;
+  color: var(--accent-primary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.links a {
+  display: block;
+  color: var(--text-on-navy-muted);
+  text-decoration: none;
+  font-size: 14.5px;
+  padding: 6px 0;
+  transition:
+    color 0.3s,
+    transform 0.3s;
+}
+.links a:hover {
+  color: var(--text-on-navy);
+  transform: translateX(4px);
+}
+.grid p {
+  font-size: 14.5px;
+  line-height: 1.7;
+  margin: 16px 0 0;
+}
+.grid p.contact {
+  margin: 0;
+}
+.contact a {
+  color: inherit;
+  text-decoration: none;
+}
+.contact a:hover {
+  color: var(--text-on-navy);
+}
+
+.news {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.news input {
+  flex: 1 1 180px;
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--border-navy);
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+  padding: 0 18px;
+  font-size: 14px;
+}
+.news input::placeholder {
+  color: var(--placeholder-on-navy);
+}
+.news :global(.btn) {
+  min-height: 48px;
+  padding: 0 20px;
+}
+
+.socials {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.socials > * {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-navy-muted);
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+.socials > a:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.socials svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bottom {
+  border-top: 1px solid var(--border-navy-soft);
+  margin-top: 56px;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-on-navy-faint);
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

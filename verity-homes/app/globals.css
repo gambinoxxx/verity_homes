@@ -28,6 +28,13 @@
   --whatsapp-float: #25d366;
   --container: 1280px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* One-off shades used by the design shell (design/assets/verity.css) */
+  --accent-hover: #d6b464; /* .btn-gold:hover */
+  --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
+  --border-navy-soft: #1a2d4d; /* .foot-bottom border */
+  --text-on-navy-faint: #a7b2c4; /* .foot-bottom text */
+  --placeholder-on-navy: #8c98ad; /* .news input::placeholder */
 }
 
 /* Colours reference the variables above, so utilities and hand-written CSS stay in sync. */
@@ -76,6 +83,10 @@
   --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -83,6 +94,112 @@ body {
   background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
+}
+
+/* Shared pieces from design/assets/verity.css, used by every public page. */
+@utility container {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+@layer components {
+  /* Hidden until focused by keyboard. */
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--accent-primary);
+    color: var(--bg-navy-deep);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+  .skip-link:focus {
+    transform: none;
+  }
+
+  /* Placeholder text for owner-supplied facts (phone, email…): dashed underline. */
+  .ph {
+    border-bottom: 1px dashed currentColor;
+    opacity: 0.85;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 28px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.6;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition:
+      transform 0.3s var(--ease),
+      background 0.3s,
+      color 0.3s,
+      border-color 0.3s,
+      box-shadow 0.3s;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  .btn svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s var(--ease);
+  }
+  .btn:hover svg {
+    transform: translateX(3px);
+  }
+  .btn-gold {
+    background: var(--accent-primary);
+    color: var(--bg-navy-deep);
+  }
+  .btn-gold:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 12px 30px rgb(200 162 78 / 0.35);
+  }
+  .btn-white {
+    background: var(--bg-base);
+    color: var(--bg-navy);
+  }
+  .btn-navy {
+    background: var(--bg-navy);
+    color: var(--text-on-navy);
+  }
+  .btn-navy:hover {
+    background: var(--bg-navy-surface);
+  }
+  .btn-outline {
+    border-color: rgb(255 255 255 / 0.45);
+    color: var(--text-on-navy);
+  }
+  .btn-outline:hover {
+    border-color: var(--text-on-navy);
+    background: rgb(255 255 255 / 0.08);
+  }
+  .btn-outline-dark {
+    border-color: var(--bg-navy);
+    color: var(--bg-navy);
+  }
+  .btn-outline-dark:hover {
+    background: var(--bg-navy);
+    color: var(--text-on-navy);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

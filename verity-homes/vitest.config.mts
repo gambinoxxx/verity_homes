@@ -16,6 +16,8 @@ export default defineConfig({
       "@": root,
       // `server-only` throws outside the React Server Components bundler; stub it for tests.
       "server-only": fileURLToPath(new URL("tests/setup/server-only.ts", import.meta.url)),
+      // cacheTag/cacheLife need the Next.js server; no-op them so cached queries run directly.
+      "next/cache": fileURLToPath(new URL("tests/setup/next-cache.ts", import.meta.url)),
     },
   },
 });

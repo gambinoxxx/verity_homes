@@ -36,6 +36,11 @@ look. There are no gradient washes and no emoji.
 | Success | `--state-success` | `#15803D` |
 | WhatsApp | (buttons only) | `#1FAF55` / float `#25D366` |
 
+One-off shell shades also live in `:root` (from `design/assets/verity.css`):
+`--accent-hover` `#D6B464`, `--header-scrolled` `rgba(7,18,38,.96)`,
+`--border-navy-soft` `#1A2D4D`, `--text-on-navy-faint` `#A7B2C4` and
+`--placeholder-on-navy` `#8C98AD`.
+
 Gold `#C8A24E` is never used as small text on white. Use `--accent-text`
 there instead.
 
@@ -118,6 +123,15 @@ Accent words in headings are `<em>`: italic and gold.
 - **Public:** custom components in `components/site/`, ported one-to-one
   from `design/`. Keep the class structure readable, using Tailwind or CSS
   modules.
+  - Shared globals in `app/globals.css`: `.container` (1280px + 24px
+    padding, overrides Tailwind's), `.btn` / `.btn-gold` / `.btn-outline` /
+    `.btn-outline-dark` / `.btn-white` / `.btn-navy`, `.ph` (dashed
+    placeholder), `.skip-link`, `:focus-visible`.
+  - CSS modules (`*.module.css`) are plain CSS using the variables. They
+    skip the Tailwind loader, so don't use `@apply` in them.
+  - Shell: `<SiteChrome>` (`components/site/site-chrome.tsx`) = skip link,
+    scroll progress, preloader, header + drawer, `<main id="main">`, footer,
+    WhatsApp float (only when a number is set), back-to-top.
 - **Admin:** shadcn/ui (Button, Input, Select, Switch, Dialog, Table,
   Tabs, Sonner for toasts), themed with these tokens to look like
   `design/admin-*.html`.
