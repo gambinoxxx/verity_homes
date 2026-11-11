@@ -20,21 +20,25 @@ export function isActiveLink(pathname: string | null, href: string): boolean {
 }
 
 /**
- * Public routes linked from the shell that have no page yet. <Link> prefetching them
+ * Public routes linked from the site that have no page yet. <Link> prefetching them
  * returns 404s that show up as console errors, so prefetch is off for these until built.
- * Remove a route from this list in the unit that builds its page.
+ * A trailing "/*" covers child routes. Remove an entry in the unit that builds its page.
  */
-export const UNBUILT_ROUTES: ReadonlySet<string> = new Set([
+export const UNBUILT_ROUTES: readonly string[] = [
   "/properties", // Unit 5
+  "/properties/*", // Unit 6
   "/invest", // Unit 9
   "/about", // Unit 10
+  "/privacy", // Unit 10
   "/blog", // Unit 11
   "/contact", // Unit 8
-  "/privacy", // no unit yet (Open question 15)
-]);
+];
 
 /** `prefetch` prop for a <Link>: false for routes not built yet, otherwise Next's default. */
 export function prefetchFor(href: string): false | undefined {
-  const path = href.split("#")[0] || "/";
-  return UNBUILT_ROUTES.has(path) ? false : undefined;
+  const path = href.split(/[?#]/)[0] || "/";
+  const unbuilt = UNBUILT_ROUTES.some((r) =>
+    r.endsWith("/*") ? path.startsWith(r.slice(0, -1)) : path === r,
+  );
+  return unbuilt ? false : undefined;
 }

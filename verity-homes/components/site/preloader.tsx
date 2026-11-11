@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { markSiteLoaded } from "@/lib/site-loaded";
 import styles from "./preloader.module.css";
 
 type Phase = "show" | "leaving" | "done" | "gone";
@@ -20,10 +21,13 @@ export function Preloader() {
   const [phase, setPhase] = useState<Phase>(() => (hasPlayed ? "gone" : "show"));
 
   useEffect(() => {
-    if (hasPlayed && phase === "gone") return;
+    if (hasPlayed && phase === "gone") {
+      markSiteLoaded(); // client-side navigation: already loaded, keep it that way
+      return;
+    }
     hasPlayed = true;
     const html = document.documentElement;
-    const markLoaded = () => document.body.classList.add("loaded");
+    const markLoaded = markSiteLoaded;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       // CSS already hides it under reduced motion; unmount on the next tick.

@@ -84,8 +84,6 @@ export async function Footer({ settings }: FooterProps) {
             <Link href="/privacy" prefetch={prefetchFor("/privacy")}>
               Privacy policy
             </Link>
-            {/* No terms page is planned yet (Open question 15): plain link, no prefetch. */}
-            <a href="/terms">Terms</a>
           </div>
           <div>
             <h2>Get in touch</h2>

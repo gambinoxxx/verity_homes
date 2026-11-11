@@ -25,7 +25,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
+    // suppressHydrationWarning: the inline script adds the `js` class before React hydrates.
+    <html lang="en" className={`${playfair.variable} ${manrope.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Lets CSS hide reveal-on-scroll content only when JavaScript will reveal it. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

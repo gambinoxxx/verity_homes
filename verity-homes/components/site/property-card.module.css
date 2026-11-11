@@ -1,0 +1,162 @@
+/* .prop from design/index.html. Shared by the home grid and /properties (Unit 5). */
+.card {
+  position: relative;
+  background: var(--bg-base);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.5s var(--ease),
+    box-shadow 0.5s,
+    opacity 0.4s;
+}
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgb(7 18 38 / 0.14);
+}
+.image {
+  height: 260px;
+}
+.image img {
+  transition: transform 1.2s var(--ease);
+}
+.card:hover .image img {
+  transform: scale(1.08);
+}
+.tag {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  background: var(--bg-base);
+  color: var(--bg-navy);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  line-height: 1.6;
+}
+.gold {
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+}
+.fav {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: rgb(255 255 255 / 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--bg-navy);
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+.fav[aria-pressed="true"] {
+  background: var(--accent-primary);
+}
+.fav svg {
+  width: 20px;
+  height: 20px;
+}
+.body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.body h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.body h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+/* The title link covers the whole card; the heart and Enquire button sit above it. */
+.body h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.body h3 a:focus-visible {
+  outline: none;
+}
+.body h3 a:focus-visible::after {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+  border-radius: 18px;
+}
+.loc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.loc svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-text);
+  flex: none;
+}
+.specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.specs > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.specs svg {
+  width: 17px;
+  height: 17px;
+  color: var(--text-muted);
+}
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border-default);
+  padding-top: 16px;
+  margin-top: auto;
+}
+.price {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.price small {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.foot :global(.btn) {
+  position: relative;
+  z-index: 2;
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 14px;
+  flex: none;
+}

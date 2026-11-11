@@ -33,6 +33,8 @@ describe("isActiveLink", () => {
 describe("prefetchFor", () => {
   it("turns prefetch off only for routes that have no page yet", () => {
     expect(prefetchFor("/properties")).toBe(false);
+    expect(prefetchFor("/properties?type=rent")).toBe(false);
+    expect(prefetchFor("/properties/sample-duplex")).toBe(false);
     expect(prefetchFor("/")).toBeUndefined();
     expect(prefetchFor("/#services")).toBeUndefined();
   });

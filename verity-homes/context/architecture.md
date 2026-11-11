@@ -84,11 +84,13 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
 
 ## Caching
 
-- `cacheComponents` is on. Data read on every page uses `"use cache"` and a
-  tag: `getSiteSettings()` is tagged `"settings"` (`SETTINGS_TAG`) with
-  `cacheLife("max")`.
+- `cacheComponents` is on. Public reads use `"use cache"` and a tag, with
+  `cacheLife("max")`:
+  - `getSiteSettings()` is tagged `"settings"` (`SETTINGS_TAG`).
+  - `getFeaturedProperties()` is tagged `"properties"` (`PROPERTIES_TAG`). Other
+    property reads should use the same tag as they get cached.
 - Admin actions that change cached data call `updateTag(tag)`, as well as
-  `revalidatePath` (Unit 19: settings).
+  `revalidatePath` (Unit 14: `"properties"`, Unit 19: `"settings"`).
 - Vitest aliases `next/cache` to a no-op stub, so cached queries run directly
   in unit tests.
 

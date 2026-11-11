@@ -74,7 +74,8 @@ Other utilities: `max-w-site` (1280px), `ease-brand`, `font-display` and
 | Section H2 (`.h2`) | `clamp(38px, 5.2vw, 72px)`, line-height 1.02, letter-spacing -1px |
 | Body | 16–18px, line-height 1.65–1.85 |
 
-Accent words in headings are `<em>`: italic and gold.
+Accent words in headings are `<em>`: italic and gold. On light sections the gold
+is `--accent-text` (contrast); on navy it is `--accent-primary`.
 
 ## Radius scale
 
@@ -127,6 +128,11 @@ Accent words in headings are `<em>`: italic and gold.
     padding, overrides Tailwind's), `.btn` / `.btn-gold` / `.btn-outline` /
     `.btn-outline-dark` / `.btn-white` / `.btn-navy`, `.ph` (dashed
     placeholder), `.skip-link`, `:focus-visible`.
+  - Also global: `.sec`, `.sec-head`, `.eyebrow`, `.h2`, `.lead`, `.link-arrow`,
+    `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `d1`–`d3`
+    delays; `RevealObserver` adds `.in`; hidden only under `html.js`).
+  - Reusable: `PropertyCard`, `MarqueeBand` (`light`, `reverse`), `SaveButton`, `icons.tsx`
+    (the design's own glyphs, copied from its `<symbol>` set).
   - CSS modules (`*.module.css`) are plain CSS using the variables. They
     skip the Tailwind loader, so don't use `@apply` in them.
   - Shell: `<SiteChrome>` (`components/site/site-chrome.tsx`) = skip link,

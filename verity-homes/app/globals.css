@@ -109,6 +109,100 @@ body {
 }
 
 @layer components {
+  /* ---- Section typography (design/assets/verity.css: TYPE, SECTIONS) ---- */
+  .sec {
+    padding: 120px 0;
+  }
+  .sec-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 48px;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 52px;
+  }
+  .sec-head .lead {
+    max-width: 440px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 32px;
+    height: 1.5px;
+    background: currentColor;
+  }
+  .on-navy .eyebrow {
+    color: var(--accent-primary);
+  }
+  .h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(38px, 5.2vw, 72px);
+    line-height: 1.02;
+    margin: 16px 0 0;
+    letter-spacing: -1px;
+  }
+  /* The design uses #C8A24E here; on white that is ~2.3:1, so light sections use the
+     darker text gold. Navy sections keep the bright gold. */
+  .h2 em {
+    font-style: italic;
+    color: var(--accent-text);
+  }
+  .on-navy .h2 em {
+    color: var(--accent-primary);
+  }
+  .lead {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .on-navy .lead {
+    color: var(--text-on-navy-muted);
+  }
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-weight: 800;
+    font-size: 15px;
+    text-decoration: none;
+    color: var(--text-primary);
+    background: linear-gradient(var(--accent-primary), var(--accent-primary)) 0 calc(100% - 8px) /
+      100% 2px no-repeat;
+    transition: background-size 0.3s;
+  }
+  .link-arrow:hover {
+    background-size: 0 2px;
+  }
+
+  /* Image box with a house-outline fallback while the photo loads or if it is missing. */
+  .media {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-navy-surface);
+  }
+  .media::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24' fill='none' stroke='%23C8A24E' stroke-opacity='.35' stroke-width='.8'%3E%3Cpath d='M4 20V10l8-6 8 6v10'/%3E%3Cpath d='M9 20v-6h6v6'/%3E%3C/svg%3E")
+      center/80px no-repeat;
+  }
+  .media img {
+    object-fit: cover;
+  }
+
   /* Hidden until focused by keyboard. */
   .skip-link {
     position: fixed;
@@ -202,7 +296,55 @@ body {
   }
 }
 
+/* Reveal on scroll (components/site/reveal-observer.tsx adds .in). Only when JS runs. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 1s var(--ease),
+    transform 1s var(--ease);
+}
+.js .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.js .reveal.d1 {
+  transition-delay: 0.1s;
+}
+.js .reveal.d2 {
+  transition-delay: 0.2s;
+}
+.js .reveal.d3 {
+  transition-delay: 0.3s;
+}
+.js .reveal-img {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1.4s var(--ease);
+}
+.js .reveal-img.in {
+  clip-path: inset(0 0 0 0);
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 700px) {
+  .sec {
+    padding: 80px 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .js .reveal,
+  .js .reveal-img {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+
   *,
   *::before,
   *::after {

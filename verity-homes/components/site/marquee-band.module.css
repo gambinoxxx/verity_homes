@@ -1,0 +1,53 @@
+/* .band from design/index.html: huge scrolling words separated by ✦ */
+.band {
+  background: var(--bg-navy-deep);
+  color: var(--text-on-navy);
+  padding: 34px 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border-navy);
+  border-bottom: 1px solid var(--border-navy);
+}
+.light {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.track {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+.reverse .track {
+  animation-direction: reverse;
+  animation-duration: 44s;
+}
+.band:hover .track {
+  animation-play-state: paused;
+}
+.track span {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(48px, 7vw, 104px);
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -1px;
+}
+.track .outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--accent-primary);
+}
+.light .track .outline {
+  -webkit-text-stroke-color: var(--text-primary);
+}
+.track .italic {
+  font-style: italic;
+  color: var(--accent-primary);
+}
+.track svg {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  color: var(--accent-primary);
+}

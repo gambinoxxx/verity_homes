@@ -1,5 +1,6 @@
 // Public property queries. Invariants: PUBLISHED rows only, and `address` is never selected.
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
 import type {
   ListingType,
@@ -142,7 +143,14 @@ const newestFirst = [
   { createdAt: "desc" },
 ] as const satisfies Prisma.PropertyOrderByWithRelationInput[];
 
+/** Cache tag for public property reads. Admin property actions (Unit 14) call updateTag(it). */
+export const PROPERTIES_TAG = "properties";
+
+/** Home page grid. Cached until a property changes (tag "properties"). */
 export async function getFeaturedProperties(limit = 6): Promise<PropertyCard[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
   const rows = await db.property.findMany({
     where: { ...PUBLISHED, featured: true },
     orderBy: newestFirst,

@@ -1,0 +1,286 @@
+/* .hero from design/index.html */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--text-on-navy);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-navy);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(7 18 38 / 0.92) 0%,
+      rgb(7 18 38 / 0.72) 42%,
+      rgb(7 18 38 / 0.25) 100%
+    ),
+    linear-gradient(0deg, rgb(7 18 38 / 0.7), transparent 40%);
+}
+.slides {
+  position: absolute;
+  inset: 0;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.active {
+  opacity: 1;
+}
+.slide img {
+  transform: scale(1.12);
+  transition: transform 7s linear;
+}
+.active img {
+  transform: scale(1);
+}
+
+.body {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 150px 0 170px;
+}
+.body > :global(.container) {
+  width: 100%;
+}
+.copy {
+  max-width: 720px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-soft);
+  backdrop-filter: blur(6px);
+}
+.tag i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 0 0 rgb(200 162 78 / 0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  70% {
+    box-shadow: 0 0 0 10px rgb(200 162 78 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(200 162 78 / 0);
+  }
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(54px, 8vw, 116px);
+  line-height: 0.95;
+  letter-spacing: -1.5px;
+  margin: 26px 0 0;
+}
+/* Word-by-word reveal once the preloader has lifted (body.loaded). */
+.w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+}
+.w > span {
+  display: inline-block;
+  transform: translateY(105%);
+  transition: transform 1s var(--ease);
+}
+:global(.loaded) .w > span {
+  transform: none;
+}
+.w:nth-child(2) > span {
+  transition-delay: 0.12s;
+}
+.w:nth-child(3) > span {
+  transition-delay: 0.24s;
+  font-style: italic;
+  color: var(--accent-primary);
+}
+
+.caption {
+  min-height: 62px;
+  margin: 26px 0 0;
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-on-navy-muted);
+}
+.caption p {
+  margin: 0;
+  transition:
+    opacity 0.6s,
+    transform 0.6s;
+}
+.caption p.swap {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 36px;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 44px;
+  font-size: 14px;
+  color: var(--text-on-navy-muted);
+}
+.meta span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.meta svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-primary);
+}
+
+.controls {
+  position: absolute;
+  z-index: 3;
+  right: 24px;
+  bottom: 130px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.count {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+.count b {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+.dots {
+  display: flex;
+  gap: 8px;
+}
+.dots button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.dots button i {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: rgb(255 255 255 / 0.25);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.dots button i::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+/* Progress fills over one slide interval while autoplay runs. */
+.dots .playing i::after {
+  animation: fill 6s linear forwards;
+}
+.dots .current:not(.playing) i::after {
+  transform: scaleX(1);
+}
+@keyframes fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.cue {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-on-navy-muted);
+  text-decoration: none;
+}
+.cue i {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(var(--accent-primary), transparent);
+  animation: cue 2s infinite;
+}
+@keyframes cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@media (max-width: 900px) {
+  .body {
+    padding: 130px 0 210px;
+  }
+  .controls {
+    left: 24px;
+    right: auto;
+    bottom: 110px;
+  }
+  .cue {
+    display: none;
+  }
+}
+
+/* No JS-timed reveal under reduced motion: show the headline straight away. */
+@media (prefers-reduced-motion: reduce) {
+  .w > span {
+    transform: none;
+  }
+}

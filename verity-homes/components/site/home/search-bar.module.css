@@ -1,0 +1,108 @@
+/* .search from design/index.html */
+.wrap {
+  position: relative;
+  z-index: 5;
+  margin-top: -80px;
+}
+.search {
+  background: var(--bg-base);
+  border-radius: 22px;
+  box-shadow: 0 30px 60px rgb(7 18 38 / 0.18);
+  padding: 12px;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px 6px 12px;
+  flex-wrap: wrap;
+}
+.tabs button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+.tabs button[aria-selected="true"] {
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 10px;
+  background: var(--bg-subtle);
+  border-radius: 16px;
+  padding: 10px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--bg-base);
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+/* Inputs have no outline of their own (as designed), so the field box shows focus. */
+.field:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+.field label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.field input,
+.field select {
+  border: 0;
+  padding: 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  outline: none;
+  min-height: 30px;
+  width: 100%;
+}
+.field input::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.fields :global(.btn) {
+  height: 100%;
+  min-height: 62px;
+  border-radius: 12px;
+}
+.fields :global(.btn) svg {
+  color: var(--accent-primary);
+}
+@media (max-width: 900px) {
+  .fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fields :global(.btn) {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 520px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}
+/* next/font's Manrope runs ~4% wider than the design's copy (accepted, Open question 17),
+   which wraps the four tabs onto two rows at 390px. Slightly less padding keeps one row. */
+@media (max-width: 420px) {
+  .tabs button {
+    padding: 0 16px;
+  }
+}
