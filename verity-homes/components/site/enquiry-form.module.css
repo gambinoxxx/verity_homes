@@ -102,7 +102,8 @@ fieldset.fg {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
-.form :global(.btn):disabled {
+.form :global(.btn):disabled,
+.card :global(.btn):disabled {
   cursor: not-allowed;
   opacity: 0.6;
   transform: none;
@@ -125,4 +126,55 @@ fieldset.fg {
   .form {
     padding: 24px;
   }
+}
+
+/* Property sidebar variant: design/assets/verity.css `.card.enq`, `.ctl`, `.checks` */
+.card {
+  display: flex;
+  flex-direction: column;
+}
+.card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.card .fg {
+  margin-bottom: 14px;
+}
+.card .fg > label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.card .fg input,
+.card .fg textarea {
+  min-height: 48px;
+  border-radius: 12px;
+}
+.card .fg textarea {
+  padding: 12px 14px;
+}
+.card :global(.btn) {
+  width: 100%;
+}
+.card .soon {
+  margin-top: 12px;
+  font-size: 13px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bg-navy);
 }

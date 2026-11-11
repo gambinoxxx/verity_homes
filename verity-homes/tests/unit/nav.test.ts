@@ -34,9 +34,14 @@ describe("prefetchFor", () => {
   it("turns prefetch off only for routes that have no page yet", () => {
     expect(prefetchFor("/properties")).toBe(false);
     expect(prefetchFor("/properties?type=rent")).toBe(false);
-    expect(prefetchFor("/properties/sample-duplex")).toBe(false);
     expect(prefetchFor("/blog/sample-post")).toBe(false);
     expect(prefetchFor("/")).toBeUndefined();
     expect(prefetchFor("/#services")).toBeUndefined();
+  });
+
+  it("prefetches property detail pages (built in Unit 6) but not the unbuilt list", () => {
+    expect(prefetchFor("/properties/sample-duplex")).toBeUndefined();
+    expect(prefetchFor("/properties/sample-duplex#enquire")).toBeUndefined();
+    expect(prefetchFor("/properties")).toBe(false);
   });
 });

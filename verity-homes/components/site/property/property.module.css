@@ -1,0 +1,551 @@
+/* design/property.html + design/assets/verity.css: PAGE HERO, SHEET, LAYOUT, PROPERTY, MAP,
+   ENQUIRY CARD, MOBILE BAR. Plain CSS with the token variables (CSS modules skip Tailwind). */
+
+/* ---------- Page hero (short variant used on the property page) ---------- */
+.hero {
+  position: relative;
+  min-height: 300px;
+  padding: 120px 0 90px;
+  color: var(--text-on-navy);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--bg-navy);
+}
+.hero > :global(.media) {
+  position: absolute;
+  inset: 0;
+}
+.hero > :global(.media) img {
+  transform: scale(1.06);
+  animation: heroZoom 12s ease-out forwards;
+}
+@keyframes heroZoom {
+  to {
+    transform: scale(1);
+  }
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(7 18 38 / 0.75) 0%,
+    rgb(7 18 38 / 0.35) 45%,
+    rgb(7 18 38 / 0.8) 100%
+  );
+}
+.hero > :global(.container) {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-on-navy-muted);
+  margin-top: 22px;
+}
+.crumbs ol {
+  display: contents;
+  list-style: none;
+}
+.crumbs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.crumbs li + li::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  flex: none;
+}
+.crumbs a {
+  color: var(--text-on-navy);
+  text-decoration: none;
+}
+.crumbs a:hover {
+  color: var(--accent-primary);
+}
+.crumbs [aria-current] {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Sheet ---------- */
+.sheet {
+  position: relative;
+  z-index: 3;
+  background: var(--bg-base);
+  border-radius: 44px 44px 0 0;
+  margin-top: -56px;
+  padding: 88px 0 110px;
+}
+
+/* ---------- Head ---------- */
+/* Design: title left, price right on one row. A grid keeps that even for long titles
+   (flex-wrap pushed the price under a long title); it stacks at 700px as in the design. */
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px 40px;
+  align-items: end;
+  margin-bottom: 28px;
+}
+.head > div {
+  min-width: 0;
+}
+.tag {
+  display: inline-flex;
+  background: var(--bg-subtle);
+  color: var(--bg-navy);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+.tagGold {
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+}
+.head h1 {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1.02;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+.loc {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 16px;
+  color: var(--text-muted);
+}
+.loc svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-text);
+  flex: none;
+}
+.price {
+  text-align: right;
+}
+.price small {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.price b {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 44px);
+}
+.price b small {
+  display: inline;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.actions {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-input);
+  background: rgb(255 255 255 / 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--bg-navy);
+  transition:
+    background 0.3s,
+    color 0.3s;
+}
+.iconBtn[aria-pressed="true"] {
+  background: var(--accent-primary);
+}
+.iconBtn svg {
+  width: 20px;
+  height: 20px;
+}
+.copied {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--state-success);
+}
+.copied:empty {
+  display: none;
+}
+
+/* ---------- Facts ---------- */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  margin: 28px 0 48px;
+  overflow: hidden;
+}
+.facts div {
+  padding: 20px 22px;
+  border-right: 1px solid var(--border-default);
+}
+.facts div:last-child {
+  border-right: 0;
+}
+.facts dt {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.facts dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+.facts svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-text);
+}
+.noFacts {
+  margin: 28px 0 48px;
+}
+
+/* ---------- Layout: content + sticky sidebar ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 40px;
+  align-items: start;
+}
+.side {
+  position: sticky;
+  top: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scroll-margin-top: 104px;
+}
+
+/* ---------- Blocks ---------- */
+.block {
+  margin-bottom: 52px;
+}
+.block h2 {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(28px, 2.6vw, 36px);
+}
+.prose {
+  font-size: 17px;
+  line-height: 1.85;
+  color: #2b3546;
+}
+.prose p {
+  margin: 0 0 18px;
+}
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.features li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--bg-subtle);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.features svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-text);
+  flex: none;
+}
+.docs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.docs li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+.verified {
+  flex: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f5ec;
+  color: var(--success-tag-text);
+}
+.note {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 10px 0 0;
+}
+
+/* ---------- Map ---------- */
+.map {
+  position: relative;
+  height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+}
+.map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(1) contrast(1.05);
+}
+.mapCard {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  top: 16px;
+  max-width: 300px;
+  background: var(--bg-base);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 14px 34px rgb(7 18 38 / 0.18);
+}
+.mapCard b {
+  display: block;
+  font-size: 15px;
+}
+.mapCard span {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.mapCard :global(.btn) {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+.nearby {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.nearby li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px dashed var(--border-input);
+  padding: 10px 0;
+  font-size: 15px;
+}
+.nearby b {
+  font-weight: 700;
+  flex: none;
+}
+
+/* ---------- Enquiry card ---------- */
+.card {
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  padding: 26px;
+}
+.agent {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.agent img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.agent b {
+  display: block;
+}
+.agent small {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-default);
+}
+.wa {
+  width: 100%;
+  background: var(--whatsapp-button);
+  color: var(--text-on-navy);
+}
+.wa:hover {
+  background: var(--whatsapp-button-hover);
+}
+
+/* ---------- Mobile bottom bar ---------- */
+.mbar {
+  display: none;
+}
+
+/* ---------- Similar properties ---------- */
+.similar {
+  background: var(--bg-subtle);
+  padding-top: 100px;
+}
+.similar :global(.link-arrow) {
+  flex: none;
+  white-space: nowrap;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+@media (max-width: 1020px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    position: static;
+  }
+  .mbar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 45;
+    background: var(--bg-base);
+    box-shadow: 0 -10px 30px rgb(7 18 38 / 0.12);
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .mbar :global(.btn) {
+    flex: 1;
+    min-height: 48px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 860px) {
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .facts div {
+    border-bottom: 1px solid var(--border-default);
+  }
+  .facts div:nth-child(2n) {
+    border-right: 0;
+  }
+}
+@media (max-width: 700px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet {
+    border-radius: 28px 28px 0 0;
+    padding: 56px 0 80px;
+  }
+  .price {
+    text-align: left;
+  }
+  .actions {
+    justify-content: flex-start;
+  }
+  .copied {
+    left: 0;
+    right: auto;
+  }
+  .features {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .nearby {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero > :global(.media) img {
+    animation: none;
+    transform: none;
+  }
+}

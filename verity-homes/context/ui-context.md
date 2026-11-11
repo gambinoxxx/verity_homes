@@ -137,6 +137,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     (the `.pill` ticker; label read once by screen readers), `EnquiryForm` (field names match
     `enquirySchema`; Unit 7 wires it), `icons.tsx` (the design's own glyphs, copied from its
     `<symbol>` set).
+  - Property page sections live in `components/site/property/` (`sections.tsx` server parts,
+    `gallery.tsx` gallery + lightbox, `share-button.tsx`). `EnquiryForm` has a `card` variant
+    for the sidebar. The mobile bottom bar carries `data-mbar`; `floats.module.css` and
+    `footer.module.css` use `body:has([data-mbar])` for the design's `.has-mbar` offsets.
   - Home sections live in `components/site/home/`. Scroll effects (showcase, statement) are
     one client component each, batch work with `requestAnimationFrame` and skip the motion
     under `prefers-reduced-motion`.

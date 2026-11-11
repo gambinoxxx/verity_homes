@@ -76,3 +76,14 @@ export const PROJECT_STATUS_LABEL = {
   UNDER_CONSTRUCTION: "Under construction",
   COMPLETED: "Completed",
 } as const;
+
+const monthYearFmt = new Intl.DateTimeFormat("en-GB", {
+  month: "short",
+  year: "numeric",
+  timeZone: "Africa/Lagos",
+});
+
+/** 2028-06-01 → "Jun 2028" (Lagos time). Used for off-plan completion dates. */
+export function formatMonthYear(d: Date): string {
+  return monthYearFmt.format(d);
+}

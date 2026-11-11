@@ -261,16 +261,54 @@ export async function listProperties(filters: PropertyFilters = {}): Promise<Pro
   };
 }
 
-/** Published property by slug, or null. Never selects the private `address`. */
+/** Every published slug, for generateStaticParams. Cached (tag "properties"). */
+export async function getPublishedPropertySlugs(): Promise<string[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const rows = await db.property.findMany({
+    where: PUBLISHED,
+    orderBy: newestFirst,
+    select: { slug: true },
+  });
+  return rows.map((r) => r.slug);
+}
+
+/**
+ * Published property by slug, or null. Never selects the private `address`.
+ * Cached (tag "properties") so the detail page can prerender and answer 404s with a real status.
+ */
 export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | null> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
   const row = await db.property.findFirst({ where: { ...PUBLISHED, slug }, select: detailSelect });
   return row ? toDetail(row) : null;
 }
 
+/**
+ * The current slug for an old property slug (SlugRedirect), or null. Cached with the
+ * "properties" tag: slug changes happen in the property actions, which update that tag.
+ */
+export async function getPropertyRedirect(fromSlug: string): Promise<string | null> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const row = await db.slugRedirect.findUnique({
+    where: { entity_fromSlug: { entity: "PROPERTY", fromSlug } },
+    select: { toSlug: true },
+  });
+  return row?.toSlug ?? null;
+}
+
+/** Same listing type, excluding the property itself. Cached (tag "properties"). */
 export async function getSimilarProperties(
   p: { id: string; listingType: ListingType },
   limit = 3,
 ): Promise<PropertyCard[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
   const rows = await db.property.findMany({
     where: { ...PUBLISHED, listingType: p.listingType, id: { not: p.id } },
     orderBy: newestFirst,
@@ -278,4 +316,26 @@ export async function getSimilarProperties(
     select: cardSelect,
   });
   return rows.map(toCard);
+}
+
+export type SlugStatus =
+  { kind: "published" } | { kind: "redirect"; to: string } | { kind: "missing" };
+
+/**
+ * Cheap existence check for proxy.ts (two indexed lookups, no content). With Cache Components
+ * the page streams its shell first, so a 404 / 308 decided inside the page would keep a 200;
+ * the proxy answers with the real status before rendering starts.
+ */
+export async function resolvePropertySlug(slug: string): Promise<SlugStatus> {
+  const published = await db.property.findFirst({
+    where: { ...PUBLISHED, slug },
+    select: { id: true },
+  });
+  if (published) return { kind: "published" };
+  const redirect = await db.slugRedirect.findUnique({
+    where: { entity_fromSlug: { entity: "PROPERTY", fromSlug: slug } },
+    select: { toSlug: true },
+  });
+  if (redirect && redirect.toSlug !== slug) return { kind: "redirect", to: redirect.toSlug };
+  return { kind: "missing" };
 }

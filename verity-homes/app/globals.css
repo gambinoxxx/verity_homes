@@ -26,6 +26,12 @@
   --state-success: #15803d;
   --whatsapp: #1faf55;
   --whatsapp-float: #25d366;
+  /* Text buttons: white on --whatsapp is 2.9:1, so labelled WhatsApp buttons use these
+     (5.0:1 / 6.4:1). The round float icon keeps --whatsapp-float. */
+  --whatsapp-button: #15803d;
+  --whatsapp-button-hover: #126e34;
+  /* Success text on the light green tag (#e8f5ec): 5.5:1 (--state-success is 4.47:1 there). */
+  --success-tag-text: #14703a;
   --container: 1280px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
@@ -188,6 +194,12 @@ body {
   }
   .link-arrow:hover {
     background-size: 0 2px;
+  }
+  /* design/assets/verity.css: `.link-arrow svg{width:16px;height:16px}` */
+  .link-arrow svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
   }
 
   /* Image box with a house-outline fallback while the photo loads or if it is missing. */

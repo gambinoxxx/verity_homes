@@ -41,8 +41,11 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `app/api/blob/upload/` — Route handler that issues Vercel Blob client
   upload tokens, admin only.
 - `app/sitemap.ts`, `app/robots.ts` — SEO files.
-- `proxy.ts` — `clerkMiddleware` protecting `/admin/*` except the sign-in
-  page.
+- `proxy.ts` — From Unit 6: answers `/properties/[slug]` with the real status before the
+  page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
+  Components a page sends its shell (HTTP 200) first, so `notFound()` / `permanentRedirect()`
+  inside it cannot change the status. Unit 12 adds `clerkMiddleware` protecting `/admin/*`
+  except the sign-in page; Unit 11 should add `/blog/[slug]` the same way.
 - `prisma/` — `schema.prisma`, `migrations/` and `seed.ts`.
 - `lib/db/` — `client.ts` (the Prisma singleton) and `queries/*.ts`. This is
   the only place that imports the generated Prisma client.
@@ -54,6 +57,8 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
   `@vercel/blob`.
 - `lib/email/` — Resend client and templates. The only importer of `resend`.
 - `lib/auth/` — `requireAdmin()` and `isAdmin()`.
+- `lib/property-detail.ts` — Property page helpers: facts strip, description paragraphs,
+  WhatsApp text, meta description and `RealEstateListing` JSON-LD (area + city only).
 - `lib/maps.ts` — Builds map embed URLs and "Open in Google Maps" links from
   a property or the site settings.
 - `lib/format.ts` — Formats money, dates (`formatDate`, Lagos time) and enum labels.
@@ -109,7 +114,9 @@ yet never breaks the build or pages that don't use it:
   `cacheLife("max")`:
   - `getSiteSettings()` is tagged `"settings"` (`SETTINGS_TAG`).
   - `getFeaturedProperties()` and `getShowcaseProperties()` are tagged `"properties"`
-    (`PROPERTIES_TAG`). Other property reads should use the same tag as they get cached.
+    (`PROPERTIES_TAG`). So are the detail-page reads `getPublishedPropertySlugs()`,
+    `getPropertyBySlug()`, `getPropertyRedirect()` (SlugRedirect) and `getSimilarProperties()`.
+    `listProperties()` (Unit 5) should use the same tag when it is cached.
   - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`, `lib/db/queries/invest.ts`).
   - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`).
   - `getPublishedTestimonials()` is tagged `"testimonials"` and `getPublishedPartners()`
@@ -147,6 +154,10 @@ yet never breaks the build or pages that don't use it:
 - **CSP and next.config:** allow frames from `https://www.google.com` and
   `https://maps.google.com`, and images from the Blob host and
   `tile.openstreetmap.org`.
+  - Done in Unit 6: `next.config.ts` `headers()` sends `Content-Security-Policy:
+    frame-src 'self' https://www.google.com https://maps.google.com; frame-ancestors 'self';
+    object-src 'none'; base-uri 'self'`, plus `Referrer-Policy` and `X-Content-Type-Options`.
+    No `script-src`/`style-src`/`img-src` yet (Next's inline scripts would need nonces).
 
 ## Auth and access model
 
@@ -179,4 +190,4 @@ yet never breaks the build or pages that don't use it:
 8. A private property `address` is never sent to the browser on public
    pages.
 9. Changing a published slug writes a `SlugRedirect`, and the old URL issues
-   a 308 redirect to the new one.
+   a 308 redirect to the new one (done in `proxy.ts`, see System boundaries).

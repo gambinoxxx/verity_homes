@@ -6,7 +6,8 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 5: properties list (Units 1–4 done).
+Unit 5: properties list — **next** (Unit 6 was built first at the owner's request, 2026-11-11).
+Until Unit 5 ships, `/properties` and every "Properties" / "All properties" link 404.
 
 ## Units
 
@@ -17,7 +18,7 @@ Unit 5: properties list (Units 1–4 done).
 | 3 | Site shell: header, mobile drawer, footer, preloader, WhatsApp float, back-to-top, progress bar, 404 | done | `index.html`, `404.html` | Done 2026-11-11: `components/site/*` + shared `<SiteChrome>` used by `app/(site)/layout.tsx` and `app/not-found.tsx` (HTTP 404). `getSiteSettings()` is `"use cache"` + `cacheTag("settings")` + `cacheLife("max")`; Unit 19 must call `updateTag("settings")`. Placeholders for phone/email; WhatsApp float hidden until a number is set. Drawer: focus in, Tab trap, Esc, focus return, scroll lock. Preloader: full loads only, reduced-motion skip, curtain up within 5s. Temp token page moved to `app/(site)/page.tsx` with a navy hero. Turbopack Tailwind rule now skips `*.module.css` (it was turning CSS modules global). `lib/nav.ts` `UNBUILT_ROUTES` turns off `<Link>` prefetch for pages not built yet: **remove each route from it in the unit that builds it.** |
 | 4 | Home page wired to the database | done | `index.html` | **4a done 2026-11-11:** hero slider (3 slides, captions, progress dots, 01/03, slow zoom, headline reveal after the preloader via `lib/site-loaded.ts`), search bar (`lib/search.ts` → `/properties?type=sale\|rent\|land&area=&ptype=`, Invest tab → `/invest`), intro with rotating badge, first marquee band (`components/site/marquee-band.tsx`, reusable), featured properties with on-page filters and localStorage hearts. Shared `components/site/property-card.tsx` for Unit 5. `getFeaturedProperties()` cached with tag `"properties"` (Unit 14 must call `updateTag("properties")`). Global reveal-on-scroll (`reveal-observer.tsx`, `.js` class on `<html>`). **4b done 2026-11-11:** search Budget ranges per tab (`lib/search-ranges.ts`, shared with Unit 5) → `min`/`max` naira params; signature projects sticky showcase (`showcase-stack.tsx`, rAF, inert hidden panel items, hidden if none); invest section (steps, plans with highlighted gold card + rate placeholder at 0, partner marquee hidden if none, disclaimer from `lib/invest.ts`); statement scroll-fill (`statement.tsx` + `lib/scroll-fill.ts`, rAF; complete by mid-viewport; filled by CSS under reduced motion / no JS); second band (reverse, light); services accordion + image swap (`#services`); CEO; testimonials carousel (hidden if none); latest 3 posts; contact block + `components/site/enquiry-form.tsx` (submit disabled, "Form goes live soon" until Unit 7). New cached queries + tags (see architecture.md). `tests/e2e/home.spec.ts` added. |
 | 5 | Properties list, filters in the URL, pagination | todo | `properties.html` | |
-| 6 | Property detail: gallery, lightbox, facts, documents, **map**, similar, JSON-LD | todo | `property.html` | |
+| 6 | Property detail: gallery, lightbox, facts, documents, **map**, similar, JSON-LD | done | `property.html` | Done 2026-11-11 (before Unit 5, at the owner's request). `app/(site)/properties/[slug]/page.tsx`: `generateStaticParams` (published slugs, placeholder if none), cached reads (tag `"properties"`): `getPublishedPropertySlugs`, `getPropertyBySlug`, `getPropertyRedirect`, `getSimilarProperties`. **`proxy.ts`** decides the status before the shell streams (Cache Components sends a 200 shell first, so `notFound()`/`permanentRedirect()` in the page can't set it): published → page, SlugRedirect → 308, unknown/draft → 404 (`resolvePropertySlug`, two indexed lookups per request). Unit 12 adds Clerk to the same `proxy.ts`. `components/site/property/`: `gallery.tsx` (1 big + 4, "View all N photos" on the last tile, 0 photos → navy house panel, 1 photo → wide tile; lightbox dialog: arrows, ←/→, Esc, swipe, "1 / N", focus trap + return), `share-button.tsx` (navigator.share → clipboard "Link copied"), `sections.tsx` (hero + breadcrumb, head, facts/features/documents/nearby only when present, map via `lib/maps.ts`, enquiry card `id="enquire"` with `EnquiryForm` `card` variant (disabled until Unit 7), mobile bar, similar). Helpers + `RealEstateListing` JSON-LD (area + city, price only when public) in `lib/property-detail.ts` (tested). CSP + security headers in `next.config.ts`. `/properties/*` removed from `UNBUILT_ROUTES`. E2E: `property.spec.ts` all pass except the Unit 7 enquiry test (`test.fixme`); `public.spec.ts` passes for the property page; its 10 "loads cleanly" failures are the unbuilt `/properties`, `/invest`, `/about`, `/blog`, `/contact` (404). Deviations (contrast, see Q27): WhatsApp text buttons `#15803D`, "Verified" text `#14703A`. Mobile gallery shows 3 tiles with no "View all" chip, as in the design. |
 | 7 | Enquiries: form component, server action, rate limit, Resend email, WhatsApp links (used on home, property, invest and contact) | todo | `property.html`, `contact.html` | |
 | 8 | Contact page with **map** | todo | `contact.html` | |
 | 9 | Invest page: plans and FAQs from the database | todo | `invest.html` | Build now; launch needs approved wording (Q5) |
@@ -109,3 +110,27 @@ Unit 5: properties list (Units 1–4 done).
 23. Partner logos (Unit 19) and post covers (Unit 18) will be Blob URLs: add the Blob host to
     `images.remotePatterns` in `next.config.ts` in those units, or `next/image` will refuse them.
     Noted by the owner 2026-11-11 — **to do in Units 18 and 19.**
+24. ~~Unit 6 — WhatsApp e2e test vs. the seed.~~ Closed 2026-11-11: `npm run db:test:reset` ends with
+    `scripts/e2e-test-settings.ts`, which sets the obviously fake `2340000000000` on the **test
+    branch only** (refuses unless `ENV_FILE=.env.test`, refuses production, refuses if the host
+    matches `.env.local`). Not in the seed, never in the dev DB. It runs before the e2e server
+    because SiteSettings is cached (`cacheLife("max")`) and the page is prerendered — a
+    `beforeAll` in the spec runs after Playwright's webServer has built, so it could not work.
+25. **Unit 6 — order.** Unit 6 was built before Unit 5 at the owner's request. Unit 5 is next;
+    `/properties`, the breadcrumb "Properties" link and "All properties" 404 until then (prefetch
+    stays off for `/properties`).
+26. **Unit 6 — CSP scope.** The new `Content-Security-Policy` only sets `frame-src`,
+    `frame-ancestors`, `object-src` and `base-uri`. `script-src`/`style-src` need nonces for Next's
+    inline scripts — revisit in Unit 21. Units 18/19 must not need CSP changes for Blob images
+    (no `img-src` is set).
+27. **Unit 6 deviations (owner to confirm).** Design colours fail WCAG AA, so: WhatsApp *text*
+    buttons use `--whatsapp-button` `#15803D` (white text 5.0:1; design `#1FAF55` is 2.9:1), hover
+    `#126E34`; the "Verified" tag text uses `--success-tag-text` `#14703A` (5.5:1; design 4.47:1).
+    The round WhatsApp float keeps `#25D366`. The gallery tile with "View all N photos" is named
+    "Open photo 5 of 5, view all 5 photos" (WCAG 2.5.3). `.link-arrow svg` is now sized globally
+    (16px, as in the design).
+28. **Local setup on this Mac (2026-11-11).** `.env.local` is still a copy of `.env.example`
+    (placeholder Neon host and salt), so Unit 6 was built, tested and compared against the test
+    branch (`.env.test` loaded into the shell). Playwright 1.65 has no Chromium for macOS 12, so
+    e2e and compare ran in the installed Google Chrome (`channel: "chrome"`) via an uncommitted
+    override; the committed config is unchanged. Fill `.env.local` with the dev-branch values.

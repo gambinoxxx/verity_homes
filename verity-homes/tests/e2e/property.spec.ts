@@ -40,7 +40,9 @@ test("WhatsApp link names the property", async ({ page }) => {
   expect(decodeURIComponent(href)).toContain("Contemporary Detached Duplex");
 });
 
-test("enquiry form validates, then succeeds", async ({ page }) => {
+// FIXME(Unit 7): the property enquiry form is built (Unit 6) but not connected — submit stays
+// disabled with "Form goes live soon" until Unit 7 adds the server action. Remove the fixme then.
+test.fixme("enquiry form validates, then succeeds", async ({ page }) => {
   await page.goto(SLUG);
   const form = page.getByRole("form", { name: /enquire about this property/i });
   await form.getByRole("button", { name: /send enquiry/i }).click();

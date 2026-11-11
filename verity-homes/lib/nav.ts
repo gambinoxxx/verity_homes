@@ -26,7 +26,6 @@ export function isActiveLink(pathname: string | null, href: string): boolean {
  */
 export const UNBUILT_ROUTES: readonly string[] = [
   "/properties", // Unit 5
-  "/properties/*", // Unit 6
   "/invest", // Unit 9
   "/about", // Unit 10
   "/privacy", // Unit 10

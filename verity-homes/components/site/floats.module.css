@@ -58,3 +58,14 @@
   z-index: 70;
   width: 0;
 }
+
+/* Pages with the mobile bottom bar (design `.has-mbar`, the property page): lift the floats
+   above it. The bar carries [data-mbar], so no body class is needed. */
+@media (max-width: 1020px) {
+  :global(body:has([data-mbar])) .wa {
+    bottom: 86px;
+  }
+  :global(body:has([data-mbar])) .toTop {
+    bottom: 156px;
+  }
+}

@@ -121,3 +121,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Room for the property page's fixed mobile bottom bar (design `.has-mbar .footer`). */
+@media (max-width: 1020px) {
+  :global(body:has([data-mbar])) .footer {
+    padding-bottom: 110px;
+  }
+}
