@@ -52,6 +52,24 @@ export const TITLE_LABEL = {
   EXCISION: "Excision",
   OTHER: "Other",
 } as const;
+export const PAYOUT_LABEL = {
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  AT_MATURITY: "At maturity",
+} as const;
+
+const dateFmt = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Africa/Lagos",
+});
+
+/** 2026-11-11 → "11 Nov 2026" (Lagos time, so server and browser agree). */
+export function formatDate(d: Date): string {
+  return dateFmt.format(d);
+}
+
 export const PROJECT_STATUS_LABEL = {
   SELLING_NOW: "Selling now",
   OFF_PLAN: "Off-plan",

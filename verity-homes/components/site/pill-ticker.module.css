@@ -1,0 +1,36 @@
+/* design/assets/verity.css: PILL TICKER */
+.pill {
+  display: inline-flex;
+  width: 190px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 999px;
+  padding: 8px 0;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+.track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: marquee 9s linear infinite;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  padding-left: 14px;
+}
+/* Navy sections use the bright gold (Open question 20). */
+:global(.on-navy) .track {
+  color: var(--accent-primary);
+}
+.item {
+  display: flex;
+  gap: 14px;
+  white-space: nowrap;
+}
+.item i {
+  font-style: normal;
+  opacity: 0.6;
+}

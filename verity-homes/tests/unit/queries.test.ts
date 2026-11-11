@@ -107,6 +107,14 @@ describe("drafts are never returned", () => {
     expect(json((await posts.listPosts({})).items)).not.toContain(TEST_TAG);
     expect(await posts.getPostBySlug("test-draft-post")).toBeNull();
   });
+
+  it("the latest posts are published only, newest first, capped at the limit", async () => {
+    const latest = await posts.getLatestPosts(3);
+    expect(latest.length).toBeLessThanOrEqual(3);
+    expect(json(latest)).not.toContain(TEST_TAG);
+    const times = latest.map((p) => p.publishedAt?.getTime() ?? 0);
+    expect([...times].sort((x, y) => y - x)).toEqual(times);
+  });
 });
 
 describe("consent is required for testimonials and partners", () => {

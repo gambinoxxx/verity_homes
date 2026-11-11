@@ -1,0 +1,107 @@
+/* design/assets/verity.css: CEO */
+.ceo {
+  background: var(--bg-cream);
+}
+/* --accent-text is 4.4:1 on cream (needs 4.5:1 at this size), so a shade darker here. */
+.ceo :global(.eyebrow) {
+  color: var(--accent-text-on-cream);
+}
+.grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 80px;
+  align-items: center;
+}
+.photo {
+  position: relative;
+  height: 600px;
+}
+.frame {
+  position: absolute;
+  inset: 0;
+  border-radius: 240px 240px 22px 22px;
+  background: var(--bg-navy);
+  overflow: hidden;
+}
+.frame img {
+  object-fit: cover;
+  object-position: 50% 35%;
+}
+.ring {
+  position: absolute;
+  inset: -18px -18px 40px 40px;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 250px 250px 26px 26px;
+  pointer-events: none;
+}
+.card {
+  position: absolute;
+  right: -20px;
+  bottom: 40px;
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 20px 40px rgb(7 18 38 / 0.3);
+}
+.card b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+.card span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-soft);
+}
+.lead1 {
+  margin-top: 22px;
+}
+.lead2 {
+  margin-top: 16px;
+}
+.ceo blockquote {
+  margin: 30px 0 0;
+  padding: 0 0 0 28px;
+  position: relative;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1.45;
+}
+.ceo blockquote::before {
+  content: "\201C";
+  position: absolute;
+  left: -6px;
+  top: -18px;
+  font-size: 80px;
+  color: var(--accent-primary);
+  font-style: normal;
+  line-height: 1;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 56px;
+  }
+  .photo {
+    height: 500px;
+    max-width: 460px;
+    margin-bottom: 28px;
+  }
+  .card {
+    right: 12px;
+    bottom: -28px;
+    padding: 14px 18px;
+  }
+  .card b {
+    font-size: 19px;
+  }
+}

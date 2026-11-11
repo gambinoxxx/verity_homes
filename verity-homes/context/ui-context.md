@@ -38,8 +38,10 @@ look. There are no gradient washes and no emoji.
 
 One-off shell shades also live in `:root` (from `design/assets/verity.css`):
 `--accent-hover` `#D6B464`, `--header-scrolled` `rgba(7,18,38,.96)`,
-`--border-navy-soft` `#1A2D4D`, `--text-on-navy-faint` `#A7B2C4` and
-`--placeholder-on-navy` `#8C98AD`.
+`--border-navy-soft` `#1A2D4D`, `--text-on-navy-faint` `#A7B2C4`,
+`--placeholder-on-navy` `#8C98AD`, `--text-on-navy-dim` `#7F8CA3` (showcase dots),
+`--border-navy-dashed` `#3A5482` (partner tiles), `--statement-unfilled` `#D5D9E0` and
+`--accent-text-on-cream` `#866720` (small gold text on cream; `--accent-text` is 4.4:1 there).
 
 Gold `#C8A24E` is never used as small text on white. Use `--accent-text`
 there instead.
@@ -131,8 +133,13 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Also global: `.sec`, `.sec-head`, `.eyebrow`, `.h2`, `.lead`, `.link-arrow`,
     `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `d1`–`d3`
     delays; `RevealObserver` adds `.in`; hidden only under `html.js`).
-  - Reusable: `PropertyCard`, `MarqueeBand` (`light`, `reverse`), `SaveButton`, `icons.tsx`
-    (the design's own glyphs, copied from its `<symbol>` set).
+  - Reusable: `PropertyCard`, `MarqueeBand` (`light`, `reverse`), `SaveButton`, `PillTicker`
+    (the `.pill` ticker; label read once by screen readers), `EnquiryForm` (field names match
+    `enquirySchema`; Unit 7 wires it), `icons.tsx` (the design's own glyphs, copied from its
+    `<symbol>` set).
+  - Home sections live in `components/site/home/`. Scroll effects (showcase, statement) are
+    one client component each, batch work with `requestAnimationFrame` and skip the motion
+    under `prefers-reduced-motion`.
   - CSS modules (`*.module.css`) are plain CSS using the variables. They
     skip the Tailwind loader, so don't use `@apply` in them.
   - Shell: `<SiteChrome>` (`components/site/site-chrome.tsx`) = skip link,

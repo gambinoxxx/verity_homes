@@ -35,6 +35,7 @@ describe("prefetchFor", () => {
     expect(prefetchFor("/properties")).toBe(false);
     expect(prefetchFor("/properties?type=rent")).toBe(false);
     expect(prefetchFor("/properties/sample-duplex")).toBe(false);
+    expect(prefetchFor("/blog/sample-post")).toBe(false);
     expect(prefetchFor("/")).toBeUndefined();
     expect(prefetchFor("/#services")).toBeUndefined();
   });

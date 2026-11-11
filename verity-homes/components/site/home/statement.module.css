@@ -1,0 +1,65 @@
+/* design/assets/verity.css: STATEMENT (scroll-fill text) */
+.statement {
+  padding: 130px 0;
+  background: var(--bg-base);
+}
+.statement p {
+  margin: 0 auto;
+  max-width: 1100px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(32px, 4.4vw, 64px);
+  line-height: 1.14;
+  letter-spacing: -0.8px;
+  text-align: center;
+}
+.wd {
+  color: var(--statement-unfilled);
+  transition: color 0.4s;
+}
+.wd.on {
+  color: var(--text-primary);
+}
+/* Design: #C8A24E. On white that fails contrast, so the darker text gold (Open question 20). */
+.wd.gold.on {
+  color: var(--accent-text);
+  font-style: italic;
+}
+.sig {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+.sig b {
+  color: var(--text-primary);
+}
+.sig i {
+  flex: none;
+  width: 40px;
+  height: 1.5px;
+  background: var(--accent-primary);
+}
+/* Filled from the start without the scroll effect: reduced motion, or no JavaScript. This
+   is CSS rather than state, so it holds before hydration too. */
+@media (prefers-reduced-motion: reduce) {
+  .wd {
+    color: var(--text-primary);
+  }
+  .wd.gold {
+    color: var(--accent-text);
+    font-style: italic;
+  }
+}
+:global(html:not(.js)) .wd {
+  color: var(--text-primary);
+}
+:global(html:not(.js)) .wd.gold {
+  color: var(--accent-text);
+  font-style: italic;
+}

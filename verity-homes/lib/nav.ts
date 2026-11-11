@@ -31,6 +31,7 @@ export const UNBUILT_ROUTES: readonly string[] = [
   "/about", // Unit 10
   "/privacy", // Unit 10
   "/blog", // Unit 11
+  "/blog/*", // Unit 11
   "/contact", // Unit 8
 ];
 

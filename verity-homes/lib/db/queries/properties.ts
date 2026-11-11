@@ -160,7 +160,11 @@ export async function getFeaturedProperties(limit = 6): Promise<PropertyCard[]> 
   return rows.map(toCard);
 }
 
+/** Home "Signature projects" showcase. Cached until a property changes (tag "properties"). */
 export async function getShowcaseProperties(limit = 4): Promise<PropertyCard[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
   const rows = await db.property.findMany({
     where: { ...PUBLISHED, showcase: true },
     orderBy: newestFirst,

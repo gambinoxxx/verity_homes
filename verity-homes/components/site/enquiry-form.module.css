@@ -1,0 +1,128 @@
+/* design/assets/verity.css: CONTACT (.form, .row, .fg, .chips) */
+.form {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  border-radius: 22px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.fg {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+fieldset.fg {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.fg legend {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding: 0;
+}
+.fg > label {
+  font-size: 13px;
+  font-weight: 700;
+}
+.fg input,
+.fg textarea {
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 0 14px;
+  min-height: 50px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+.fg textarea {
+  padding: 14px;
+  resize: vertical;
+}
+.fg input:focus,
+.fg textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgb(200 162 78 / 0.18);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips label {
+  position: relative;
+}
+.chips input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+}
+.chips span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-input);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.chips input:checked + span {
+  background: var(--bg-navy);
+  border-color: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+.chips input:focus-visible + span {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+.form :global(.btn):disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+.soon {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+.note {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+  .form {
+    padding: 24px;
+  }
+}

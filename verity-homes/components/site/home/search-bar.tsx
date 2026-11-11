@@ -2,14 +2,28 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, type KeyboardEvent } from "react";
-import { SEARCH_PROPERTY_TYPES, SEARCH_TABS, searchHref, type SearchTab } from "@/lib/search";
+import {
+  SEARCH_PROPERTY_TYPES,
+  SEARCH_TABS,
+  TYPE_PARAM,
+  searchHref,
+  type SearchTab,
+} from "@/lib/search";
+import { BUDGET_RANGES } from "@/lib/search-ranges";
 import { SearchIcon } from "../icons";
 import styles from "./search-bar.module.css";
 
 /** Search card overlapping the hero. Submits to /properties with query params. */
 export function SearchBar() {
   const router = useRouter();
-  const [tab, setTab] = useState<SearchTab>("buy");
+  const [tab, setTabState] = useState<SearchTab>("buy");
+  const [budget, setBudget] = useState("");
+  const ranges = tab === "invest" ? [] : BUDGET_RANGES[TYPE_PARAM[tab]];
+  // Each tab has its own ranges, so a chosen budget never carries over to another tab.
+  const setTab = (next: SearchTab) => {
+    setTabState(next);
+    setBudget("");
+  };
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Arrow keys move between tabs (WAI-ARIA tabs pattern); only the selected tab is in the Tab order.
@@ -37,6 +51,7 @@ export function SearchBar() {
               searchHref(tab, {
                 area: String(data.get("area") ?? ""),
                 ptype: String(data.get("ptype") ?? ""),
+                budget,
               }),
             );
           }}
@@ -77,12 +92,20 @@ export function SearchBar() {
             </div>
             <div className={styles.field}>
               <label htmlFor="s-bud">Budget</label>
-              {/* Budget ranges are not set yet (Open question 19): placeholders, not selectable. */}
-              <select id="s-bud" name="budget" defaultValue="">
+              {/* Ranges follow the tab (lib/search-ranges.ts). The Invest tab has none. */}
+              <select
+                id="s-bud"
+                name="budget"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                disabled={ranges.length === 0}
+              >
                 <option value="">Any budget</option>
-                <option disabled>[Budget range 1]</option>
-                <option disabled>[Budget range 2]</option>
-                <option disabled>[Budget range 3]</option>
+                {ranges.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.label}
+                  </option>
+                ))}
               </select>
             </div>
             <button className="btn btn-navy" type="submit">

@@ -1,0 +1,146 @@
+/* design/assets/verity.css: SERVICES (accordion + image swap) */
+.list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+.items {
+  border-top: 1px solid var(--border-default);
+}
+.item {
+  border-bottom: 1px solid var(--border-default);
+  padding: 26px 0;
+}
+.item h3 {
+  margin: 0;
+  font: inherit;
+}
+.item button {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+.n {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--accent-text);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 600;
+  transition:
+    color 0.3s,
+    transform 0.4s var(--ease);
+}
+.ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--border-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s;
+}
+.ic svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.4s;
+}
+.panel {
+  /* Under the title: 64px number column + 18px gap (design: grid-column 2/4). The top padding
+     is the design's 18px grid row gap, which it keeps even while the text is collapsed. */
+  padding: 18px 0 0 82px;
+}
+.panel p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.5s var(--ease),
+    opacity 0.4s,
+    margin 0.4s;
+}
+.active .title {
+  transform: translateX(6px);
+}
+.active .panel p {
+  max-height: 120px;
+  opacity: 1;
+  margin-top: 4px;
+}
+.active .ic {
+  background: var(--bg-navy);
+  border-color: var(--bg-navy);
+  color: var(--accent-primary);
+}
+.active .ic svg {
+  transform: rotate(-45deg);
+}
+.visual {
+  position: sticky;
+  top: 110px;
+  height: 560px;
+  border-radius: 22px;
+}
+.shot {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  opacity: 0;
+  transition: opacity 0.7s;
+}
+.show {
+  opacity: 1;
+}
+.cap {
+  position: absolute;
+  z-index: 2;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  background: rgb(7 18 38 / 0.82);
+  backdrop-filter: blur(6px);
+  color: var(--text-on-navy);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.cap b {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+.capBtn:global(.btn) {
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 14px;
+}
+@media (max-width: 960px) {
+  .list {
+    grid-template-columns: 1fr;
+  }
+  .visual {
+    position: relative;
+    top: 0;
+    height: 360px;
+    order: -1;
+  }
+}

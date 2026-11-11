@@ -56,7 +56,10 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `lib/auth/` — `requireAdmin()` and `isAdmin()`.
 - `lib/maps.ts` — Builds map embed URLs and "Open in Google Maps" links from
   a property or the site settings.
-- `lib/format.ts` — Formats money, dates and enum labels.
+- `lib/format.ts` — Formats money, dates (`formatDate`, Lagos time) and enum labels.
+- `lib/search.ts` + `lib/search-ranges.ts` — Search URL building and the budget ranges
+  (naira) per listing type, shared by the home search and the `/properties` filters.
+- `lib/invest.ts` — Shared investment copy: the disclaimer and the 4 steps.
 - `components/site/` — Public sections and cards, ported from `design/`.
   `site-chrome.tsx` wraps every public page and the root `app/not-found.tsx`.
 - `lib/nav.ts` — Main nav links, active-link matching, and `UNBUILT_ROUTES`
@@ -87,10 +90,22 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
 - `cacheComponents` is on. Public reads use `"use cache"` and a tag, with
   `cacheLife("max")`:
   - `getSiteSettings()` is tagged `"settings"` (`SETTINGS_TAG`).
-  - `getFeaturedProperties()` is tagged `"properties"` (`PROPERTIES_TAG`). Other
-    property reads should use the same tag as they get cached.
+  - `getFeaturedProperties()` and `getShowcaseProperties()` are tagged `"properties"`
+    (`PROPERTIES_TAG`). Other property reads should use the same tag as they get cached.
+  - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`, `lib/db/queries/invest.ts`).
+  - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`).
+  - `getPublishedTestimonials()` is tagged `"testimonials"` and `getPublishedPartners()`
+    `"partners"` (`TESTIMONIALS_TAG`, `PARTNERS_TAG`, `lib/db/queries/trust.ts`).
+- With `cacheComponents`, a page that reads uncached data outside `<Suspense>` fails the
+  build, so every query used by a static public page is cached like this.
 - Admin actions that change cached data call `updateTag(tag)`, as well as
-  `revalidatePath` (Unit 14: `"properties"`, Unit 19: `"settings"`).
+  `revalidatePath`:
+  | Unit | Admin area | Tags to update |
+  | --- | --- | --- |
+  | 14–15 | Properties, photos | `"properties"` |
+  | 17 | Plans (FAQs once cached) | `"plans"` |
+  | 18 | Posts, categories | `"posts"` |
+  | 19 | Testimonials, partners, settings | `"testimonials"`, `"partners"`, `"settings"` |
 - Vitest aliases `next/cache` to a no-op stub, so cached queries run directly
   in unit tests.
 

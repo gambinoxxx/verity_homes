@@ -1,6 +1,6 @@
 // Spec for lib/format.ts — implement the functions so these pass.
 import { describe, expect, it } from "vitest";
-import { formatNaira, formatPrice, koboFromNaira } from "@/lib/format";
+import { formatDate, formatNaira, formatPrice, koboFromNaira } from "@/lib/format";
 
 describe("formatNaira", () => {
   it("formats kobo as whole naira with separators", () => {
@@ -41,5 +41,13 @@ describe("formatPrice", () => {
     expect(
       formatPrice({ priceKobo: 30_000_000n, pricePeriod: "PER_MONTH", priceOnRequest: false }),
     ).toBe("₦300,000 / month");
+  });
+});
+
+describe("formatDate", () => {
+  it("formats in Lagos time as day, short month, year", () => {
+    expect(formatDate(new Date("2026-11-11T10:00:00Z"))).toBe("11 Nov 2026");
+    // 23:30 UTC on 31 Dec is already 1 Jan in Lagos (UTC+1).
+    expect(formatDate(new Date("2026-12-31T23:30:00Z"))).toBe("1 Jan 2027");
   });
 });

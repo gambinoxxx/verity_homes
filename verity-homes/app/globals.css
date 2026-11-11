@@ -35,6 +35,10 @@
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */
   --text-on-navy-faint: #a7b2c4; /* .foot-bottom text */
   --placeholder-on-navy: #8c98ad; /* .news input::placeholder */
+  --text-on-navy-dim: #7f8ca3; /* .sc-dots inactive numbers */
+  --border-navy-dashed: #3a5482; /* .marquee-track partner tiles */
+  --statement-unfilled: #d5d9e0; /* .statement .wd before it fills */
+  --accent-text-on-cream: #866720; /* small gold text on --bg-cream: #8a6a22 is 4.4:1 there */
 }
 
 /* Colours reference the variables above, so utilities and hand-written CSS stay in sync. */

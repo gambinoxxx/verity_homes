@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
 import type { FaqPage, PayoutFrequency } from "@/lib/generated/prisma/client";
 import { decimalToNumber, koboToNumber } from "./convert";
@@ -16,7 +17,14 @@ export type PlanView = {
   highlighted: boolean;
 };
 
+/** Cache tag for plan reads. The admin plan actions (Unit 17) call updateTag(it). */
+export const PLANS_TAG = "plans";
+
+/** Home invest section and /invest. Cached until a plan changes (tag "plans"). */
 export async function getPublishedPlans(): Promise<PlanView[]> {
+  "use cache";
+  cacheTag(PLANS_TAG);
+  cacheLife("max");
   const rows = await db.investmentPlan.findMany({
     where: { status: "PUBLISHED" },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],

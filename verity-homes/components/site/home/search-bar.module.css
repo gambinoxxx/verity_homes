@@ -74,6 +74,10 @@
   min-height: 30px;
   width: 100%;
 }
+.field select:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
 .field input::placeholder {
   color: var(--text-muted);
   font-weight: 500;

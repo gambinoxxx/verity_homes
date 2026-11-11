@@ -23,7 +23,7 @@ export function MarqueeBand({ words, light = false, reverse = false }: MarqueeBa
       <div className={styles.track}>
         {[0, 1].map((copy) =>
           words.map((w, i) => (
-            <Fragment key={`${copy}-${w}`}>
+            <Fragment key={`${copy}-${i}`}>
               <span className={STYLE_CYCLE[i % 3]}>{w}</span>
               <SparkIcon />
             </Fragment>

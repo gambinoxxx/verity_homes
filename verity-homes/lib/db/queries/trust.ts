@@ -1,5 +1,6 @@
 // Testimonials and partners: public only when PUBLISHED *and* consentConfirmed.
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
 
 const PUBLIC = { status: "PUBLISHED", consentConfirmed: true } as const;
@@ -13,7 +14,15 @@ export type TestimonialView = {
   avatarUrl: string | null;
 };
 
+/** Cache tag for testimonial reads. The admin testimonial actions (Unit 19) call updateTag(it). */
+export const TESTIMONIALS_TAG = "testimonials";
+/** Cache tag for partner reads. The admin partner actions (Unit 19) call updateTag(it). */
+export const PARTNERS_TAG = "partners";
+
 export async function getPublishedTestimonials(): Promise<TestimonialView[]> {
+  "use cache";
+  cacheTag(TESTIMONIALS_TAG);
+  cacheLife("max");
   return db.testimonial.findMany({
     where: PUBLIC,
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -29,6 +38,9 @@ export type PartnerView = {
 };
 
 export async function getPublishedPartners(): Promise<PartnerView[]> {
+  "use cache";
+  cacheTag(PARTNERS_TAG);
+  cacheLife("max");
   return db.partner.findMany({
     where: PUBLIC,
     orderBy: { sortOrder: "asc" },

@@ -1,4 +1,5 @@
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
@@ -57,6 +58,22 @@ export async function listPosts(filters: PostFilters = {}): Promise<PostPage> {
     }),
   ]);
   return { items, total, page, pageCount: Math.max(1, Math.ceil(total / POSTS_PER_PAGE)) };
+}
+
+/** Cache tag for post reads. The admin post actions (Unit 18) call updateTag(it). */
+export const POSTS_TAG = "posts";
+
+/** Newest published posts for the home page. Cached until a post changes (tag "posts"). */
+export async function getLatestPosts(limit = 3): Promise<PostSummary[]> {
+  "use cache";
+  cacheTag(POSTS_TAG);
+  cacheLife("max");
+  return db.post.findMany({
+    where: PUBLISHED,
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    take: limit,
+    select: listSelect,
+  });
 }
 
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
