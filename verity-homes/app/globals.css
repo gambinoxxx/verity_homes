@@ -36,6 +36,7 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
   /* One-off shades used by the design shell (design/assets/verity.css) */
+  --text-prose: #2b3546; /* .prose body text (articles, privacy) */
   --accent-hover: #d6b464; /* .btn-gold:hover */
   --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */
@@ -354,6 +355,54 @@ body {
     line-height: 1.6;
   }
 
+  /* ---- Article column + prose (design/assets/verity.css: .article, .prose) ----
+     Used by /privacy and the blog post page (Unit 11). */
+  .prose {
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--text-prose);
+  }
+  .prose p {
+    margin: 0 0 18px;
+  }
+  .prose h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(26px, 2.6vw, 34px);
+    line-height: 1.25;
+    color: var(--text-primary);
+    margin: 40px 0 14px;
+  }
+  .prose h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 28px 0 10px;
+  }
+  .prose blockquote {
+    margin: 28px 0;
+    padding: 6px 0 6px 24px;
+    border-left: 3px solid var(--accent-primary);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--text-primary);
+  }
+  .prose ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 0 0 18px;
+  }
+  .prose li {
+    margin-bottom: 8px;
+  }
+  .prose a {
+    color: var(--text-primary);
+    font-weight: 700;
+    text-decoration-color: var(--accent-primary);
+    text-underline-offset: 3px;
+  }
+
   /* Hidden until focused by keyboard. */
   .skip-link {
     position: fixed;
@@ -514,4 +563,11 @@ body {
     transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* design .article: 780px column. Unlayered on purpose: it must beat the `container` utility
+   (utilities layer) on the same element (`<article class="container article">`). */
+.article {
+  max-width: 780px;
+  margin: 0 auto;
 }

@@ -101,3 +101,18 @@
     padding: 130px 0 90px;
   }
 }
+
+/* design/post.html: `.page-hero` with min-height 520px and an inline-styled smaller h1. */
+.post {
+  min-height: 520px;
+}
+.postText {
+  max-width: 900px;
+}
+.post .title {
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 1;
+}
+.postText > :first-child:not(.title) + .title {
+  margin-top: 20px;
+}

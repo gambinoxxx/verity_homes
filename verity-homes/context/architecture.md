@@ -71,6 +71,9 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `lib/search.ts` + `lib/search-ranges.ts` — Search URL building and the budget ranges
   (naira) per listing type, shared by the home search and the `/properties` filters.
 - `lib/invest.ts` — Shared investment copy: the disclaimer and the 4 steps.
+- `components/site/privacy/privacy-notice.tsx` — The /privacy DRAFT notice. It describes what the
+  code collects; when a unit changes what is collected, stored or shared (new form field, new
+  processor, analytics, cookies), update the notice and `PRIVACY_LAST_UPDATED` in the same unit.
 - `components/site/` — Public sections and cards, ported from `design/`.
   `site-chrome.tsx` wraps every public page and the root `app/not-found.tsx`.
 - `lib/nav.ts` — Main nav links, active-link matching, and `UNBUILT_ROUTES`

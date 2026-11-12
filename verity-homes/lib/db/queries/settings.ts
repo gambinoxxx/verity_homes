@@ -23,6 +23,8 @@ export type SiteSettingsView = {
   phone: string | null;
   whatsapp: string | null;
   email: string | null;
+  /** The area only ("Onipanu, Lagos State"), never the street address (/about CAC card). */
+  officeArea: string;
   /** The address line safe to show publicly: officeAddress only if showFullAddress is on. */
   officeDisplay: string;
   mapQuery: string;
@@ -72,6 +74,7 @@ export async function getSiteSettings(): Promise<SiteSettingsView> {
     phone: row.phone,
     whatsapp: row.whatsapp,
     email: row.email,
+    officeArea: row.officeArea,
     officeDisplay: row.showFullAddress && row.officeAddress ? row.officeAddress : row.officeArea,
     mapQuery: row.mapQuery,
     rcNumber: row.rcNumber,

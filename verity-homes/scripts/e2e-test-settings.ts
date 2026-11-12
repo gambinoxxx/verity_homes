@@ -6,6 +6,7 @@
 // - refuses unless ENV_FILE=.env.test
 // - refuses production (NODE_ENV / VERCEL_ENV)
 // - refuses if the test DATABASE_URL host equals the one in .env.local
+// Also adds two [E2E] partners that are not public (see E2E_HIDDEN_PARTNERS).
 // It runs before the e2e server is built: SiteSettings is cached (cacheLife "max") and the
 // property page is prerendered, so a change made inside a test would never reach the page.
 import { existsSync, readFileSync } from "node:fs";
@@ -18,6 +19,12 @@ const E2E_PHONE = "+234 000 000 0000";
 const E2E_EMAIL = "e2e-contact@example.com";
 // A private address that must never be shown while showFullAddress is false (contact.spec.ts).
 const E2E_PRIVATE_ADDRESS = "E2E-PRIVATE 7 Hidden Close, Onipanu";
+// Partners that must NEVER appear on a public page (about.spec.ts): one published without
+// consent, one consented but still a draft. Public partners need both (architecture invariant 1).
+const E2E_HIDDEN_PARTNERS = [
+  { name: "[E2E] Partner without consent", status: "PUBLISHED", consentConfirmed: false },
+  { name: "[E2E] Draft partner", status: "DRAFT", consentConfirmed: true },
+] as const;
 
 function fail(msg: string): never {
   console.error(`e2e-test-settings: ${msg}`);
@@ -58,6 +65,11 @@ async function main() {
       showFullAddress: false,
     },
   });
+  await db.partner.deleteMany({ where: { name: { startsWith: "[E2E]" } } });
+  await db.partner.createMany({ data: E2E_HIDDEN_PARTNERS.map((p) => ({ ...p })) });
+  console.log(
+    `e2e-test-settings: ${E2E_HIDDEN_PARTNERS.length} non-public [E2E] partners (no consent / draft).`,
+  );
   console.log(
     `e2e-test-settings: test-branch SiteSettings whatsapp=${E2E_WHATSAPP}, phone=${E2E_PHONE}, email=${E2E_EMAIL}, private officeAddress set, showFullAddress=false (all fake).`,
   );

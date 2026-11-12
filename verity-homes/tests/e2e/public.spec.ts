@@ -11,6 +11,7 @@ const ROUTES = [
   "/properties/sample-contemporary-detached-duplex",
   "/invest",
   "/about",
+  "/privacy",
   "/blog",
   "/contact",
   NOT_FOUND_ROUTE,

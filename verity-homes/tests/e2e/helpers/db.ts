@@ -57,11 +57,14 @@ export type SettingsRow = {
   officeAddress: string | null;
   showFullAddress: boolean;
   mapQuery: string;
+  rcNumber: string;
+  companyName: string;
 };
 
 export async function getSettingsRow(): Promise<SettingsRow> {
   const rows = (await sql()`
-    SELECT phone, email, whatsapp, "officeArea", "officeAddress", "showFullAddress", "mapQuery"
+    SELECT phone, email, whatsapp, "officeArea", "officeAddress", "showFullAddress", "mapQuery",
+           "rcNumber", "companyName"
     FROM "SiteSettings" WHERE id = 1`) as SettingsRow[];
   if (!rows[0]) throw new Error("SiteSettings row missing — run npm run db:test:reset");
   return rows[0];
@@ -89,4 +92,12 @@ export async function findInvestEnquiry(name: string): Promise<InvestEnquiryRow 
     SELECT source::text AS source, "planId", "amountKobo"::text AS "amountKobo"
     FROM "Enquiry" WHERE name = ${name} LIMIT 1`) as InvestEnquiryRow[];
   return rows[0] ?? null;
+}
+
+export type PartnerRow = { name: string; status: string; consentConfirmed: boolean };
+
+export async function getPartnerRows(): Promise<PartnerRow[]> {
+  return (await sql()`
+    SELECT name, status::text AS status, "consentConfirmed"
+    FROM "Partner" ORDER BY "sortOrder", name`) as PartnerRow[];
 }

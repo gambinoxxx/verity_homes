@@ -13,20 +13,29 @@ type PageHeroProps = {
   sub?: React.ReactNode;
   /** Decorative background photo. */
   image: string;
+  /**
+   * "post": the design/post.html hero (taller, smaller title up to 900px wide) for prose
+   * pages and blog posts. Default is the giant inner-page title.
+   */
+  variant?: "page" | "post";
+  /** Shown above the title in the "post" variant (e.g. the category tag). */
+  kicker?: React.ReactNode;
 };
 
 /**
  * Inner-page hero (design `.page-hero`): full-bleed photo, dark overlay, giant title,
  * breadcrumb, optional subtitle on the right. Follow it with `<section className="sheet">`.
  */
-export function PageHero({ title, crumbs, sub, image }: PageHeroProps) {
+export function PageHero({ title, crumbs, sub, image, variant = "page", kicker }: PageHeroProps) {
+  const post = variant === "post";
   return (
-    <section className={styles.hero} aria-labelledby="page-title">
+    <section className={`${styles.hero} ${post ? styles.post : ""}`} aria-labelledby="page-title">
       <div className={`${styles.image} media`} aria-hidden="true">
         <Image src={image} alt="" fill priority sizes="100vw" />
       </div>
       <div className={`container ${styles.inner}`}>
-        <div>
+        <div className={post ? styles.postText : undefined}>
+          {kicker}
           <h1 className={styles.title} id="page-title">
             {title}
           </h1>

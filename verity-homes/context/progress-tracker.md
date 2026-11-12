@@ -6,7 +6,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 10: about page — **next** (Units 1–9 done).
+Unit 11: blog — **next** (Units 1–10 done).
 
 ## Units
 
@@ -21,7 +21,7 @@ Unit 10: about page — **next** (Units 1–9 done).
 | 7 | Enquiries: form component, server action, rate limit, Resend email, WhatsApp links (used on home, property, invest and contact) | done | `property.html`, `contact.html` | Done 2026-11-12: `lib/actions/enquiry.ts` `createEnquiry` (Zod → rate limit 5/h per `sha256(ip+IP_HASH_SALT)` counted in DB → published property/plan check → **save** → Resend email → `emailSentAt`; friendly messages only). `lib/email/` (only `resend` importer): `enquiry-template.ts` (HTML + plain text, subject `New enquiry: <interest> — <name>`, links via `NEXT_PUBLIC_SITE_URL`), `enquiry.ts` (never throws). `components/site/enquiry-form.tsx`: `useActionState`, errors under fields (`aria-describedby`), focus first invalid, `role="status"` success, pending/no double submit, honeypot `company`, `startedAt`; props `source`, `propertyId`, `planId`, `interest` for Units 8/9. Wired on home + property; "Form goes live soon" removed. Newsletter: `lib/actions/subscribe.ts` (upsert, honeypot). DB writes in `lib/db/mutations/enquiries.ts`. Playwright loads `.env.test` (Q29). Tests: 16 unit (action on test branch with mocked email, template, subscribe), `tests/e2e/enquiry.spec.ts`, property enquiry e2e re-enabled. |
 | 8 | Contact page with **map** | done | `contact.html` | Done 2026-11-12: `app/(site)/contact/page.tsx` — `PageHero` + sheet; `ContactCards` (email/phone/WhatsApp from settings, placeholder + hidden button when unset; WhatsApp message "Hi Verity, I'd like to make an enquiry"; directions via `mapsLink(mapQuery)`); `EnquiryForm variant="contact"` (soft pills, first + last → `name`, interest select incl. Listing my property, source CONTACT_PAGE) in `#message`; `OfficeMap` (`mapEmbedUrl(mapQuery, 14)`, grayscale, map card, Open in Maps; only `officeDisplay`, so the full address shows only when `showFullAddress`). `/contact` out of `UNBUILT_ROUTES`; header "WhatsApp us" → wa.me or `/contact#message`; "Make a request" / "Book a consultation" → `/contact#message`. WhatsApp text buttons use `--whatsapp-button` (design green fails contrast). Tests: `tests/e2e/contact.spec.ts`, `tests/unit/contact-cards.test.ts`. |
 | 9 | Invest page: plans and FAQs from the database | done | `invest.html` | Done 2026-11-12: `app/(site)/invest/page.tsx` — `PageHero` + sheet (how-it-works split + navy steps), plans section (navy; highlighted = gold card; rate only when > 0 else placeholder; `formatNaira`, tenure months, `PAYOUT_LABEL`; disclaimer directly under the plans), FAQ (`getFaqs("INVEST")`, native `<details>`, sticky heading, hidden if none), `#start` investment enquiry (`EnquiryForm variant="invest"`: plan select + "Not sure yet", amount → `amountKobo`; "I want to invest" preselects the plan via `lib/invest-plan-select.ts`). Plan cards + steps extracted to `components/site/invest/plans.tsx` and shared with the home section (copy stays in `lib/invest.ts`). `getFaqs` cached, tag `"faqs"`. `/invest` out of `UNBUILT_ROUTES`. No FAQPage JSON-LD yet (answers are sample text) — **Unit 20**. Tests: `tests/e2e/invest.spec.ts`, `invest-copy.test.ts` now covers the page. |
-| 10 | About page | todo | `about.html` | |
+| 10 | About page (+ `/privacy`) | done | `about.html`, `post.html` | Done 2026-11-12: `app/(site)/about/page.tsx` — `PageHero` + sheet story split (dusk + building, company-story placeholder), values `MarqueeBand` (Honesty ✦ Clarity ✦ Care), three value cards, CEO (`CeoSection`, shared with home via `components/site/ceo.tsx`; full-bio + promise placeholders, **no DB field — Q4 open**), CAC trust card (`companyName`, `rcNumber`, `officeArea` from `getSiteSettings()`; `officeArea` added to the view), partner strip (`PartnerMarquee`, shared with home; published + consented only, hidden if none), navy CTA (Contact us → `/contact#message`, View properties → `/properties`). Sections in `components/site/about/`. `/privacy`: `PageHero variant="post"` + sheet + `.article`/`.prose` (now global, for Unit 11), **draft** notice from what the code does (`components/site/privacy/privacy-notice.tsx`), visible draft banner, owner placeholders (retention, response time, data location), email from settings or placeholder (Q39). `/about` + `/privacy` out of `UNBUILT_ROUTES`. No Organization JSON-LD here — **Unit 20** puts it in the root layout. Mobile CTA box stacks (deviation, Q38). Tests: `tests/e2e/about.spec.ts`, `/privacy` in `public.spec.ts`, `tests/unit/about-privacy.test.ts`; `scripts/e2e-test-settings.ts` now adds two non-public `[E2E]` partners on the test branch. |
 | 11 | Blog list and post page (Markdown) | todo | `blog.html`, `post.html` | |
 | 12 | Admin auth: Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout | todo | `admin.html` (shell) | |
 | 13 | Admin dashboard | todo | `admin.html` | |
@@ -175,3 +175,15 @@ Unit 10: about page — **next** (Units 1–9 done).
 37. ~~`mapQuery` is free text.~~ Agreed 2026-11-12: Unit 19's settings form must warn against a private street address in `mapQuery` (noted on the Unit 19 row). The contact map and directions use
     `SiteSettings.mapQuery` as typed. The admin settings form should warn not to put the
     private street address there unless `showFullAddress` is on.
+38. **Unit 10 deviation (owner to confirm).** design/about.html's CTA box sets
+    `grid-template-columns:1fr auto` inline, which overrides its own ≤960px rule, so at 390px the
+    heading and text squeeze to one word per line beside the buttons. The app stacks text above
+    the buttons on mobile (the design's `.contact-box` mobile rule). Desktop matches. The story
+    photos keep the design's 540px height at every width (also an inline style there).
+39. **Privacy notice — owner/legal review before launch.** `/privacy` is a plain-English DRAFT
+    for the Nigeria Data Protection Act 2023, written only from what the code does, with a visible
+    "Draft" banner. Owner/legal to confirm: lawful bases as worded, retention period, response
+    time for requests, where Neon/Vercel/Resend store data and the cross-border safeguards,
+    whether a DPO or registration with the NDPC is needed, and the privacy contact email (it uses
+    `SiteSettings.email`, placeholder until set — see Q2). Update `PRIVACY_LAST_UPDATED` in
+    `components/site/privacy/privacy-notice.tsx` and remove the banner once approved.

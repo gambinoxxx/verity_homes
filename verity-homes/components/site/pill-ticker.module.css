@@ -25,6 +25,10 @@
 :global(.on-navy) .track {
   color: var(--accent-primary);
 }
+/* Cream sections: --accent-text is 4.4:1 on cream, so one shade darker (Open question 22). */
+:global(.on-cream) .track {
+  color: var(--accent-text-on-cream);
+}
 .item {
   display: flex;
   gap: 14px;

@@ -25,8 +25,6 @@ export function isActiveLink(pathname: string | null, href: string): boolean {
  * A trailing "/*" covers child routes. Remove an entry in the unit that builds its page.
  */
 export const UNBUILT_ROUTES: readonly string[] = [
-  "/about", // Unit 10
-  "/privacy", // Unit 10
   "/blog", // Unit 11
   "/blog/*", // Unit 11
 ];

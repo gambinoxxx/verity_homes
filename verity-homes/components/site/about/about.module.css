@@ -1,0 +1,214 @@
+/* design/assets/verity.css: .split, .intro-media, About (.values, .value, .trust), .contact-box */
+
+/* ---- Story split with two overlapping photos ---- */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+/* design/about.html sets height:540px inline, so it stays 540px at every width. */
+.media {
+  position: relative;
+  height: 540px;
+}
+.m1 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 72%;
+  height: 82%;
+  border-radius: 220px 220px 18px 18px;
+}
+.m2 {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 48%;
+  height: 52%;
+  border-radius: 18px;
+  border: 8px solid var(--bg-base);
+  box-shadow: 0 30px 60px rgb(7 18 38 / 0.2);
+}
+.lead1 {
+  margin-top: 22px;
+}
+.lead2 {
+  margin-top: 16px;
+}
+
+/* ---- Values ---- */
+.values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.value {
+  border: 1px solid var(--border-default);
+  border-radius: 22px;
+  padding: 32px;
+  transition:
+    transform 0.4s var(--ease),
+    border-color 0.4s;
+}
+.value:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent-primary);
+}
+.value b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1.2px var(--accent-text);
+  line-height: 1;
+}
+.value h3 {
+  margin: 16px 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.value p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ---- CAC trust card ---- */
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-cream);
+  border-radius: 24px;
+  padding: 32px 36px;
+}
+.trustHead {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.trustHead h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+}
+.trustHead p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+}
+.seal {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--bg-navy);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.seal svg {
+  width: 34px;
+  height: 34px;
+}
+.trust dl {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 6px 40px;
+  margin: 0;
+}
+.trust dt {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.trust dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: 17px;
+}
+.partners {
+  margin-top: 64px;
+  border-top: 1px solid var(--border-default);
+  padding-top: 32px;
+}
+
+/* ---- CTA box (navy .contact-box, two columns: text | buttons) ---- */
+.ctaSec {
+  padding-top: 0;
+}
+.box {
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+  border-radius: 32px;
+  padding: 64px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.box::before,
+.box::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.box::before {
+  right: -120px;
+  top: -120px;
+  width: 360px;
+  height: 360px;
+  border: 1.5px solid rgb(200 162 78 / 0.35);
+}
+.box::after {
+  right: -60px;
+  top: -60px;
+  width: 240px;
+  height: 240px;
+  border: 1.5px solid rgb(200 162 78 / 0.2);
+}
+.boxText,
+.boxActions {
+  position: relative;
+  z-index: 1;
+}
+.boxText p {
+  margin-top: 12px;
+}
+.boxActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .split {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+  .box {
+    grid-template-columns: 1fr;
+    padding: 40px 24px;
+    border-radius: 24px;
+  }
+}
+@media (max-width: 860px) {
+  .values {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .trust dl {
+    grid-template-columns: 1fr;
+  }
+}

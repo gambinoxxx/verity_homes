@@ -1,20 +1,11 @@
 import Image from "next/image";
 import { getPublishedPlans } from "@/lib/db/queries/invest";
-import { getPublishedPartners, type PartnerView } from "@/lib/db/queries/trust";
+import { getPublishedPartners } from "@/lib/db/queries/trust";
 import { INVEST_LEAD } from "@/lib/invest";
+import { PartnerMarquee } from "../partner-marquee";
 import { InvestDisclaimer, InvestSteps, PlanGrid } from "../invest/plans";
 import { Reveal } from "../reveal";
 import styles from "./invest.module.css";
-
-function PartnerTile({ partner }: { partner: PartnerView }) {
-  return partner.logoUrl ? (
-    <span className={styles.logo}>
-      <Image src={partner.logoUrl} alt={partner.name} width={140} height={40} />
-    </span>
-  ) : (
-    <span>{partner.name}</span>
-  );
-}
 
 /** "Invest with Verity": steps, published plans, partner marquee (if any), disclaimer. */
 export async function Invest() {
@@ -44,28 +35,7 @@ export async function Invest() {
 
         {/* design/index.html puts the disclaimer after the partner marquee. */}
         <Reveal className={`${styles.partners} ${partners.length === 0 ? styles.noPartners : ""}`}>
-          {partners.length > 0 ? (
-            <>
-              <div className={styles.partnersLabel} id="partners-label">
-                Our development partners
-              </div>
-              <div className={styles.marquee}>
-                <ul className={styles.track} aria-labelledby="partners-label">
-                  {partners.map((p) => (
-                    <li key={p.id}>
-                      <PartnerTile partner={p} />
-                    </li>
-                  ))}
-                  {/* Second copy for a seamless loop; hidden from screen readers. */}
-                  {partners.map((p) => (
-                    <li key={`dup-${p.id}`} aria-hidden="true">
-                      <PartnerTile partner={p} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </>
-          ) : null}
+          <PartnerMarquee partners={partners} labelId="partners-label" />
           <InvestDisclaimer />
         </Reveal>
       </div>

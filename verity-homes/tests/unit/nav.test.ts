@@ -33,7 +33,10 @@ describe("isActiveLink", () => {
 describe("prefetchFor", () => {
   it("turns prefetch off only for routes that have no page yet", () => {
     expect(prefetchFor("/blog")).toBe(false);
-    expect(prefetchFor("/about?x=1")).toBe(false);
+    expect(prefetchFor("/blog?q=1")).toBe(false);
+    expect(prefetchFor("/about")).toBeUndefined(); // built in Unit 10
+    expect(prefetchFor("/about?x=1")).toBeUndefined();
+    expect(prefetchFor("/privacy")).toBeUndefined(); // built in Unit 10
     expect(prefetchFor("/invest")).toBeUndefined(); // built in Unit 9
     expect(prefetchFor("/invest#start")).toBeUndefined();
     expect(prefetchFor("/contact#message")).toBeUndefined(); // built in Unit 8

@@ -1,0 +1,19 @@
+/* /privacy: visible draft banner above the prose (not in the design; owner review flag). */
+.banner {
+  margin: 0 0 36px;
+  padding: 18px 22px;
+  border: 1.5px dashed var(--accent-primary);
+  border-radius: 16px;
+  background: var(--bg-cream);
+  color: var(--text-primary);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+.banner strong {
+  font-weight: 800;
+}
+.updated {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}

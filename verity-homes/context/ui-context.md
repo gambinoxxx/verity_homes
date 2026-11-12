@@ -146,6 +146,15 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
     `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`
     + `legend.lbl` for groups), `.cta-card`.
+  - `PageHero variant="post"` is the design/post.html hero (min-height 520px, smaller title up
+    to 900px wide, optional `kicker` above the title) for /privacy and blog posts (Unit 11).
+    Follow it with `<section className="sheet"><article className="container article">` and a
+    `.prose` body. `.article` (780px column) is unlayered in `globals.css` so it beats the
+    `container` utility; `.prose` (with `--text-prose`) lives in the components layer.
+  - Shared sections: `CeoSection` (`components/site/ceo.tsx`; home and /about pass their own
+    text column) and `PartnerMarquee` (`components/site/partner-marquee.tsx`; `light` on /about;
+    renders nothing without partners). A `.on-cream` section darkens `PillTicker` text to
+    `--accent-text-on-cream`. About sections live in `components/site/about/`.
   - Investment: `PlanCard` / `PlanGrid` / `InvestSteps` / `InvestDisclaimer`
     (`components/site/invest/plans.tsx`) are shared by the home invest section and /invest;
     the copy lives in `lib/invest.ts`. `EnquiryForm` variants: `full`, `card`, `contact`,
