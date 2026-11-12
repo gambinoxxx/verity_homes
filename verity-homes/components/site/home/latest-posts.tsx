@@ -1,19 +1,20 @@
 import Image from "next/image";
-import Link from "next/link";
 import { getLatestPosts, type PostSummary } from "@/lib/db/queries/posts";
 import { formatDate } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "../icons";
 import { PillTicker } from "../pill-ticker";
+import { Reveal, RevealLink } from "../reveal";
 import styles from "./latest-posts.module.css";
 
-const DELAYS = ["", "d1", "d2"] as const;
+const DELAYS = [0, 1, 2] as const;
 
 function PostCard({ post, big, index }: { post: PostSummary; big: boolean; index: number }) {
   const href = `/blog/${post.slug}`;
   return (
-    <Link
-      className={`${styles.post} ${big ? styles.big : ""} reveal ${DELAYS[index] ?? ""}`}
+    <RevealLink
+      className={`${styles.post} ${big ? styles.big : ""}`}
+      delay={DELAYS[index] ?? 0}
       href={href}
       prefetch={prefetchFor(href)}
     >
@@ -41,7 +42,7 @@ function PostCard({ post, big, index }: { post: PostSummary; big: boolean; index
           </span>
         ) : null}
       </div>
-    </Link>
+    </RevealLink>
   );
 }
 
@@ -54,16 +55,16 @@ export async function LatestPosts() {
       <div className="container">
         <div className="sec-head">
           <div>
-            <span className="reveal">
+            <Reveal as="span">
               <PillTicker label="Articles & insights" />
-            </span>
-            <h2 className="h2 reveal d1" id="b-h">
+            </Reveal>
+            <Reveal as="h2" className="h2" delay={1} id="b-h">
               Insights for buyers &amp; investors
-            </h2>
+            </Reveal>
           </div>
-          <Link className="link-arrow reveal d2" href="/blog" prefetch={prefetchFor("/blog")}>
+          <RevealLink className="link-arrow" delay={2} href="/blog" prefetch={prefetchFor("/blog")}>
             All articles <ArrowIcon className={styles.arrow} />
-          </Link>
+          </RevealLink>
         </div>
         <div className={styles.posts}>
           {posts.map((p, i) => (

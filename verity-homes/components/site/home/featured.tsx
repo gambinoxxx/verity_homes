@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getFeaturedProperties } from "@/lib/db/queries/properties";
 import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "../icons";
+import { Reveal } from "../reveal";
 import { FeaturedGrid } from "./featured-grid";
 import styles from "./featured.module.css";
 
@@ -13,13 +14,15 @@ export async function Featured() {
       <div className="container">
         <FeaturedGrid properties={properties}>
           <div>
-            <span className="eyebrow reveal">Featured properties</span>
-            <h2 className="h2 reveal d1" id="props-h">
+            <Reveal as="span" className="eyebrow">
+              Featured properties
+            </Reveal>
+            <Reveal as="h2" className="h2" delay={1} id="props-h">
               Homes and land worth owning
-            </h2>
+            </Reveal>
           </div>
         </FeaturedGrid>
-        <div className={`${styles.more} reveal`}>
+        <Reveal className={styles.more}>
           <Link
             className="btn btn-outline-dark"
             href="/properties"
@@ -28,7 +31,7 @@ export async function Featured() {
             View all properties
             <ArrowIcon />
           </Link>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

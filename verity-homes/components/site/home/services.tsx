@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId, useState } from "react";
 import { ArrowIcon } from "../icons";
+import { Reveal } from "../reveal";
 import styles from "./services.module.css";
 
 // Static copy from design/index.html. The design's 4th image is an Unsplash photo; the sample
@@ -35,7 +36,7 @@ const SERVICES = [
   },
 ] as const;
 
-const DELAYS = ["", "d1", "d2", "d1", "d2"] as const;
+const DELAYS = [0, 1, 2, 1, 2] as const;
 
 /**
  * "Our services": one-open accordion (click, or hover on devices that can hover) that swaps
@@ -51,15 +52,17 @@ export function Services() {
       <div className="container">
         <div className="sec-head">
           <div>
-            <span className="eyebrow reveal">Our services</span>
-            <h2 className="h2 reveal d1" id="svc-h">
+            <Reveal as="span" className="eyebrow">
+              Our services
+            </Reveal>
+            <Reveal as="h2" className="h2" delay={1} id="svc-h">
               Everything property, <em>in one place.</em>
-            </h2>
+            </Reveal>
           </div>
-          <p className="lead reveal d2">
+          <Reveal as="p" className="lead" delay={2}>
             Whatever stage you&apos;re at — buying, letting, investing or building — one team
             handles it end to end.
-          </p>
+          </Reveal>
         </div>
         <div className={styles.list}>
           <div className={styles.items}>
@@ -68,9 +71,12 @@ export function Services() {
               const btnId = `${uid}-b${i}`;
               const panelId = `${uid}-p${i}`;
               return (
-                <div
+                // The active class changes on every tap; <Reveal> owns the revealed state, so it
+                // survives that re-render (a classList-added "in" was wiped by it).
+                <Reveal
                   key={s.title}
-                  className={`${styles.item} ${on ? styles.active : ""} reveal ${DELAYS[i]}`}
+                  className={`${styles.item} ${on ? styles.active : ""}`}
+                  delay={DELAYS[i]}
                 >
                   <h3>
                     <button
@@ -101,7 +107,7 @@ export function Services() {
                   >
                     <p>{s.text}</p>
                   </div>
-                </div>
+                </Reveal>
               );
             })}
           </div>

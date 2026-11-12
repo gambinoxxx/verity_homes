@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fillProgress, filledWords } from "@/lib/scroll-fill";
+import { useHydrated } from "@/lib/use-hydrated";
 import styles from "./statement.module.css";
 
 const TEXT =
@@ -20,6 +21,8 @@ const WORDS = [
 export function Statement() {
   const ref = useRef<HTMLParagraphElement>(null);
   const [filled, setFilled] = useState(0);
+  // Words only start grey once hydrated, so without JS the finished sentence shows.
+  const hydrated = useHydrated();
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -47,7 +50,10 @@ export function Statement() {
   }, []);
 
   return (
-    <section className={styles.statement} aria-label="Our promise">
+    <section
+      className={`${styles.statement} ${hydrated ? styles.ready : ""}`}
+      aria-label="Our promise"
+    >
       <div className="container">
         <p ref={ref}>
           <span className="sr-only">

@@ -13,17 +13,20 @@
   letter-spacing: -0.8px;
   text-align: center;
 }
+/* Filled by default: the server HTML (and a page whose JS failed) shows the finished
+   sentence. Once hydrated (.ready) unfilled words go grey and fill in as you scroll. */
 .wd {
-  color: var(--statement-unfilled);
+  color: var(--text-primary);
   transition: color 0.4s;
 }
-.wd.on {
-  color: var(--text-primary);
-}
 /* Design: #C8A24E. On white that fails contrast, so the darker text gold (Open question 20). */
-.wd.gold.on {
+.wd.gold {
   color: var(--accent-text);
   font-style: italic;
+}
+.ready .wd:not(.on) {
+  color: var(--statement-unfilled);
+  font-style: normal;
 }
 .sig {
   display: flex;
@@ -47,19 +50,13 @@
 }
 /* Filled from the start without the scroll effect: reduced motion, or no JavaScript. This
    is CSS rather than state, so it holds before hydration too. */
+/* Reduced motion: no scroll fill, show the finished sentence. */
 @media (prefers-reduced-motion: reduce) {
-  .wd {
+  .ready .wd:not(.on) {
     color: var(--text-primary);
   }
-  .wd.gold {
+  .ready .wd.gold:not(.on) {
     color: var(--accent-text);
     font-style: italic;
   }
-}
-:global(html:not(.js)) .wd {
-  color: var(--text-primary);
-}
-:global(html:not(.js)) .wd.gold {
-  color: var(--accent-text);
-  font-style: italic;
 }

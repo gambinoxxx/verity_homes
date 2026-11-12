@@ -3,6 +3,7 @@
 import type { PropertyFilters } from "@/lib/db/queries/properties";
 import { withoutKeys } from "@/lib/validation/property-filters";
 import { useFilterNav } from "./filter-nav";
+import { Reveal } from "../reveal";
 import styles from "./properties.module.css";
 
 const PILLS = [
@@ -17,7 +18,7 @@ const PILLS = [
 export function ListingPills({ filters }: { filters: PropertyFilters }) {
   const { navigate } = useFilterNav();
   return (
-    <div className={`pills reveal ${styles.pills}`} role="group" aria-label="Listing type">
+    <Reveal className={`pills ${styles.pills}`} role="group" aria-label="Listing type">
       {PILLS.map((p) => (
         <button
           key={p.label}
@@ -31,6 +32,6 @@ export function ListingPills({ filters }: { filters: PropertyFilters }) {
           {p.label}
         </button>
       ))}
-    </div>
+    </Reveal>
   );
 }

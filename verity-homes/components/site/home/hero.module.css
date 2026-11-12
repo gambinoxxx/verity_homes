@@ -94,7 +94,8 @@
   letter-spacing: -1.5px;
   margin: 26px 0 0;
 }
-/* Word-by-word reveal once the preloader has lifted (body.loaded). */
+/* Word-by-word reveal once the preloader has lifted. The words are only lowered while
+   .pending (hydrated, preloader not lifted yet), so without JS the headline just shows. */
 .w {
   display: inline-block;
   overflow: hidden;
@@ -103,11 +104,10 @@
 }
 .w > span {
   display: inline-block;
-  transform: translateY(105%);
   transition: transform 1s var(--ease);
 }
-:global(.loaded) .w > span {
-  transform: none;
+.pending .w > span {
+  transform: translateY(105%);
 }
 .w:nth-child(2) > span {
   transition-delay: 0.12s;
@@ -280,7 +280,7 @@
 
 /* No JS-timed reveal under reduced motion: show the headline straight away. */
 @media (prefers-reduced-motion: reduce) {
-  .w > span {
+  .pending .w > span {
     transform: none;
   }
 }

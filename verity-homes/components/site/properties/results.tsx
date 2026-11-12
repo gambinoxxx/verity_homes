@@ -32,7 +32,7 @@ export function Results({ filters, result }: ResultsProps) {
                 key={p.id}
                 property={p}
                 cta="details"
-                className={`reveal ${i % 2 ? "d1" : ""}`}
+                reveal={i % 2 ? 1 : 0}
                 sizes="(max-width: 640px) 100vw, (max-width: 1020px) 50vw, 440px"
               />
             ))}

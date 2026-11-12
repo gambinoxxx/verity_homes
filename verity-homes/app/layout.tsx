@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // The `js` class (reveal-on-scroll may hide content) is added by RevealObserver once it
-    // runs, never by an inline script, so a JavaScript failure cannot leave content hidden.
+    // Nothing is written onto <html>/<body> by hand: reveal-on-scroll and the hero headline keep
+    // their state in React (components/site/reveal.tsx, lib/site-loaded.ts).
     <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
       <body>{children}</body>
     </html>

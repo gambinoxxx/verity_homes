@@ -131,12 +131,17 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `.btn-outline-dark` / `.btn-white` / `.btn-navy`, `.ph` (dashed
     placeholder), `.skip-link`, `:focus-visible`.
   - Also global: `.sec`, `.sec-head`, `.eyebrow`, `.h2`, `.lead`, `.link-arrow`,
-    `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `d1`–`d3`
-    delays; `RevealObserver` adds `.in`; hidden only under `html.js`, and `RevealObserver`
-    itself adds `js` when it starts, so content stays visible if the app's JS fails).
-    `.reveal-img` is revealed when its **parent** enters view: Chrome measures an observed
-    element after its own `clip-path`, so a fully clipped element can't be observed reliably.
-    Give every `.reveal-img` an unclipped parent of about its own size.
+    `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `.d1`–`.d3`).
+  - **Reveal-on-scroll is owned by React.** Use `<Reveal as="h2" delay={1}>`, `<Reveal
+    variant="image">`, `<RevealLink>` or the `useReveal()` hook (`components/site/reveal.tsx`);
+    `PropertyCard` takes `reveal={0–3}`. Never write `reveal`/`in` in a className by hand, and
+    never `classList.add` on an element React renders: a re-render rewrites className and
+    drops it (that blanked tapped services items, 2026-11-12).
+  - The hiding classes are rendered only after hydration (`useHydrated`), so server HTML and a
+    page whose JS failed show everything. The hero headline (`useSiteLoaded`) and the
+    statement fill (`.ready`) follow the same rule. Nothing is written onto `<html>`/`<body>`.
+  - `variant="image"` reveals when its **parent** enters view (Chrome measures an observed
+    element after its own `clip-path`). Give it an unclipped parent of about its own size.
   - Inner pages: `PageHero` (`components/site/page-hero.tsx`: photo, giant title with gold
     `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
     `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`

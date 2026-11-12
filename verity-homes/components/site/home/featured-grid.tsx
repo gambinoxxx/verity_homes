@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PropertyCard as PropertyCardData } from "@/lib/db/queries/properties";
 import { PropertyCard } from "../property-card";
+import { Reveal } from "../reveal";
 import styles from "./featured.module.css";
 
 const FILTERS = [
@@ -14,7 +15,7 @@ const FILTERS = [
 ] as const;
 
 type FilterId = (typeof FILTERS)[number]["id"];
-const DELAYS = ["", "d1", "d2"] as const;
+const DELAYS = [0, 1, 2] as const;
 
 /** Filter pills + card grid. Filtering happens on the page, within the featured set. */
 export function FeaturedGrid({
@@ -36,7 +37,7 @@ export function FeaturedGrid({
     <>
       <div className="sec-head">
         {children}
-        <div className={`${styles.filters} reveal d2`} role="group" aria-label="Filter properties">
+        <Reveal className={styles.filters} delay={2} role="group" aria-label="Filter properties">
           {FILTERS.map((f) => (
             <button
               key={f.id}
@@ -50,7 +51,7 @@ export function FeaturedGrid({
               {f.label}
             </button>
           ))}
-        </div>
+        </Reveal>
       </div>
 
       {/* Re-keyed per filter so the cards replay their fade-up. */}
@@ -59,7 +60,8 @@ export function FeaturedGrid({
           <PropertyCard
             key={p.id}
             property={p}
-            className={changed ? "" : `reveal ${DELAYS[i % 3]}`}
+            // After a filter change the cards play the grid\'s fade-up instead of the scroll reveal.
+            reveal={changed ? undefined : DELAYS[i % 3]}
           />
         ))}
         {shown.length === 0 ? (

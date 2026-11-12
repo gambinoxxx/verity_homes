@@ -3,17 +3,18 @@ import Link from "next/link";
 import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "../icons";
 import { Logo } from "../logo";
+import { Reveal } from "../reveal";
 import styles from "./intro.module.css";
 
 const POINTS = [
-  { title: "Homes & land", text: "Houses, apartments and plots for sale and rent.", delay: "d1" },
+  { title: "Homes & land", text: "Houses, apartments and plots for sale and rent.", delay: 1 },
   {
     title: "Investment plans",
     text: "Grow your money through structured real estate projects.",
-    delay: "d2",
+    delay: 2,
   },
-  { title: "Management", text: "We look after your property and your tenants.", delay: "d1" },
-  { title: "Development", text: "New residential projects, from plan to handover.", delay: "d2" },
+  { title: "Management", text: "We look after your property and your tenants.", delay: 1 },
+  { title: "Development", text: "New residential projects, from plan to handover.", delay: 2 },
 ] as const;
 
 /** "Who we are": arched photo, inset photo, rotating gold badge, four service points. */
@@ -22,22 +23,22 @@ export function Intro() {
     <section className={styles.intro} id="about" aria-labelledby="intro-h">
       <div className={`container ${styles.grid}`}>
         <div className={styles.media}>
-          <div className={`${styles.m1} media reveal-img`}>
+          <Reveal variant="image" className={`${styles.m1} media`}>
             <Image
               src="/samples/tower.jpg"
               alt="Modern residential tower"
               fill
               sizes="(max-width: 960px) 72vw, 440px"
             />
-          </div>
-          <div className={`${styles.m2} media reveal-img`}>
+          </Reveal>
+          <Reveal variant="image" className={`${styles.m2} media`}>
             <Image
               src="/samples/dusk.jpg"
               alt="Modern home lit at dusk"
               fill
               sizes="(max-width: 960px) 48vw, 300px"
             />
-          </div>
+          </Reveal>
           <div className={styles.badge} aria-hidden="true">
             <svg className={styles.ring} viewBox="0 0 120 120">
               <defs>
@@ -54,29 +55,31 @@ export function Intro() {
           </div>
         </div>
         <div>
-          <span className="eyebrow reveal">Who we are</span>
-          <h2 className="h2 reveal d1" id="intro-h">
+          <Reveal as="span" className="eyebrow">
+            Who we are
+          </Reveal>
+          <Reveal as="h2" className="h2" delay={1} id="intro-h">
             Real estate built on <em>truth.</em>
-          </h2>
-          <p className={`lead reveal d2 ${styles.lead}`}>
+          </Reveal>
+          <Reveal as="p" className={`lead ${styles.lead}`} delay={2}>
             Verity means truth — and that is how we work. Verity Homes and Properties Ltd helps
             families, professionals and investors buy, rent, develop and invest in property with
             confidence, through one team that walks with you from first enquiry to the day you get
             your keys.
-          </p>
+          </Reveal>
           <div className={styles.points}>
             {POINTS.map((p) => (
-              <div key={p.title} className={`reveal ${p.delay}`}>
+              <Reveal key={p.title} delay={p.delay}>
                 <h3>{p.title}</h3>
                 <p>{p.text}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
-          <div className={`reveal d3 ${styles.cta}`}>
+          <Reveal className={styles.cta} delay={3}>
             <Link className="link-arrow" href="/contact" prefetch={prefetchFor("/contact")}>
               Book a consultation <ArrowIcon />
             </Link>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

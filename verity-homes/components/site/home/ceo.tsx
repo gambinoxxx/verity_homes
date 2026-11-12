@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "../icons";
+import { Reveal } from "../reveal";
 import styles from "./ceo.module.css";
 
 /**
@@ -12,7 +13,7 @@ export function Ceo() {
   return (
     <section className={`sec ${styles.ceo}`} aria-labelledby="ceo-h">
       <div className={`container ${styles.grid}`}>
-        <div className={`${styles.photo} reveal`}>
+        <Reveal className={styles.photo}>
           <div className={styles.ring} aria-hidden="true" />
           <div className={styles.frame}>
             <Image
@@ -26,26 +27,28 @@ export function Ceo() {
             <b>Esther Ezenagu</b>
             <span>Founder &amp; CEO</span>
           </div>
-        </div>
+        </Reveal>
         <div>
-          <span className="eyebrow reveal">Meet our CEO</span>
-          <h2 className="h2 reveal d1" id="ceo-h">
+          <Reveal as="span" className="eyebrow">
+            Meet our CEO
+          </Reveal>
+          <Reveal as="h2" className="h2" delay={1} id="ceo-h">
             Built on trust. <em>Named for it.</em>
-          </h2>
-          <p className={`lead reveal d2 ${styles.lead1}`}>
+          </Reveal>
+          <Reveal as="p" className={`lead ${styles.lead1}`} delay={2}>
             Every listing we present, every plan we offer and every promise we make is held to one
             standard: the truth. That&apos;s the name on the door.
-          </p>
-          <p className={`lead reveal d2 ${styles.lead2}`}>
+          </Reveal>
+          <Reveal as="p" className={`lead ${styles.lead2}`} delay={2}>
             <span className="ph">
               [Short bio — Esther&apos;s background in real estate and property investment, the
               partners she works with, and why she founded Verity.]
             </span>
-          </p>
-          <blockquote className="reveal d3">
+          </Reveal>
+          <Reveal as="blockquote" delay={3}>
             <span className="ph">A one-line personal promise from Esther to her clients.</span>
-          </blockquote>
-          <div className={`${styles.actions} reveal d3`}>
+          </Reveal>
+          <Reveal className={styles.actions} delay={3}>
             <a className="btn btn-navy" href="#contact">
               Book a consultation
               <ArrowIcon />
@@ -53,7 +56,7 @@ export function Ceo() {
             <Link className="btn btn-outline-dark" href="/about" prefetch={prefetchFor("/about")}>
               About Verity
             </Link>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

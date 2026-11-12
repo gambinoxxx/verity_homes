@@ -11,6 +11,7 @@ import {
 } from "@/lib/search";
 import { BUDGET_RANGES } from "@/lib/search-ranges";
 import { SearchIcon } from "../icons";
+import { Reveal } from "../reveal";
 import styles from "./search-bar.module.css";
 
 /** Search card overlapping the hero. Submits to /properties with query params. */
@@ -41,12 +42,13 @@ export function SearchBar() {
   return (
     <div className={styles.wrap} id="search">
       <div className="container">
-        <form
-          className={`${styles.search} reveal`}
+        <Reveal
+          as="form"
+          className={styles.search}
           aria-label="Find a property"
           onSubmit={(e) => {
             e.preventDefault();
-            const data = new FormData(e.currentTarget);
+            const data = new FormData(e.currentTarget as HTMLFormElement);
             router.push(
               searchHref(tab, {
                 area: String(data.get("area") ?? ""),
@@ -113,7 +115,7 @@ export function SearchBar() {
               Search
             </button>
           </div>
-        </form>
+        </Reveal>
       </div>
     </div>
   );

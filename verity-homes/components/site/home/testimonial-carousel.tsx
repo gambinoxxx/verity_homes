@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TestimonialView } from "@/lib/db/queries/trust";
 import { ArrowIcon, StarIcon } from "../icons";
+import { Reveal } from "../reveal";
 import styles from "./testimonials.module.css";
 
 const GAP = 24;
@@ -58,18 +59,18 @@ export function TestimonialCarousel({
       <div className="sec-head">
         <div>{children}</div>
         {max > 0 ? (
-          <div className={`${styles.nav} reveal d2`}>
+          <Reveal className={styles.nav} delay={2}>
             <button type="button" aria-label="Previous testimonials" onClick={() => go(shown - 1)}>
               <ArrowIcon className={styles.flip} />
             </button>
             <button type="button" aria-label="Next testimonials" onClick={() => go(shown + 1)}>
               <ArrowIcon />
             </button>
-          </div>
+          </Reveal>
         ) : null}
       </div>
-      <div
-        className={`${styles.wrap} reveal`}
+      <Reveal
+        className={styles.wrap}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
@@ -106,7 +107,7 @@ export function TestimonialCarousel({
             </figure>
           ))}
         </div>
-      </div>
+      </Reveal>
     </>
   );
 }

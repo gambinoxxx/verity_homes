@@ -3,7 +3,6 @@ import { whatsappLink } from "@/lib/whatsapp";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { Preloader } from "./preloader";
-import { RevealObserver } from "./reveal-observer";
 import { BackToTop, ScrollProgress } from "./scroll-ui";
 import { WhatsAppFloat } from "./whatsapp-float";
 
@@ -29,7 +28,6 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       <Footer settings={settings} />
       <WhatsAppFloat href={wa} />
       <BackToTop />
-      <RevealObserver />
     </>
   );
 }

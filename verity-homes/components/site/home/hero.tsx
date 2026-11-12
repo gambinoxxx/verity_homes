@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { prefetchFor } from "@/lib/nav";
-import { onSiteLoaded } from "@/lib/site-loaded";
+import { onSiteLoaded, useSiteLoaded } from "@/lib/site-loaded";
+import { useHydrated } from "@/lib/use-hydrated";
 import { ArrowIcon, PinIcon, ShieldIcon } from "../icons";
 import styles from "./hero.module.css";
 
@@ -31,6 +32,8 @@ type HeroProps = { rcNumber: string };
 
 /** Home hero: 3-slide slideshow with captions, counter and progress dots (design/index.html). */
 export function Hero({ rcNumber }: HeroProps) {
+  const hydrated = useHydrated();
+  const siteLoaded = useSiteLoaded();
   const [current, setCurrent] = useState(0);
   const [caption, setCaption] = useState(0);
   const [swapping, setSwapping] = useState(false);
@@ -86,7 +89,8 @@ export function Hero({ rcNumber }: HeroProps) {
               <i />
               Homes · Land · Investment plans
             </span>
-            <h1 className={styles.title}>
+            {/* Words stay lowered only between hydration and the preloader lifting (React state). */}
+            <h1 className={`${styles.title} ${hydrated && !siteLoaded ? styles.pending : ""}`}>
               <span className={styles.w}>
                 <span>Invest.</span>
               </span>{" "}

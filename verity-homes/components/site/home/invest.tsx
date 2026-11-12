@@ -5,13 +5,16 @@ import { formatNaira, PAYOUT_LABEL } from "@/lib/format";
 import { INVEST_DISCLAIMER, INVEST_LEAD, INVEST_STEPS } from "@/lib/invest";
 import { CheckIcon } from "../icons";
 import styles from "./invest.module.css";
+import { Reveal } from "../reveal";
 
-const DELAYS = ["", "d1", "d2", "d3"] as const;
+const DELAYS = [0, 1, 2, 3] as const;
 
 function PlanCard({ plan, index }: { plan: PlanView; index: number }) {
   return (
-    <article
-      className={`${styles.plan} ${plan.highlighted ? styles.featured : ""} reveal ${DELAYS[index % 3]}`}
+    <Reveal
+      as="article"
+      className={`${styles.plan} ${plan.highlighted ? styles.featured : ""}`}
+      delay={DELAYS[index % 3]}
     >
       <div className={styles.planTop}>
         <h3>{plan.name}</h3>
@@ -51,7 +54,7 @@ function PlanCard({ plan, index }: { plan: PlanView; index: number }) {
       <a className={`btn ${plan.highlighted ? "btn-navy" : "btn-white"}`} href="#contact">
         I want to invest
       </a>
-    </article>
+    </Reveal>
   );
 }
 
@@ -76,21 +79,25 @@ export async function Invest() {
       <div className={`container ${styles.inner}`}>
         <div className="sec-head">
           <div className={styles.headText}>
-            <span className="eyebrow reveal">Invest with Verity</span>
-            <h2 className="h2 reveal d1" id="inv-h">
+            <Reveal as="span" className="eyebrow">
+              Invest with Verity
+            </Reveal>
+            <Reveal as="h2" className="h2" delay={1} id="inv-h">
               Let your money work in <em>real estate.</em>
-            </h2>
+            </Reveal>
           </div>
-          <p className="lead reveal d2">{INVEST_LEAD}</p>
+          <Reveal as="p" className="lead" delay={2}>
+            {INVEST_LEAD}
+          </Reveal>
         </div>
 
         <ol className={styles.steps}>
           {INVEST_STEPS.map((s, i) => (
-            <li key={s.title} className={`${styles.step} reveal ${DELAYS[i]}`}>
+            <Reveal as="li" key={s.title} className={styles.step} delay={DELAYS[i]}>
               <b aria-hidden="true">{String(i + 1).padStart(2, "0")}</b>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
-            </li>
+            </Reveal>
           ))}
         </ol>
 
@@ -102,9 +109,7 @@ export async function Invest() {
           </div>
         ) : null}
 
-        <div
-          className={`${styles.partners} ${partners.length === 0 ? styles.noPartners : ""} reveal`}
-        >
+        <Reveal className={`${styles.partners} ${partners.length === 0 ? styles.noPartners : ""}`}>
           {partners.length > 0 ? (
             <>
               <div className={styles.partnersLabel} id="partners-label">
@@ -128,7 +133,7 @@ export async function Invest() {
             </>
           ) : null}
           <p className={styles.disclaimer}>{INVEST_DISCLAIMER}</p>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

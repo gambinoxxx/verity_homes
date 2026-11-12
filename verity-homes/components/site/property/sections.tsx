@@ -29,6 +29,7 @@ import { PropertyCard } from "../property-card";
 import { SaveButton } from "../save-button";
 import { ShareButton } from "./share-button";
 import styles from "./property.module.css";
+import { Reveal } from "../reveal";
 
 type P = { property: PropertyDetail };
 
@@ -141,14 +142,14 @@ export function AboutBlock({ property: p }: P) {
   if (paragraphs.length === 0) return null;
   const heading = p.listingType === "LAND" ? "About this land" : "About this home";
   return (
-    <div className={`${styles.block} reveal`}>
+    <Reveal className={styles.block}>
       <h2>{heading}</h2>
       <div className={styles.prose}>
         {paragraphs.map((text, i) => (
           <p key={i}>{text}</p>
         ))}
       </div>
-    </div>
+    </Reveal>
   );
 }
 
@@ -156,7 +157,7 @@ export function FeaturesBlock({ property: p }: P) {
   const features = p.features.map((f) => f.trim()).filter(Boolean);
   if (features.length === 0) return null;
   return (
-    <div className={`${styles.block} reveal`}>
+    <Reveal className={styles.block}>
       <h2>Features &amp; amenities</h2>
       <ul className={styles.features}>
         {features.map((f, i) => (
@@ -166,14 +167,14 @@ export function FeaturesBlock({ property: p }: P) {
           </li>
         ))}
       </ul>
-    </div>
+    </Reveal>
   );
 }
 
 export function DocumentsBlock({ property: p }: P) {
   if (p.documents.length === 0) return null;
   return (
-    <div className={`${styles.block} reveal`}>
+    <Reveal className={styles.block}>
       <h2>Documents</h2>
       <ul className={styles.docs}>
         {p.documents.map((d) => (
@@ -184,7 +185,7 @@ export function DocumentsBlock({ property: p }: P) {
         ))}
       </ul>
       <p className={styles.note}>Copies are shared on request, before any payment.</p>
-    </div>
+    </Reveal>
   );
 }
 
@@ -195,7 +196,7 @@ export function DocumentsBlock({ property: p }: P) {
 export function LocationBlock({ property: p }: P) {
   const { query, zoom, exact } = propertyMapQuery(p);
   return (
-    <div className={`${styles.block} reveal`} id="location">
+    <Reveal className={styles.block} id="location">
       <h2>Location</h2>
       <div className={styles.map}>
         <iframe
@@ -232,7 +233,7 @@ export function LocationBlock({ property: p }: P) {
           ))}
         </ul>
       ) : null}
-    </div>
+    </Reveal>
   );
 }
 
@@ -307,7 +308,7 @@ export function SimilarProperties({ items }: { items: PropertyCardData[] }) {
         </div>
         <div className={styles.grid}>
           {items.map((item) => (
-            <PropertyCard key={item.id} property={item} className="reveal" />
+            <PropertyCard key={item.id} property={item} reveal={0} />
           ))}
         </div>
       </div>

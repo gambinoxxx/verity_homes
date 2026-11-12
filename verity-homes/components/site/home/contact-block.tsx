@@ -3,6 +3,7 @@ import { whatsappLink } from "@/lib/whatsapp";
 import { EnquiryForm } from "../enquiry-form";
 import { MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "../icons";
 import { PillTicker } from "../pill-ticker";
+import { Reveal } from "../reveal";
 import styles from "./contact-block.module.css";
 
 const WHATSAPP_MESSAGE = "Hello Verity Homes and Properties, I would like to make an enquiry.";
@@ -20,7 +21,7 @@ export async function ContactBlock() {
   return (
     <section className="sec" id="contact" aria-labelledby="c-h">
       <div className="container">
-        <div className={`${styles.box} on-navy reveal`}>
+        <Reveal className={`${styles.box} on-navy`}>
           <div className={styles.text}>
             <PillTicker label="Quick enquiry" />
             <h2 className="h2" id="c-h">
@@ -77,7 +78,7 @@ export async function ContactBlock() {
             </ul>
           </div>
           <EnquiryForm source="HOME_PAGE" />
-        </div>
+        </Reveal>
       </div>
     </section>
   );

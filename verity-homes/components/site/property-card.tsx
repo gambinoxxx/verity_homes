@@ -4,6 +4,7 @@ import type { PropertyCard as PropertyCardData } from "@/lib/db/queries/properti
 import { LISTING_LABEL, PROJECT_STATUS_LABEL, TITLE_LABEL } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
 import { AreaIcon, BathIcon, BedIcon, DocIcon, PinIcon } from "./icons";
+import { Reveal } from "./reveal";
 import { SaveButton } from "./save-button";
 import styles from "./property-card.module.css";
 
@@ -12,6 +13,8 @@ type PropertyCardProps = {
   /** `sizes` for the cover photo; the default fits the 3/2/1-column grid. */
   sizes?: string;
   className?: string;
+  /** Reveal on scroll, with this stagger (0–3). Leave out for no reveal. */
+  reveal?: 0 | 1 | 2 | 3;
   /**
    * Footer button: "enquire" (home, similar listings) links to the enquiry card on the
    * property page; "details" (the /properties list, as in design/properties.html) to the page.
@@ -42,6 +45,7 @@ export function PropertyCard({
   property: p,
   sizes = "(max-width: 640px) 100vw, (max-width: 1020px) 50vw, 410px",
   className,
+  reveal,
   cta = "enquire",
 }: PropertyCardProps) {
   const href = `/properties/${p.slug}`;
@@ -50,7 +54,7 @@ export function PropertyCard({
   const isOffPlan = p.listingType === "OFF_PLAN";
 
   return (
-    <article className={`${styles.card} ${className ?? ""}`}>
+    <CardRoot className={`${styles.card} ${className ?? ""}`} reveal={reveal}>
       <div className={`${styles.image} media`}>
         <span
           className={`${styles.tag} ${GOLD_TAGS.has(p.listingType) ? styles.gold : ""}`}
@@ -136,6 +140,24 @@ export function PropertyCard({
           )}
         </div>
       </div>
-    </article>
+    </CardRoot>
+  );
+}
+
+/** <article>, or a revealing <article> (state owned by <Reveal>, so it survives re-renders). */
+function CardRoot({
+  className,
+  reveal,
+  children,
+}: {
+  className: string;
+  reveal?: 0 | 1 | 2 | 3;
+  children: React.ReactNode;
+}) {
+  if (reveal === undefined) return <article className={className}>{children}</article>;
+  return (
+    <Reveal as="article" className={className} delay={reveal}>
+      {children}
+    </Reveal>
   );
 }

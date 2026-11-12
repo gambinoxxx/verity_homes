@@ -257,3 +257,70 @@ test("services titles stay aligned when one is active", async ({ page }) => {
     expect(new Set(lefts).size, `title x positions: ${lefts.join(", ")}`).toBe(1);
   }
 });
+
+// ---- Services tap bug (2026-11-12) ------------------------------------------------------
+// Tapping an item used to blank it: React re-rendered its className (active toggled) and
+// wiped the "in" class a scroll observer had added by hand, so it fell back to opacity 0.
+// Animations must be ON here: under reduced motion CSS shows every .reveal anyway, which
+// would hide the bug. Opacity is checked including ancestors (the item wrapper faded out).
+
+const SERVICE_TITLES = [
+  "Property sales",
+  "Rentals",
+  "Land",
+  "Property management",
+  "Development",
+] as const;
+
+/** Opacity as rendered: the element's own times every ancestor's. */
+function effectiveOpacity(el: Element): number {
+  let o = 1;
+  for (let n: Element | null = el; n; n = n.parentElement) o *= Number(getComputedStyle(n).opacity);
+  return o;
+}
+
+test.describe("services accordion, animations on", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("tapping each service keeps every title visible and opens its description", async ({
+    page,
+  }, info) => {
+    await page.goto("/");
+    await expect(page.locator('[role="status"][aria-label^="Loading Verity"]')).toHaveCount(0, {
+      timeout: 7000,
+    });
+    const section = page.locator("#services");
+    const buttons = section.locator("h3 button");
+    await expect(buttons).toHaveCount(5);
+    // Scroll through the list so every item has been revealed before tapping.
+    await buttons.last().scrollIntoViewIfNeeded();
+    await section.scrollIntoViewIfNeeded();
+
+    for (const [i, title] of SERVICE_TITLES.entries()) {
+      const button = buttons.nth(i);
+      await button.scrollIntoViewIfNeeded();
+      if (info.project.name === "mobile") await button.tap();
+      else await button.click();
+      await expect(button).toHaveAttribute("aria-expanded", "true");
+
+      // The tapped item: title and description fully visible, with a real size.
+      const panel = section.locator(`#${await button.getAttribute("aria-controls")}`);
+      for (const el of [button, panel.locator("p")]) {
+        await expect.poll(() => el.evaluate(effectiveOpacity), { timeout: 3000 }).toBe(1);
+        const bb = await el.boundingBox();
+        expect(bb?.width ?? 0).toBeGreaterThan(0);
+        expect(bb?.height ?? 0).toBeGreaterThan(0);
+      }
+      // The caption over the photo names it.
+      await expect(section.locator("[class*=cap] b")).toHaveText(title);
+      // The other four titles stay visible too.
+      for (const [k, other] of SERVICE_TITLES.entries()) {
+        if (k === i) continue;
+        expect(
+          await buttons.nth(k).evaluate(effectiveOpacity),
+          `"${other}" faded after tapping "${title}"`,
+        ).toBe(1);
+      }
+    }
+  });
+});
