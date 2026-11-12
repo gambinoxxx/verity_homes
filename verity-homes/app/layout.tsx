@@ -25,14 +25,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: the inline script adds the `js` class before React hydrates.
-    <html lang="en" className={`${playfair.variable} ${manrope.variable}`} suppressHydrationWarning>
-      <head>
-        {/* Lets CSS hide reveal-on-scroll content only when JavaScript will reveal it. */}
-        <script
-          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
-        />
-      </head>
+    // The `js` class (reveal-on-scroll may hide content) is added by RevealObserver once it
+    // runs, never by an inline script, so a JavaScript failure cannot leave content hidden.
+    <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
       <body>{children}</body>
     </html>
   );

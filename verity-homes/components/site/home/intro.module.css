@@ -58,7 +58,7 @@
   letter-spacing: 3.2px;
   fill: var(--bg-navy-deep);
 }
-/* The mark inside the badge: navy roof instead of white. */
+/* The mark inside the badge: whole mark (roof and V) in navy, so the V shows on gold. */
 .mark {
   position: relative;
   width: 44px;

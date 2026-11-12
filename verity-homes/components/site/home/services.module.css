@@ -38,9 +38,7 @@
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
   font-weight: 600;
-  transition:
-    color 0.3s,
-    transform 0.4s var(--ease);
+  transition: color 0.3s;
 }
 .ic {
   width: 46px;
@@ -75,9 +73,7 @@
     opacity 0.4s,
     margin 0.4s;
 }
-.active .title {
-  transform: translateX(6px);
-}
+/* No translateX on the active title (the design shifts it 6px): all five titles stay aligned. */
 .active .panel p {
   max-height: 120px;
   opacity: 1;

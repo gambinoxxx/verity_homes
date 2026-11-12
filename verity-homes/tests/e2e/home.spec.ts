@@ -147,3 +147,113 @@ test.describe("with motion on", () => {
     );
   });
 });
+
+// ---- Intro photos (bug fix 2026-11-12) -------------------------------------------------
+// The photos are `.reveal-img`: clipped with `clip-path: inset(0 0 100% 0)` until revealed.
+// Playwright's boundingBox()/toBeVisible() ignore clip-path, so these checks also assert that
+// the computed clip no longer hides the photo — otherwise they would pass with the bug.
+
+async function expectIntroPhotosShown(page: import("@playwright/test").Page) {
+  const intro = page.locator("#about");
+  await intro.scrollIntoViewIfNeeded();
+  const boxes = intro.locator(".reveal-img");
+  await expect(boxes).toHaveCount(2);
+  for (const box of await boxes.all()) {
+    const bb = await box.boundingBox();
+    expect(bb?.width ?? 0).toBeGreaterThan(0);
+    expect(bb?.height ?? 0).toBeGreaterThan(0);
+    // Loaded…
+    await expect
+      .poll(() => box.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    // …and not clipped away (the reveal wipe ends at inset(0) / none).
+    await expect
+      .poll(() => box.evaluate((el) => getComputedStyle(el).clipPath))
+      .not.toContain("100%");
+  }
+}
+
+test.describe("intro photos, animations on", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  test("both photos show after scrolling to the intro", async ({ page }) => {
+    await page.goto("/");
+    // The preloader covers the page for up to 5s on a full load.
+    await expect(page.locator('[role="status"][aria-label^="Loading Verity"]')).toHaveCount(0, {
+      timeout: 7000,
+    });
+    await expectIntroPhotosShown(page);
+  });
+});
+
+test.describe("intro photos after a scroll jump", () => {
+  test.use({ reducedMotion: "no-preference" });
+
+  // A reload mid-page or a fast fling can land past the photos' top edge in one step.
+  test("photos still show when the page jumps past their top edge", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('[role="status"][aria-label^="Loading Verity"]')).toHaveCount(0, {
+      timeout: 7000,
+    });
+    // Jump so the tall arched photo's top edge is 100px above the screen.
+    await page.evaluate(() => {
+      const photo = document.querySelector("#about .reveal-img")!;
+      window.scrollTo(0, window.scrollY + photo.getBoundingClientRect().top + 100);
+    });
+    const photo = page.locator("#about .reveal-img").first();
+    await expect
+      .poll(() => photo.evaluate((el) => getComputedStyle(el).clipPath))
+      .not.toContain("100%");
+  });
+});
+
+test.describe("intro photos, reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("both photos show without any animation", async ({ page }) => {
+    await page.goto("/");
+    await expectIntroPhotosShown(page);
+  });
+});
+
+test.describe("reveal content without the app's JavaScript", () => {
+  // Animations on: under reduced motion nothing is hidden anyway.
+  test.use({ reducedMotion: "no-preference" });
+
+  test("nothing stays hidden if the Next.js bundles fail to load", async ({ page }) => {
+    // Inline scripts still run, but the app bundles never arrive (blocked here), as on a flaky
+    // network or a broken deploy. No reveal content may be left hidden.
+    let blocked = 0;
+    await page.route(/\/_next\/static\/chunks\/.+\.js(\?|$)/, (route) => {
+      blocked++;
+      return route.abort();
+    });
+    await page.goto("/");
+    await page.waitForTimeout(500);
+    expect(blocked, "no bundles were blocked: the test would prove nothing").toBeGreaterThan(0);
+    const hidden = await page.evaluate(
+      () =>
+        [...document.querySelectorAll(".reveal, .reveal-img")].filter((el) => {
+          const cs = getComputedStyle(el);
+          return cs.opacity === "0" || cs.clipPath.includes("100%");
+        }).length,
+    );
+    expect(hidden, "reveal elements left hidden").toBe(0);
+  });
+});
+
+test("services titles stay aligned when one is active", async ({ page }) => {
+  await page.goto("/");
+  const buttons = page.locator("#services h3 button");
+  await expect(buttons).toHaveCount(5);
+  for (const i of [2, 4]) {
+    await buttons.nth(i).click();
+    await expect(buttons.nth(i)).toHaveAttribute("aria-expanded", "true");
+    const lefts = await buttons.evaluateAll((els) =>
+      els.map((b) =>
+        Math.round(b.querySelector("span:nth-child(2)")!.getBoundingClientRect().left),
+      ),
+    );
+    expect(new Set(lefts).size, `title x positions: ${lefts.join(", ")}`).toBe(1);
+  }
+});

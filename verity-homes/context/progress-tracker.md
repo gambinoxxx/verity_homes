@@ -144,3 +144,11 @@ Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5
     but rotate the test branch's password in Neon and update `.env.test`.
 31. **`public/samples/ceo.jpg` is now 1.9 MB** (commit ddb7b51). `next/image` resizes it for
     visitors, but a smaller source (≤ 300 KB) would keep the repo and builds lighter.
+32. ~~Home intro photos invisible (2026-11-12).~~ Fixed: `.reveal-img` never got `.in` because
+    Chrome's IntersectionObserver measures the target after its own `clip-path` (ratio 0, and
+    `isIntersecting` only while the clipped top edge is on screen). `RevealObserver` now
+    observes each `.reveal-img`'s parent, and adds the `js` class itself (the inline script
+    was removed) so a JS failure never leaves content hidden. Badge logo is all navy; the
+    services title shift is gone. e2e in `tests/e2e/home.spec.ts` (motion on, scroll jump,
+    reduced motion, app JS blocked, title alignment). Note: the static `design/` files use the
+    same observer pattern, which is why `npm run compare` adds `.in` itself.

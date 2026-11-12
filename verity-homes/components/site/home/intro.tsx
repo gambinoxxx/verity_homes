@@ -50,7 +50,7 @@ export function Intro() {
                 <textPath href="#intro-badge-circle">VERITY · HOMES · PROPERTIES · </textPath>
               </text>
             </svg>
-            <Logo className={styles.mark} />
+            <Logo className={styles.mark} monochrome />
           </div>
         </div>
         <div>

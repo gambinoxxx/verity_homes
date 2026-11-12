@@ -132,7 +132,11 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     placeholder), `.skip-link`, `:focus-visible`.
   - Also global: `.sec`, `.sec-head`, `.eyebrow`, `.h2`, `.lead`, `.link-arrow`,
     `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `d1`–`d3`
-    delays; `RevealObserver` adds `.in`; hidden only under `html.js`).
+    delays; `RevealObserver` adds `.in`; hidden only under `html.js`, and `RevealObserver`
+    itself adds `js` when it starts, so content stays visible if the app's JS fails).
+    `.reveal-img` is revealed when its **parent** enters view: Chrome measures an observed
+    element after its own `clip-path`, so a fully clipped element can't be observed reliably.
+    Give every `.reveal-img` an unclipped parent of about its own size.
   - Inner pages: `PageHero` (`components/site/page-hero.tsx`: photo, giant title with gold
     `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
     `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`
@@ -173,6 +177,11 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
 - Reveal-on-scroll moves from 40px below with opacity 0 to rest, over 1s.
 - Image reveals use a clip-path wipe.
 - Card hover lifts the card 8px and zooms the image 1.08×.
+- Services accordion: the active title does **not** shift 6px right (the design's
+  `.svc-item.active h3` translateX was removed on request, 2026-11-12) so all titles align;
+  the arrow rotation, navy arrow circle and opening description stay.
+- Logo on a gold background (intro badge): `<Logo monochrome />` draws roof and V in
+  `currentColor` (navy-deep); the regular gold V would vanish on gold.
 - Every animation is disabled under `prefers-reduced-motion`. Transitions are set to
   `0s` with no delay (not the design's `0.01ms`), so nothing is ever half-hidden for a frame
   (that broke drawer focus and made e2e clicks land on the wrong element). Nothing in the app

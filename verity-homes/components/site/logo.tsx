@@ -1,7 +1,12 @@
 // The Verity mark: roof stroke + gold "V". Paths copied from the #logo symbol in design/index.html.
-type LogoProps = { className?: string };
+type LogoProps = {
+  className?: string;
+  /** Draw the whole mark (roof and V) in currentColor, e.g. navy on the gold intro badge. */
+  monochrome?: boolean;
+};
 
-export function Logo({ className }: LogoProps) {
+export function Logo({ className, monochrome = false }: LogoProps) {
+  const accent = monochrome ? "currentColor" : "var(--accent-primary)";
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true" focusable="false">
       <path
@@ -15,7 +20,7 @@ export function Logo({ className }: LogoProps) {
       <path
         d="M11 18 L24 42 L37 18"
         fill="none"
-        stroke="var(--accent-primary)"
+        stroke={accent}
         strokeWidth="3.2"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -23,7 +28,7 @@ export function Logo({ className }: LogoProps) {
       <path
         d="M19 18 L24 27 L29 18"
         fill="none"
-        stroke="var(--accent-primary)"
+        stroke={accent}
         strokeWidth="1.6"
         strokeLinejoin="round"
         strokeLinecap="round"
