@@ -40,9 +40,9 @@ test("WhatsApp link names the property", async ({ page }) => {
   expect(decodeURIComponent(href)).toContain("Contemporary Detached Duplex");
 });
 
-// FIXME(Unit 7): the property enquiry form is built (Unit 6) but not connected — submit stays
-// disabled with "Form goes live soon" until Unit 7 adds the server action. Remove the fixme then.
-test.fixme("enquiry form validates, then succeeds", async ({ page }) => {
+test("enquiry form validates, then succeeds", async ({ page }) => {
+  // Own client IP per run, so repeated runs don't hit the 5-per-hour rate limit (Unit 7).
+  await page.setExtraHTTPHeaders({ "x-forwarded-for": `198.51.100.${Date.now() % 250}` });
   await page.goto(SLUG);
   const form = page.getByRole("form", { name: /enquire about this property/i });
   await form.getByRole("button", { name: /send enquiry/i }).click();

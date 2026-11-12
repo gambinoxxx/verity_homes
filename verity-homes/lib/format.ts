@@ -87,3 +87,21 @@ const monthYearFmt = new Intl.DateTimeFormat("en-GB", {
 export function formatMonthYear(d: Date): string {
   return monthYearFmt.format(d);
 }
+
+export const INTEREST_LABEL = {
+  BUYING: "Buying",
+  RENTING: "Renting",
+  LAND: "Land",
+  INVESTING: "Investing",
+  MANAGEMENT: "Property management",
+  DEVELOPMENT: "Development",
+  LISTING: "Listing a property",
+  OTHER: "General enquiry",
+} as const;
+
+export const SOURCE_LABEL = {
+  HOME_PAGE: "Home page",
+  PROPERTY_PAGE: "Property page",
+  INVEST_PAGE: "Invest page",
+  CONTACT_PAGE: "Contact page",
+} as const;

@@ -49,13 +49,19 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `prisma/` — `schema.prisma`, `migrations/` and `seed.ts`.
 - `lib/db/` — `client.ts` (the Prisma singleton) and `queries/*.ts`. This is
   the only place that imports the generated Prisma client.
-- `lib/actions/` — Server actions grouped by entity. Each one validates with
+- `lib/actions/` — Server actions grouped by entity (`enquiry.ts` → `createEnquiry`,
+  `subscribe.ts` → `subscribe`; Unit 7). Each one validates with
   Zod, checks `requireAdmin()` for admin actions, writes, then calls
   `revalidatePath`.
 - `lib/validation/` — Zod schemas shared by forms and actions.
 - `lib/storage/` — Blob wrapper (`upload`, `remove`). The only importer of
   `@vercel/blob`.
 - `lib/email/` — Resend client and templates. The only importer of `resend`.
+  `client.ts` (lazy client), `enquiry-template.ts` (pure: subject/HTML/text),
+  `enquiry.ts` (`sendEnquiryEmail`, never throws).
+- `lib/db/mutations/` — Writes for public actions (`enquiries.ts`: rate-limit count,
+  published property/plan lookup, save enquiry, mark email sent, upsert subscriber).
+- `lib/ip-hash.ts` — client IP from `x-forwarded-for` / `x-real-ip`, `sha256(ip + salt)`.
 - `lib/auth/` — `requireAdmin()` and `isAdmin()`.
 - `lib/property-detail.ts` — Property page helpers: facts strip, description paragraphs,
   WhatsApp text, meta description and `RealEstateListing` JSON-LD (area + city only).

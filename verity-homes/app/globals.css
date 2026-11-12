@@ -41,6 +41,8 @@
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */
   --text-on-navy-faint: #a7b2c4; /* .foot-bottom text */
   --placeholder-on-navy: #8c98ad; /* .news input::placeholder */
+  --state-success-bg: #e8f5ec; /* .form-ok */
+  --state-error-bg: #fdecea; /* form-level error box */
   --text-on-navy-dim: #7f8ca3; /* .sc-dots inactive numbers */
   --border-navy-dashed: #3a5482; /* .marquee-track partner tiles */
   --statement-unfilled: #d5d9e0; /* .statement .wd before it fills */

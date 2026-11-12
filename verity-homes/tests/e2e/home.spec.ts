@@ -85,11 +85,11 @@ test("testimonials and latest posts render from the database", async ({ page }) 
   await expect(blog.locator('a[href^="/blog/"]')).toHaveCount(3);
 });
 
-test("the enquiry form is not live yet: submit disabled, note visible", async ({ page }) => {
+test("the enquiry form is live: submit enabled, no 'goes live soon' note", async ({ page }) => {
   await page.goto("/#contact");
   const form = page.locator("#enquiry");
-  await expect(form.getByRole("button", { name: /Send enquiry/ })).toBeDisabled();
-  await expect(form.getByText("Form goes live soon", { exact: false })).toBeVisible();
+  await expect(form.getByRole("button", { name: /Send enquiry/ })).toBeEnabled();
+  await expect(page.getByText("Form goes live soon", { exact: false })).toHaveCount(0);
   await expect(form.getByRole("radio", { name: "Investing" })).toBeChecked();
 });
 

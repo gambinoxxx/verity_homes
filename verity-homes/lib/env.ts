@@ -70,6 +70,12 @@ export const emailEnv = lazyFeature(
   z.object({
     RESEND_API_KEY: z.string().min(1),
     ENQUIRY_NOTIFY_TO: z.email(),
-    ENQUIRY_FROM: z.string().min(3),
+    // What Resend accepts: "email@example.com" or "Name <email@example.com>".
+    ENQUIRY_FROM: z
+      .string()
+      .trim()
+      .regex(
+        /^(?:[^<>]*[^<>\s]\s*<[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+>|[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+)$/,
+      ),
   }),
 );

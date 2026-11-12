@@ -73,3 +73,23 @@ describe("feature env (validated on first call)", () => {
     expect(blobEnv().BLOB_READ_WRITE_TOKEN).toBe("vercel_blob_rw_test");
   });
 });
+
+describe("ENQUIRY_FROM format (what Resend accepts)", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  for (const [value, ok] of [
+    ["Verity Website <onboarding@resend.dev>", true],
+    ["onboarding@resend.dev", true],
+    ["<onboarding@resend.dev>", false], // brackets without a name: Resend rejects it (422)
+    ["Verity Website", false],
+  ] as const) {
+    it(`${ok ? "accepts" : "rejects"} ${JSON.stringify(value)}`, async () => {
+      const { emailEnv } = await loadWithCoreOnly();
+      vi.stubEnv("RESEND_API_KEY", "re_test");
+      vi.stubEnv("ENQUIRY_NOTIFY_TO", "delivered@resend.dev");
+      vi.stubEnv("ENQUIRY_FROM", value);
+      if (ok) expect(emailEnv().ENQUIRY_FROM).toBe(value);
+      else expect(() => emailEnv()).toThrow(/: ENQUIRY_FROM\./);
+    });
+  }
+});

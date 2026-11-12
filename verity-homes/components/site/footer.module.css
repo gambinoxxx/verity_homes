@@ -67,6 +67,26 @@
 .news input::placeholder {
   color: var(--placeholder-on-navy);
 }
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.newsMsg {
+  margin: 10px 0 0;
+  min-height: 1px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-on-navy);
+}
+.newsMsg:empty {
+  margin: 0;
+}
+.newsError {
+  color: var(--accent-soft);
+}
 .news :global(.btn) {
   min-height: 48px;
   padding: 0 20px;

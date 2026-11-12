@@ -6,7 +6,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5 at the owner's request).
+Unit 8: contact page — **next** (Units 1–7 done).
 
 ## Units
 
@@ -18,7 +18,7 @@ Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5
 | 4 | Home page wired to the database | done | `index.html` | **4a done 2026-11-11:** hero slider (3 slides, captions, progress dots, 01/03, slow zoom, headline reveal after the preloader via `lib/site-loaded.ts`), search bar (`lib/search.ts` → `/properties?type=sale\|rent\|land&area=&ptype=`, Invest tab → `/invest`), intro with rotating badge, first marquee band (`components/site/marquee-band.tsx`, reusable), featured properties with on-page filters and localStorage hearts. Shared `components/site/property-card.tsx` for Unit 5. `getFeaturedProperties()` cached with tag `"properties"` (Unit 14 must call `updateTag("properties")`). Global reveal-on-scroll (now `components/site/reveal.tsx`, React-owned; see Open question 33). **4b done 2026-11-11:** search Budget ranges per tab (`lib/search-ranges.ts`, shared with Unit 5) → `min`/`max` naira params; signature projects sticky showcase (`showcase-stack.tsx`, rAF, inert hidden panel items, hidden if none); invest section (steps, plans with highlighted gold card + rate placeholder at 0, partner marquee hidden if none, disclaimer from `lib/invest.ts`); statement scroll-fill (`statement.tsx` + `lib/scroll-fill.ts`, rAF; complete by mid-viewport; filled by CSS under reduced motion / no JS); second band (reverse, light); services accordion + image swap (`#services`); CEO; testimonials carousel (hidden if none); latest 3 posts; contact block + `components/site/enquiry-form.tsx` (submit disabled, "Form goes live soon" until Unit 7). New cached queries + tags (see architecture.md). `tests/e2e/home.spec.ts` added. |
 | 5 | Properties list, filters in the URL, pagination | done | `properties.html` | Done 2026-11-12: `app/(site)/properties/page.tsx` — `PageHero` + sheet; pills, sidebar and sort `router.push(…, { scroll: false })` in a transition; results render on the server from the URL inside `<Suspense>` (◐ partial prerender). Params (`type`, `q`, `area`, `ptype`, `min`, `max`, `beds`, `title[]`, `sort`, `page`, 12/page) parsed per param with Zod in `lib/validation/property-filters.ts` (bad values dropped, never throws; 9 unit tests). Price uses `lib/search-ranges.ts` (rent/land/sale ranges by pill), preselects the URL's range, keeps a non-preset min/max as "custom"; Price-on-request included unless min/max set. Area dropdown = distinct published areas (`getPublishedAreas`). `listProperties` + `getPublishedAreas` cached, tag `"properties"`, page clamped. Shared `PropertyCard` (`cta="details"`, `data-tag`). Empty state + Clear filters + Make a request. `generateMetadata` e.g. "Properties for rent in Lagos". `/properties` removed from `UNBUILT_ROUTES`; breadcrumb and "All properties" on the property page work. Reduced-motion transitions now `0s` (see ui-context). |
 | 6 | Property detail: gallery, lightbox, facts, documents, **map**, similar, JSON-LD | done | `property.html` | Done 2026-11-11 (before Unit 5, at the owner's request). `app/(site)/properties/[slug]/page.tsx`: `generateStaticParams` (published slugs, placeholder if none), cached reads (tag `"properties"`): `getPublishedPropertySlugs`, `getPropertyBySlug`, `getPropertyRedirect`, `getSimilarProperties`. **`proxy.ts`** decides the status before the shell streams (Cache Components sends a 200 shell first, so `notFound()`/`permanentRedirect()` in the page can't set it): published → page, SlugRedirect → 308, unknown/draft → 404 (`resolvePropertySlug`, two indexed lookups per request). Unit 12 adds Clerk to the same `proxy.ts`. `components/site/property/`: `gallery.tsx` (1 big + 4, "View all N photos" on the last tile, 0 photos → navy house panel, 1 photo → wide tile; lightbox dialog: arrows, ←/→, Esc, swipe, "1 / N", focus trap + return), `share-button.tsx` (navigator.share → clipboard "Link copied"), `sections.tsx` (hero + breadcrumb, head, facts/features/documents/nearby only when present, map via `lib/maps.ts`, enquiry card `id="enquire"` with `EnquiryForm` `card` variant (disabled until Unit 7), mobile bar, similar). Helpers + `RealEstateListing` JSON-LD (area + city, price only when public) in `lib/property-detail.ts` (tested). CSP + security headers in `next.config.ts`. `/properties/*` removed from `UNBUILT_ROUTES`. E2E: `property.spec.ts` all pass except the Unit 7 enquiry test (`test.fixme`); `public.spec.ts` passes for the property page; its 10 "loads cleanly" failures are the unbuilt `/properties`, `/invest`, `/about`, `/blog`, `/contact` (404). Deviations (contrast, see Q27): WhatsApp text buttons `#15803D`, "Verified" text `#14703A`. Mobile gallery shows 3 tiles with no "View all" chip, as in the design. |
-| 7 | Enquiries: form component, server action, rate limit, Resend email, WhatsApp links (used on home, property, invest and contact) | todo | `property.html`, `contact.html` | |
+| 7 | Enquiries: form component, server action, rate limit, Resend email, WhatsApp links (used on home, property, invest and contact) | done | `property.html`, `contact.html` | Done 2026-11-12: `lib/actions/enquiry.ts` `createEnquiry` (Zod → rate limit 5/h per `sha256(ip+IP_HASH_SALT)` counted in DB → published property/plan check → **save** → Resend email → `emailSentAt`; friendly messages only). `lib/email/` (only `resend` importer): `enquiry-template.ts` (HTML + plain text, subject `New enquiry: <interest> — <name>`, links via `NEXT_PUBLIC_SITE_URL`), `enquiry.ts` (never throws). `components/site/enquiry-form.tsx`: `useActionState`, errors under fields (`aria-describedby`), focus first invalid, `role="status"` success, pending/no double submit, honeypot `company`, `startedAt`; props `source`, `propertyId`, `planId`, `interest` for Units 8/9. Wired on home + property; "Form goes live soon" removed. Newsletter: `lib/actions/subscribe.ts` (upsert, honeypot). DB writes in `lib/db/mutations/enquiries.ts`. Playwright loads `.env.test` (Q29). Tests: 16 unit (action on test branch with mocked email, template, subscribe), `tests/e2e/enquiry.spec.ts`, property enquiry e2e re-enabled. |
 | 8 | Contact page with **map** | todo | `contact.html` | |
 | 9 | Invest page: plans and FAQs from the database | todo | `invest.html` | Build now; launch needs approved wording (Q5) |
 | 10 | About page | todo | `about.html` | |
@@ -47,7 +47,8 @@ Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5
 ## Open questions
 
 1. Phone and WhatsApp number.
-2. Business email (`info@verityhomes.com.ng` once email hosting is set up).
+2. Business email (`info@verityhomes.com.ng` once email hosting is set up). **Still open:**
+   `ENQUIRY_NOTIFY_TO` is temporarily the owner's Resend sign-up address (Unit 7).
 3. Office address display: show only "Onipanu, Lagos", or the full
    address? The registered address is also the CEO's home address.
 4. Esther's bio and her one-line promise to clients.
@@ -133,15 +134,12 @@ Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5
     branch (`.env.test` loaded into the shell). Playwright 1.65 has no Chromium for macOS 12, so
     e2e and compare ran in the installed Google Chrome (`channel: "chrome"`) via an uncommitted
     override; the committed config is unchanged. Fill `.env.local` with the dev-branch values.
-29. **E2E server database (Unit 5).** `playwright.config.ts` starts `npm run build && npm run
-    start`, which reads `.env.local` (dev branch), but `db:test:reset` writes the e2e fixtures
-    (fake WhatsApp number) to the **test** branch. Unit 5's e2e run exported `.env.test` into
-    the shell first (`set -a; . ./.env.test; set +a; npm run test:e2e …`), since real env vars
-    override `.env.local`. Should the Playwright config load `.env.test` for its web server so
-    a plain `npm run test:e2e` always uses the test branch?
-30. **Rotate the Neon test-branch password (2026-11-12).** During Unit 5 a URL-parse error
-    echoed the `.env.test` connection string into the agent's tool output. It went nowhere else,
-    but rotate the test branch's password in Neon and update `.env.test`.
+29. ~~E2E server database.~~ Closed 2026-11-12 (Unit 7): `playwright.config.ts` loads `.env.test`
+    itself (dotenv) and refuses to run if its `DATABASE_URL` is missing, a placeholder, or the
+    same host as `.env.local`; it never reuses a server on :3000; e2e enquiry emails are forced
+    to `delivered@resend.dev`. Documented in `testing/TESTING.md` §5.
+30. ~~Rotate the Neon test-branch password.~~ Closed 2026-11-12: rotated by the owner and
+    `.env.test` updated.
 31. **`public/samples/ceo.jpg` is now 1.9 MB** (commit ddb7b51). `next/image` resizes it for
     visitors, but a smaller source (≤ 300 KB) would keep the repo and builds lighter.
 32. ~~Home intro photos invisible (2026-11-12).~~ Fixed: `.reveal-img` never got `.in` because
@@ -159,3 +157,12 @@ Unit 7: enquiries — **next** (Units 1–6 done; Unit 6 was built before Unit 5
     hydration). The hero headline and statement no longer read `body.loaded` / `html.js`.
     e2e: "tapping each service…" (animations on; fails on the previous code, desktop and
     mobile).
+34. **Resend is in testing mode (Unit 7, 2026-11-12).** No verified domain yet, so
+    `ENQUIRY_FROM="Verity Website <onboarding@resend.dev>"` and mail can only go to the
+    account's own address or Resend test inboxes; `.env.test` uses `delivered@resend.dev`.
+    **Unit 21 must verify `verityhomes.com.ng` in Resend and switch `ENQUIRY_FROM` to
+    `website@verityhomes.com.ng`** (Vercel env too). `emailEnv()` now rejects a malformed
+    `ENQUIRY_FROM` (e.g. `<x@y>` with no name, which Resend refuses with 422).
+35. **Vercel env for Unit 7.** Add `RESEND_API_KEY`, `ENQUIRY_FROM` (as above, with the name)
+    and `ENQUIRY_NOTIFY_TO` to the Vercel project, or enquiries are saved with
+    `emailSentAt = null` and the server logs name the missing variable.

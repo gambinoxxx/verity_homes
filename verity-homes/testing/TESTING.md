@@ -105,6 +105,24 @@ placeholders. Differences in layout or style are not.
   with consent, and SiteSettings.
 - Never run tests against the production database.
 
+### How the test branch is used (Unit 7)
+
+- **Unit tests** (`npm run test`) load `.env.test` in `tests/setup/env.ts`. DB-backed tests
+  call `assertTestDatabase()` (`tests/unit/helpers/test-db.ts`).
+- **E2E** (`npm run test:e2e`) loads `.env.test` itself, in `playwright.config.ts`, before
+  starting the app. The built app inherits those values; real environment variables take
+  precedence over `.env.local` in Next.js, so the app under test always uses the test
+  branch. It **refuses to run** if `.env.test` is missing, if its `DATABASE_URL` is missing
+  or still the placeholder, or if it points at the same host as `.env.local`.
+- E2E never reuses a server already running on port 3000 (it could be `npm run dev` on
+  the dev database). Stop it first, or Playwright stops with a "port in use" error.
+- Enquiry emails sent during e2e always go to Resend's test inbox
+  `delivered@resend.dev` (forced in `playwright.config.ts`), never a real address.
+- Rows created by e2e are tagged `[E2E]` and removed after the run. Each enquiry test sends
+  its own `x-forwarded-for` header so repeated runs don't hit the 5-per-hour rate limit.
+- Reset the branch to a clean seed with `npm run db:test:reset`. Prisma refuses to let an
+  AI agent run `migrate reset` without your explicit consent.
+
 ## 6. Admin tests with Clerk
 
 - Install `@clerk/testing` and call `clerkSetup()` in Playwright global

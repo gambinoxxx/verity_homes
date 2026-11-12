@@ -108,11 +108,44 @@ fieldset.fg {
   opacity: 0.6;
   transform: none;
 }
-.soon {
+/* Honeypot: off-screen, not focusable (tabIndex -1), hidden from assistive tech. */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+/* Errors and success (design: invalid fields get a red border; .form-ok success box). */
+.fg input[aria-invalid="true"],
+.fg textarea[aria-invalid="true"] {
+  border-color: var(--state-error);
+}
+.fieldError {
   margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--state-error);
+}
+.formError {
+  margin: 0;
+  background: var(--state-error-bg);
+  color: var(--state-error);
+  border-radius: 10px;
+  padding: 12px 14px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent-text);
+}
+.ok {
+  margin: 0;
+}
+.ok[data-shown] {
+  background: var(--state-success-bg);
+  color: var(--state-success);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
 }
 .note {
   font-size: 12.5px;
@@ -159,9 +192,12 @@ fieldset.fg {
 .card :global(.btn) {
   width: 100%;
 }
-.card .soon {
+.card .formError,
+.card .ok[data-shown] {
   margin-top: 12px;
-  font-size: 13px;
+}
+.card .fieldError {
+  margin-top: 2px;
 }
 .check {
   display: flex;
