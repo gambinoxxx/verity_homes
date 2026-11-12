@@ -365,6 +365,9 @@ body {
   .prose p {
     margin: 0 0 18px;
   }
+  .prose > :first-child {
+    margin-top: 0;
+  }
   .prose h2 {
     font-family: var(--font-display);
     font-weight: 600;
@@ -395,6 +398,50 @@ body {
   }
   .prose li {
     margin-bottom: 8px;
+  }
+  .prose ol {
+    list-style: decimal;
+    padding-left: 22px;
+    margin: 0 0 18px;
+  }
+  .prose ul ul,
+  .prose ol ol {
+    margin: 8px 0 0;
+  }
+  .prose .prose-img {
+    width: 100%;
+    height: auto;
+    border-radius: 18px;
+    margin: 12px 0 28px;
+  }
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--border-default);
+    margin: 40px 0;
+  }
+  .prose code {
+    font-size: 0.9em;
+    background: var(--bg-subtle);
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 24px;
+    font-size: 15px;
+    display: block;
+    overflow-x: auto;
+  }
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-default);
+  }
+  .prose th {
+    color: var(--text-primary);
+    font-weight: 800;
   }
   .prose a {
     color: var(--text-primary);

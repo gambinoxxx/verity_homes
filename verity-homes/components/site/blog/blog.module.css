@@ -1,0 +1,224 @@
+/* design/assets/verity.css: .layout.right, .post-row, .side, .search, .links, .pager (blog list) */
+.pills {
+  margin-bottom: 56px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 40px;
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* ---- Post rows ---- */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 40px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border-default);
+  text-decoration: none;
+  color: inherit;
+}
+.rowMedia {
+  height: 340px;
+  border-radius: 22px;
+}
+.rowMedia img {
+  transition: transform 1.2s var(--ease);
+}
+.row:hover .rowMedia img {
+  transform: scale(1.05);
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.cat {
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.meta i {
+  flex: 1;
+  height: 1px;
+  background: var(--border-input);
+}
+.row h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 2.8vw, 36px);
+  line-height: 1.2;
+}
+.row p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ---- Empty state ---- */
+.empty {
+  text-align: center;
+  padding: 56px 24px;
+  border: 1px dashed var(--border-input);
+  border-radius: 22px;
+}
+.empty h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+}
+.empty p {
+  margin: 0 0 22px;
+  color: var(--text-muted);
+}
+
+/* ---- Pager ---- */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 48px;
+}
+.pager a,
+.pager span {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-input);
+  text-decoration: none;
+  font-weight: 800;
+  color: var(--text-primary);
+  background: var(--bg-base);
+}
+.pager span {
+  border-color: transparent;
+  background: transparent;
+}
+.pager a[aria-current="page"] {
+  background: var(--bg-navy);
+  border-color: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+.pager svg {
+  width: 16px;
+  height: 16px;
+}
+.prev svg {
+  transform: rotate(180deg);
+}
+
+/* ---- Sidebar ---- */
+.side {
+  position: sticky;
+  top: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.sideHead {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.searchHead {
+  margin-bottom: 12px;
+}
+.search {
+  display: flex;
+  align-items: center;
+  background: var(--bg-subtle);
+  border-radius: 999px;
+  padding: 0 6px 0 20px;
+}
+.search input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  min-height: 48px;
+  font-size: 15px;
+  outline: none;
+  min-width: 0;
+  color: var(--text-primary);
+}
+.search:focus-within {
+  box-shadow: 0 0 0 3px var(--accent-primary);
+}
+.search button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--bg-navy);
+  color: var(--accent-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.search button svg {
+  width: 16px;
+  height: 16px;
+}
+.links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.links a {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-default);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.links a:hover,
+.links a[aria-current="page"] {
+  color: var(--accent-text);
+}
+.links small {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.loading {
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+@media (max-width: 1020px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    position: static;
+  }
+}

@@ -32,8 +32,8 @@ describe("isActiveLink", () => {
 
 describe("prefetchFor", () => {
   it("turns prefetch off only for routes that have no page yet", () => {
-    expect(prefetchFor("/blog")).toBe(false);
-    expect(prefetchFor("/blog?q=1")).toBe(false);
+    expect(prefetchFor("/blog")).toBeUndefined(); // built in Unit 11
+    expect(prefetchFor("/blog?q=1")).toBeUndefined();
     expect(prefetchFor("/about")).toBeUndefined(); // built in Unit 10
     expect(prefetchFor("/about?x=1")).toBeUndefined();
     expect(prefetchFor("/privacy")).toBeUndefined(); // built in Unit 10
@@ -42,14 +42,22 @@ describe("prefetchFor", () => {
     expect(prefetchFor("/contact#message")).toBeUndefined(); // built in Unit 8
     expect(prefetchFor("/properties")).toBeUndefined(); // built in Unit 5
     expect(prefetchFor("/properties?type=rent")).toBeUndefined();
-    expect(prefetchFor("/blog/sample-post")).toBe(false);
+    expect(prefetchFor("/blog/sample-post")).toBeUndefined();
     expect(prefetchFor("/")).toBeUndefined();
     expect(prefetchFor("/#services")).toBeUndefined();
   });
 
-  it("prefetches property detail pages (built in Unit 6) but not the unbuilt list", () => {
+  it("still turns prefetch off for routes listed as unbuilt (exact and /* children)", () => {
+    const unbuilt = ["/careers", "/news/*"];
+    expect(prefetchFor("/careers", unbuilt)).toBe(false);
+    expect(prefetchFor("/careers?x=1#a", unbuilt)).toBe(false);
+    expect(prefetchFor("/news/some-item", unbuilt)).toBe(false);
+    expect(prefetchFor("/careers-old", unbuilt)).toBeUndefined();
+  });
+
+  it("prefetches detail pages (properties: Unit 6, blog posts: Unit 11)", () => {
     expect(prefetchFor("/properties/sample-duplex")).toBeUndefined();
     expect(prefetchFor("/properties/sample-duplex#enquire")).toBeUndefined();
-    expect(prefetchFor("/blog/sample-post")).toBe(false);
+    expect(prefetchFor("/blog/sample-post")).toBeUndefined();
   });
 });

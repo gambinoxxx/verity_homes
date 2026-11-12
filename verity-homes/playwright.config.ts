@@ -43,6 +43,10 @@ function loadTestEnv() {
 
 loadTestEnv();
 
+// PW_CHANNEL=chrome runs the tests in the installed Google Chrome (for Macs where Playwright's
+// bundled Chromium won't launch, e.g. macOS 12). Unset: the bundled Chromium.
+const channel = process.env.PW_CHANNEL || undefined;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60_000,
@@ -59,9 +63,12 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+      use: { ...devices["Desktop Chrome"], channel, viewport: { width: 1440, height: 900 } },
     },
-    { name: "mobile", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 7"], channel, viewport: { width: 390, height: 844 } },
+    },
   ],
   // start the app automatically unless testing a deployed URL
   webServer: process.env.PLAYWRIGHT_BASE_URL

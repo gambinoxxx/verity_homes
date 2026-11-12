@@ -25,14 +25,16 @@ export function isActiveLink(pathname: string | null, href: string): boolean {
  * A trailing "/*" covers child routes. Remove an entry in the unit that builds its page.
  */
 export const UNBUILT_ROUTES: readonly string[] = [
-  "/blog", // Unit 11
-  "/blog/*", // Unit 11
+  // Empty since Unit 11: every public page linked from the site exists.
 ];
 
 /** `prefetch` prop for a <Link>: false for routes not built yet, otherwise Next's default. */
-export function prefetchFor(href: string): false | undefined {
+export function prefetchFor(
+  href: string,
+  unbuiltRoutes: readonly string[] = UNBUILT_ROUTES,
+): false | undefined {
   const path = href.split(/[?#]/)[0] || "/";
-  const unbuilt = UNBUILT_ROUTES.some((r) =>
+  const unbuilt = unbuiltRoutes.some((r) =>
     r.endsWith("/*") ? path.startsWith(r.slice(0, -1)) : path === r,
   );
   return unbuilt ? false : undefined;

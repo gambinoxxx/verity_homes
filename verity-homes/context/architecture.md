@@ -41,11 +41,11 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `app/api/blob/upload/` — Route handler that issues Vercel Blob client
   upload tokens, admin only.
 - `app/sitemap.ts`, `app/robots.ts` — SEO files.
-- `proxy.ts` — From Unit 6: answers `/properties/[slug]` with the real status before the
+- `proxy.ts` — From Unit 6 (and `/blog/[slug]` from Unit 11): answers `/properties/[slug]` with the real status before the
   page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
   Components a page sends its shell (HTTP 200) first, so `notFound()` / `permanentRedirect()`
   inside it cannot change the status. Unit 12 adds `clerkMiddleware` protecting `/admin/*`
-  except the sign-in page; Unit 11 should add `/blog/[slug]` the same way.
+  except the sign-in page. `/blog/[slug]` uses `resolvePostSlug` (SlugRedirect entity `POST`).
 - `prisma/` — `schema.prisma`, `migrations/` and `seed.ts`.
 - `lib/db/` — `client.ts` (the Prisma singleton) and `queries/*.ts`. This is
   the only place that imports the generated Prisma client.
@@ -71,6 +71,12 @@ code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
 - `lib/search.ts` + `lib/search-ranges.ts` — Search URL building and the budget ranges
   (naira) per listing type, shared by the home search and the `/properties` filters.
 - `lib/invest.ts` — Shared investment copy: the disclaimer and the 4 steps.
+- `lib/blog.ts` — Post helpers: share links, meta description, Article JSON-LD, and the Markdown
+  link/image rules (`markdownLinkKind`, `markdownImageSrc`, `MARKDOWN_IMAGE_HOSTS`).
+  `lib/validation/blog-filters.ts` parses `/blog` params (`category`, `q`, `page`).
+- `components/site/blog/markdown.tsx` — The only Markdown renderer: react-markdown + remark-gfm,
+  `skipHtml` (raw HTML is never rendered), default `urlTransform`, safe external links, images only
+  from known hosts. Unit 18's preview must use this same component.
 - `components/site/privacy/privacy-notice.tsx` — The /privacy DRAFT notice. It describes what the
   code collects; when a unit changes what is collected, stored or shared (new form field, new
   processor, analytics, cookies), update the notice and `PRIVACY_LAST_UPDATED` in the same unit.
@@ -133,7 +139,10 @@ yet never breaks the build or pages that don't use it:
     "not set" on its own, so a bad URL never throws.
   - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`) and `getFaqs(page)` `"faqs"`
     (`FAQS_TAG`), both in `lib/db/queries/invest.ts`.
-  - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`).
+  - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`), as are the
+    Unit 11 reads `listPosts(filters)`, `getPostCategories()`, `getPublishedPostSlugs()`,
+    `getPostBySlug()`, `getPostRedirect()` and `getRelatedPosts()`. `/blog` reads `searchParams`
+    inside `<Suspense>` like `/properties`.
   - `getPublishedTestimonials()` is tagged `"testimonials"` and `getPublishedPartners()`
     `"partners"` (`TESTIMONIALS_TAG`, `PARTNERS_TAG`, `lib/db/queries/trust.ts`).
 - With `cacheComponents`, a page that reads uncached data outside `<Suspense>` fails the

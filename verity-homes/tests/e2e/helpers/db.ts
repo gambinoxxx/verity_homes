@@ -101,3 +101,9 @@ export async function getPartnerRows(): Promise<PartnerRow[]> {
     SELECT name, status::text AS status, "consentConfirmed"
     FROM "Partner" ORDER BY "sortOrder", name`) as PartnerRow[];
 }
+
+export async function countPublishedPosts(): Promise<number> {
+  const rows = (await sql()`
+    SELECT count(*)::int AS n FROM "Post" WHERE status = 'PUBLISHED'`) as { n: number }[];
+  return rows[0]?.n ?? 0;
+}

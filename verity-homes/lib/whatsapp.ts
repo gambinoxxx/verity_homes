@@ -4,3 +4,8 @@ export function whatsappLink(number: string | null | undefined, message: string)
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
+
+/** "Share on WhatsApp": https://wa.me/?text=<message> (no number — the visitor picks a chat). */
+export function whatsappShareLink(message: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}

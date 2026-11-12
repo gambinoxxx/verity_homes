@@ -12,7 +12,8 @@ const designUrl = pathToFileURL(path.resolve("design", designFile)).href;
 const out = path.resolve("test-results/compare");
 mkdirSync(out, { recursive: true });
 
-const browser = await chromium.launch();
+// PW_CHANNEL=chrome uses the installed Google Chrome (see testing/TESTING.md).
+const browser = await chromium.launch({ channel: process.env.PW_CHANNEL || undefined });
 for (const [w, h, label] of [
   [1440, 900, "desktop"],
   [390, 844, "mobile"],

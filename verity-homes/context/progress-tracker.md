@@ -6,7 +6,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-Unit 11: blog — **next** (Units 1–10 done).
+**Public site complete** (Units 1–11 done). Next: **Unit 12 — admin auth** (Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout).
 
 ## Units
 
@@ -22,7 +22,7 @@ Unit 11: blog — **next** (Units 1–10 done).
 | 8 | Contact page with **map** | done | `contact.html` | Done 2026-11-12: `app/(site)/contact/page.tsx` — `PageHero` + sheet; `ContactCards` (email/phone/WhatsApp from settings, placeholder + hidden button when unset; WhatsApp message "Hi Verity, I'd like to make an enquiry"; directions via `mapsLink(mapQuery)`); `EnquiryForm variant="contact"` (soft pills, first + last → `name`, interest select incl. Listing my property, source CONTACT_PAGE) in `#message`; `OfficeMap` (`mapEmbedUrl(mapQuery, 14)`, grayscale, map card, Open in Maps; only `officeDisplay`, so the full address shows only when `showFullAddress`). `/contact` out of `UNBUILT_ROUTES`; header "WhatsApp us" → wa.me or `/contact#message`; "Make a request" / "Book a consultation" → `/contact#message`. WhatsApp text buttons use `--whatsapp-button` (design green fails contrast). Tests: `tests/e2e/contact.spec.ts`, `tests/unit/contact-cards.test.ts`. |
 | 9 | Invest page: plans and FAQs from the database | done | `invest.html` | Done 2026-11-12: `app/(site)/invest/page.tsx` — `PageHero` + sheet (how-it-works split + navy steps), plans section (navy; highlighted = gold card; rate only when > 0 else placeholder; `formatNaira`, tenure months, `PAYOUT_LABEL`; disclaimer directly under the plans), FAQ (`getFaqs("INVEST")`, native `<details>`, sticky heading, hidden if none), `#start` investment enquiry (`EnquiryForm variant="invest"`: plan select + "Not sure yet", amount → `amountKobo`; "I want to invest" preselects the plan via `lib/invest-plan-select.ts`). Plan cards + steps extracted to `components/site/invest/plans.tsx` and shared with the home section (copy stays in `lib/invest.ts`). `getFaqs` cached, tag `"faqs"`. `/invest` out of `UNBUILT_ROUTES`. No FAQPage JSON-LD yet (answers are sample text) — **Unit 20**. Tests: `tests/e2e/invest.spec.ts`, `invest-copy.test.ts` now covers the page. |
 | 10 | About page (+ `/privacy`) | done | `about.html`, `post.html` | Done 2026-11-12: `app/(site)/about/page.tsx` — `PageHero` + sheet story split (dusk + building, company-story placeholder), values `MarqueeBand` (Honesty ✦ Clarity ✦ Care), three value cards, CEO (`CeoSection`, shared with home via `components/site/ceo.tsx`; full-bio + promise placeholders, **no DB field — Q4 open**), CAC trust card (`companyName`, `rcNumber`, `officeArea` from `getSiteSettings()`; `officeArea` added to the view), partner strip (`PartnerMarquee`, shared with home; published + consented only, hidden if none), navy CTA (Contact us → `/contact#message`, View properties → `/properties`). Sections in `components/site/about/`. `/privacy`: `PageHero variant="post"` + sheet + `.article`/`.prose` (now global, for Unit 11), **draft** notice from what the code does (`components/site/privacy/privacy-notice.tsx`), visible draft banner, owner placeholders (retention, response time, data location), email from settings or placeholder (Q39). `/about` + `/privacy` out of `UNBUILT_ROUTES`. No Organization JSON-LD here — **Unit 20** puts it in the root layout. Mobile CTA box stacks (deviation, Q38). Tests: `tests/e2e/about.spec.ts`, `/privacy` in `public.spec.ts`, `tests/unit/about-privacy.test.ts`; `scripts/e2e-test-settings.ts` now adds two non-public `[E2E]` partners on the test branch. |
-| 11 | Blog list and post page (Markdown) | todo | `blog.html`, `post.html` | |
+| 11 | Blog list and post page (Markdown) | done | `blog.html`, `post.html` | Done 2026-11-12: `/blog` — `PageHero` + sheet; `BlogBrowser` inside `<Suspense>` (◐) renders from the URL: `?category=` pills (links, `aria-current`), `?q=` (title + excerpt, case-insensitive, `next/form` GET), 6/page pager (page clamped), empty state "No articles found" + See all articles; sidebar (search, recent 3, categories with published counts, invest CTA). Params parsed per param in `lib/validation/blog-filters.ts` (never throws). `/blog/[slug]` — `generateStaticParams`, post hero (`PageHero variant="post"` over the cover, gold category tag, `formatDate` · reading time), Markdown body (`components/site/blog/markdown.tsx`: react-markdown 10.1.0 + remark-gfm 4.0.1, `skipHtml`, default `urlTransform`, external links `target=_blank rel="noopener noreferrer"`, `#` demoted to h2, images via next/image only for same-site paths / `MARKDOWN_IMAGE_HOSTS`, else skipped), share (WhatsApp `whatsappShareLink` title + URL, email, native share with copy fallback), author box (CEO photo only for Esther), 2 related (same category first, then newest). `proxy.ts` now resolves `/blog/:slug` too (308 from `SlugRedirect` POST, 404 for draft/unknown). Article JSON-LD + `generateMetadata` (canonical, OG image from the cover). All post reads cached, tag `"posts"`. Home latest posts + post-page "More articles" share `PostsSection` (`components/site/post-cards.tsx`). `UNBUILT_ROUTES` now empty. Tests: `tests/e2e/blog.spec.ts`, `/blog/<seeded slug>` in `public.spec.ts`, `tests/unit/markdown.test.ts` + `blog.test.ts`; fixtures in `scripts/e2e-test-settings.ts` (5 older posts, raw-HTML post, draft, old-slug redirect). Deviation: Q40. |
 | 12 | Admin auth: Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout | todo | `admin.html` (shell) | |
 | 13 | Admin dashboard | todo | `admin.html` | |
 | 14 | Admin properties list + editor (fields, documents, featured/showcase) | todo | `admin-properties.html`, `admin-property-edit.html` | |
@@ -109,6 +109,8 @@ Unit 11: blog — **next** (Units 1–10 done).
       set; 44px interest chips. Latest posts hidden when there are none.
 23. Partner logos (Unit 19) and post covers (Unit 18) will be Blob URLs: add the Blob host to
     `images.remotePatterns` in `next.config.ts` in those units, or `next/image` will refuse them.
+    **Unit 18 must also add it to `MARKDOWN_IMAGE_HOSTS` in `lib/blog.ts`** (Markdown images from
+    other hosts are skipped).
     Noted by the owner 2026-11-11 — **to do in Units 18 and 19.**
 24. ~~Unit 6 — WhatsApp e2e test vs. the seed.~~ Closed 2026-11-11: `npm run db:test:reset` ends with
     `scripts/e2e-test-settings.ts`, which sets the obviously fake `2340000000000` on the **test
@@ -129,11 +131,10 @@ Unit 11: blog — **next** (Units 1–10 done).
     The round WhatsApp float keeps `#25D366`. The gallery tile with "View all N photos" is named
     "Open photo 5 of 5, view all 5 photos" (WCAG 2.5.3). `.link-arrow svg` is now sized globally
     (16px, as in the design).
-28. **Local setup on this Mac (2026-11-11).** `.env.local` is still a copy of `.env.example`
-    (placeholder Neon host and salt), so Unit 6 was built, tested and compared against the test
-    branch (`.env.test` loaded into the shell). Playwright 1.65 has no Chromium for macOS 12, so
-    e2e and compare ran in the installed Google Chrome (`channel: "chrome"`) via an uncommitted
-    override; the committed config is unchanged. Fill `.env.local` with the dev-branch values.
+28. ~~Local setup on this Mac.~~ Closed 2026-11-12: `PW_CHANNEL=chrome` makes
+    `playwright.config.ts` and `scripts/compare-design.mjs` use the installed Google Chrome
+    (Playwright's Chromium has no macOS 12 build); unset = bundled Chromium. Documented in
+    `testing/TESTING.md`. `.env.local` now holds the dev-branch values.
 29. ~~E2E server database.~~ Closed 2026-11-12 (Unit 7): `playwright.config.ts` loads `.env.test`
     itself (dotenv) and refuses to run if its `DATABASE_URL` is missing, a placeholder, or the
     same host as `.env.local`; it never reuses a server on :3000; e2e enquiry emails are forced
@@ -187,3 +188,14 @@ Unit 11: blog — **next** (Units 1–10 done).
     whether a DPO or registration with the NDPC is needed, and the privacy contact email (it uses
     `SiteSettings.email`, placeholder until set — see Q2). Update `PRIVACY_LAST_UPDATED` in
     `components/site/privacy/privacy-notice.tsx` and remove the banner once approved.
+40. **Unit 11 deviation (owner to confirm).** Same pattern as Q38: design/post.html sets
+    `grid-template-columns:1fr 1fr` inline on "More articles", overriding its own ≤900px rule, so
+    at 390px the two cards squeeze titles to one word per line. The app stacks them on mobile;
+    desktop matches. The design shows the cover only as the post hero photo (no second cover in
+    the article), so the app does the same; `coverAlt` is used for the OG image alt.
+    Category order on /blog is alphabetical (Category has no sort field; the design's order is
+    Investing, Buying guide, Renting, Company news). Unit 18 can add ordering if wanted.
+41. **Neon cold start in unit tests.** The first DB-backed unit test after the test branch has
+    been idle can exceed Vitest's 5 s timeout (seen twice: enquiry-action, subscribe-action); a
+    rerun passes. Not changed in Unit 11. Options: a warm-up query in `tests/setup/env.ts`, or a
+    longer `testTimeout` for DB tests only — owner/reviewer to choose.

@@ -95,6 +95,20 @@ Read the side-by-side images and list every difference you can see before
 you fix anything. Differences in data are fine: real content replaces the
 placeholders. Differences in layout or style are not.
 
+### On a Mac where Chromium won't launch
+
+On a Mac where Chromium won't launch, run tests with `PW_CHANNEL=chrome`. Playwright's
+bundled Chromium has no build for some macOS versions (e.g. macOS 12); with
+`PW_CHANNEL=chrome` both `playwright.config.ts` and `scripts/compare-design.mjs` use the
+installed Google Chrome instead:
+
+```bash
+PW_CHANNEL=chrome npm run test:e2e -- tests/e2e/blog.spec.ts
+PW_CHANNEL=chrome npm run compare -- /blog blog.html
+```
+
+Unset, they use the bundled Chromium as before (CI and other machines).
+
 ## 5. Test data
 
 - Use a **separate Neon branch** for tests. Neon branches are free and

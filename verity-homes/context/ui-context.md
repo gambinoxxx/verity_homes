@@ -151,6 +151,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     Follow it with `<section className="sheet"><article className="container article">` and a
     `.prose` body. `.article` (780px column) is unlayered in `globals.css` so it beats the
     `container` utility; `.prose` (with `--text-prose`) lives in the components layer.
+  - Blog: `components/site/blog/` (`blog-browser.tsx` list + sidebar, `markdown.tsx` body,
+    `post-sections.tsx` tag/share/author). `PostsSection` (`components/site/post-cards.tsx`,
+    `layout="featured"` on home, `"pair"` for the post page's "More articles"). `ShareButton`
+    takes a `label`. Global `.prose` also styles `ol`, tables, `hr`, `code` and `.prose-img`.
   - Shared sections: `CeoSection` (`components/site/ceo.tsx`; home and /about pass their own
     text column) and `PartnerMarquee` (`components/site/partner-marquee.tsx`; `light` on /about;
     renders nothing without partners). A `.on-cream` section darkens `PillTicker` text to

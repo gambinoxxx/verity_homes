@@ -13,6 +13,7 @@ const ROUTES = [
   "/about",
   "/privacy",
   "/blog",
+  "/blog/sample-property-documents-explained",
   "/contact",
   NOT_FOUND_ROUTE,
 ];
