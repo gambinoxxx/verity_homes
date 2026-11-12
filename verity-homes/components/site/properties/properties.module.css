@@ -1,0 +1,189 @@
+/* /properties layout from design/assets/verity.css: sidebar + results, results bar, pager. */
+.pills {
+  margin-bottom: 44px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+.side {
+  position: sticky;
+  top: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.mobileFilter {
+  display: none;
+}
+.mobileFilter svg {
+  width: 16px;
+  height: 16px;
+}
+.form :global(.btn) {
+  width: 100%;
+}
+/* Grey pill, as the design's reset button renders */
+.form .reset {
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  min-height: 44px;
+}
+.form .beds {
+  justify-content: flex-start;
+}
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: none;
+  letter-spacing: 0;
+  min-height: 28px;
+  cursor: pointer;
+}
+/* The design's .ctl input rule gives checkboxes a 48px min-height: that sets the row rhythm. */
+.checks input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin: 3px 3px 3px 4px; /* browser default the design relies on (Tailwind resets it) */
+  accent-color: var(--bg-navy);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.bar b {
+  font-size: 15px;
+}
+.bar select {
+  min-height: 44px;
+  border: 1px solid var(--border-input);
+  border-radius: 999px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+.results {
+  scroll-margin-top: 104px;
+  transition: opacity 0.3s;
+}
+/* While a new set of results loads after a filter change */
+.results[aria-busy="true"] {
+  opacity: 0.55;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.empty {
+  text-align: center;
+  background: var(--bg-base);
+  border-radius: 20px;
+  padding: 56px 24px;
+}
+.empty h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.empty p {
+  margin: 10px auto 24px;
+  max-width: 420px;
+  color: var(--text-muted);
+}
+.empty div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 48px;
+}
+.pager a,
+.pager span {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-input);
+  text-decoration: none;
+  font-weight: 800;
+  color: var(--text-primary);
+  background: var(--bg-base);
+}
+.pager span {
+  border-color: transparent;
+  background: transparent;
+}
+.pager a[aria-current="page"] {
+  background: var(--bg-navy);
+  border-color: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+.pager svg {
+  width: 16px;
+  height: 16px;
+}
+.prev svg {
+  transform: rotate(180deg);
+}
+
+.loading {
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+@media (max-width: 1020px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    position: static;
+  }
+  .mobileFilter {
+    display: inline-flex;
+  }
+  /* Mobile: the filters card is hidden until the "Filters" button opens it. */
+  .side:not([data-open="true"]) .form {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

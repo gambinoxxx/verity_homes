@@ -12,6 +12,11 @@ type PropertyCardProps = {
   /** `sizes` for the cover photo; the default fits the 3/2/1-column grid. */
   sizes?: string;
   className?: string;
+  /**
+   * Footer button: "enquire" (home, similar listings) links to the enquiry card on the
+   * property page; "details" (the /properties list, as in design/properties.html) to the page.
+   */
+  cta?: "enquire" | "details";
 };
 
 const GOLD_TAGS = new Set(["SALE", "OFF_PLAN"]);
@@ -37,6 +42,7 @@ export function PropertyCard({
   property: p,
   sizes = "(max-width: 640px) 100vw, (max-width: 1020px) 50vw, 410px",
   className,
+  cta = "enquire",
 }: PropertyCardProps) {
   const href = `/properties/${p.slug}`;
   const prefetch = prefetchFor(href);
@@ -46,7 +52,10 @@ export function PropertyCard({
   return (
     <article className={`${styles.card} ${className ?? ""}`}>
       <div className={`${styles.image} media`}>
-        <span className={`${styles.tag} ${GOLD_TAGS.has(p.listingType) ? styles.gold : ""}`}>
+        <span
+          className={`${styles.tag} ${GOLD_TAGS.has(p.listingType) ? styles.gold : ""}`}
+          data-tag={p.listingType.toLowerCase()}
+        >
           {LISTING_LABEL[p.listingType]}
         </span>
         <SaveButton slug={p.slug} title={p.title} className={styles.fav} />
@@ -114,10 +123,17 @@ export function PropertyCard({
         </div>
         <div className={styles.foot}>
           <Price label={p.priceLabel} />
-          <Link className="btn btn-navy" href={`${href}#enquire`} prefetch={prefetch}>
-            {isOffPlan ? "Register interest" : "Enquire"}
-            <span className="sr-only"> about {p.title}</span>
-          </Link>
+          {cta === "details" ? (
+            <Link className="btn btn-navy" href={href} prefetch={prefetch}>
+              View details
+              <span className="sr-only"> of {p.title}</span>
+            </Link>
+          ) : (
+            <Link className="btn btn-navy" href={`${href}#enquire`} prefetch={prefetch}>
+              {isOffPlan ? "Register interest" : "Enquire"}
+              <span className="sr-only"> about {p.title}</span>
+            </Link>
+          )}
         </div>
       </div>
     </article>

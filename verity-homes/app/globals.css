@@ -219,6 +219,139 @@ body {
     object-fit: cover;
   }
 
+  /* ---- Inner pages (design/assets/verity.css: page hero sheet, pills, cards, controls) ---- */
+  /* White sheet overlapping the page hero by 56px. */
+  .sheet {
+    position: relative;
+    z-index: 3;
+    background: var(--bg-base);
+    border-radius: 44px 44px 0 0;
+    margin-top: -56px;
+    padding: 88px 0 110px;
+  }
+  .sheet.subtle {
+    background: var(--bg-subtle);
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .pills button,
+  .pills a {
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    border: 1px solid var(--border-input);
+    background: var(--bg-base);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s;
+  }
+  .pills [aria-pressed="true"],
+  .pills [aria-current="page"] {
+    background: var(--bg-navy);
+    border-color: var(--bg-navy);
+    color: var(--text-on-navy);
+  }
+  .pills button:hover,
+  .pills a:hover {
+    border-color: var(--bg-navy);
+  }
+  .card {
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: 20px;
+    padding: 26px;
+  }
+  .card h2,
+  .card h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.6;
+  }
+  .sheet.subtle .card {
+    border-color: transparent;
+  }
+  /* Labelled form control: .ctl > label/.lbl + input/select/textarea */
+  .ctl {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .ctl label,
+  .ctl .lbl {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0;
+  }
+  /* A <legend> is not a flex item, so it does not get the 6px gap: add it by hand. */
+  fieldset.ctl > legend {
+    margin-bottom: 6px;
+  }
+  .ctl input,
+  .ctl select,
+  .ctl textarea {
+    min-height: 48px;
+    border: 1px solid var(--border-input);
+    border-radius: 12px;
+    padding: 0 14px;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--bg-base);
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s;
+    width: 100%;
+    min-width: 0;
+  }
+  .ctl textarea {
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  .ctl input:focus,
+  .ctl select:focus,
+  .ctl textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px rgb(200 162 78 / 0.18);
+  }
+  .cta-card {
+    background: var(--bg-navy);
+    color: var(--text-on-navy);
+    border-radius: 22px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-card h2,
+  .cta-card h3 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .cta-card p {
+    color: var(--text-on-navy-muted);
+    margin: 0 0 20px;
+    line-height: 1.6;
+  }
+
   /* Hidden until focused by keyboard. */
   .skip-link {
     position: fixed;
@@ -351,6 +484,10 @@ body {
   .sec {
     padding: 80px 0;
   }
+  .sheet {
+    border-radius: 28px 28px 0 0;
+    padding: 56px 0 80px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -361,12 +498,17 @@ body {
     clip-path: none;
   }
 
+  /* Transitions are switched off outright (0s, no delay). The design's 0.01ms trick still
+     transitioned every property, including inherited `visibility`, so for one frame an
+     opening element's children stayed hidden: focus could not move in and tests saw the
+     wrong element. Nothing here listens for transitionend. */
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }

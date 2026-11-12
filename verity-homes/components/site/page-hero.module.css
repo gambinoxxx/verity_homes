@@ -1,0 +1,103 @@
+/* .page-hero and .crumbs from design/assets/verity.css: inner-page hero with a giant title. */
+.hero {
+  position: relative;
+  min-height: 440px;
+  padding: 150px 0 110px;
+  color: var(--text-on-navy);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--bg-navy);
+}
+.image {
+  position: absolute;
+  inset: 0;
+}
+.image img {
+  transform: scale(1.06);
+  animation: heroZoom 12s ease-out forwards;
+}
+@keyframes heroZoom {
+  to {
+    transform: scale(1);
+  }
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(7 18 38 / 0.75) 0%,
+    rgb(7 18 38 / 0.35) 45%,
+    rgb(7 18 38 / 0.8) 100%
+  );
+}
+.inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 48px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(56px, 9vw, 128px);
+  line-height: 0.92;
+  letter-spacing: -2px;
+}
+.title em {
+  font-style: italic;
+  color: var(--accent-primary);
+}
+.sub {
+  max-width: 420px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-on-navy-muted);
+  margin: 0;
+}
+.crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-on-navy-muted);
+}
+.crumbs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Gold dot between items */
+.crumbs li + li::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+}
+.crumbs a {
+  color: var(--text-on-navy);
+  text-decoration: none;
+}
+.crumbs a:hover {
+  color: var(--accent-primary);
+}
+
+@media (max-width: 700px) {
+  .hero {
+    min-height: 360px;
+    padding: 130px 0 90px;
+  }
+}

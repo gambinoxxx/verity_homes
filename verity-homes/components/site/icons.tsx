@@ -246,3 +246,18 @@ export function HomeIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** Three shrinking lines (#i-filter in design/properties.html). */
+export function FilterIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path
+        d="M4 6h16M7 12h10M10 18h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

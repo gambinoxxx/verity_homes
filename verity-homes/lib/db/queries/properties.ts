@@ -240,25 +240,43 @@ export type PropertyPage = {
   pageCount: number;
 };
 
+/**
+ * One page of published properties for /properties. Cached (tag "properties"); the filters
+ * object is part of the cache key, so pass it already normalised (parsePropertyFilters).
+ * A page past the end is clamped to the last page.
+ */
 export async function listProperties(filters: PropertyFilters = {}): Promise<PropertyPage> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
   const where = buildWhere(filters);
-  const page = Math.max(1, Math.floor(filters.page ?? 1));
-  const [total, rows] = await Promise.all([
-    db.property.count({ where }),
-    db.property.findMany({
-      where,
-      orderBy: buildOrder(filters.sort),
-      skip: (page - 1) * PROPERTIES_PER_PAGE,
-      take: PROPERTIES_PER_PAGE,
-      select: cardSelect,
-    }),
-  ]);
-  return {
-    items: rows.map(toCard),
-    total,
-    page,
-    pageCount: Math.max(1, Math.ceil(total / PROPERTIES_PER_PAGE)),
-  };
+  const total = await db.property.count({ where });
+  const pageCount = Math.max(1, Math.ceil(total / PROPERTIES_PER_PAGE));
+  const page = Math.min(pageCount, Math.max(1, Math.floor(filters.page ?? 1)));
+  const rows = total
+    ? await db.property.findMany({
+        where,
+        orderBy: buildOrder(filters.sort),
+        skip: (page - 1) * PROPERTIES_PER_PAGE,
+        take: PROPERTIES_PER_PAGE,
+        select: cardSelect,
+      })
+    : [];
+  return { items: rows.map(toCard), total, page, pageCount };
+}
+
+/** Distinct areas of published properties, A–Z, for the area dropdown. Cached (tag "properties"). */
+export async function getPublishedAreas(): Promise<string[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const rows = await db.property.findMany({
+    where: PUBLISHED,
+    distinct: ["area"],
+    orderBy: { area: "asc" },
+    select: { area: true },
+  });
+  return rows.map((r) => r.area);
 }
 
 /** Every published slug, for generateStaticParams. Cached (tag "properties"). */

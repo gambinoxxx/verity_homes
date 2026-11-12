@@ -116,7 +116,12 @@ yet never breaks the build or pages that don't use it:
   - `getFeaturedProperties()` and `getShowcaseProperties()` are tagged `"properties"`
     (`PROPERTIES_TAG`). So are the detail-page reads `getPublishedPropertySlugs()`,
     `getPropertyBySlug()`, `getPropertyRedirect()` (SlugRedirect) and `getSimilarProperties()`.
-    `listProperties()` (Unit 5) should use the same tag when it is cached.
+    So are the list-page reads `listProperties(filters)` (the normalised filters object is
+    part of the cache key) and `getPublishedAreas()` (Unit 5).
+  - `/properties` reads `searchParams` inside `<Suspense>` (request-time data under Cache
+    Components): the hero and sheet prerender, the results stream (◐ in the build output).
+    URL params are parsed in `lib/validation/property-filters.ts`; every param falls back to
+    "not set" on its own, so a bad URL never throws.
   - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`, `lib/db/queries/invest.ts`).
   - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`).
   - `getPublishedTestimonials()` is tagged `"testimonials"` and `getPublishedPartners()`

@@ -75,6 +75,34 @@ afterAll(async () => {
 
 const json = (v: unknown) => JSON.stringify(v);
 
+describe("properties list (Unit 5)", () => {
+  it("area dropdown lists published areas only, A–Z, once each", async () => {
+    const areas = await properties.getPublishedAreas();
+    expect(areas).toEqual([...new Set(areas)].sort((a, b) => a.localeCompare(b)));
+    expect(areas).toContain("Lekki");
+    expect(areas).not.toContain("Surulere"); // the seeded draft's area
+  });
+
+  it("includes Price on request listings unless a price filter is set", async () => {
+    const all = await properties.listProperties({});
+    expect(all.items.some((p) => p.priceOnRequest)).toBe(true);
+    const priced = await properties.listProperties({ min: 0 });
+    expect(priced.items.length).toBeGreaterThan(0);
+    expect(priced.items.every((p) => !p.priceOnRequest)).toBe(true);
+  });
+
+  it("filters by listing type and price range in naira", async () => {
+    const rent = await properties.listProperties({ type: "rent", min: 3_000_000, max: 6_000_000 });
+    expect(rent.items.map((p) => p.slug)).toEqual(["sample-detached-bungalow"]);
+  });
+
+  it("clamps a page past the end to the last page", async () => {
+    const page = await properties.listProperties({ page: 99 });
+    expect(page.page).toBe(page.pageCount);
+    expect(page.items.length).toBeGreaterThan(0);
+  });
+});
+
 describe("drafts are never returned", () => {
   it("property lists exclude drafts", async () => {
     const featured = await properties.getFeaturedProperties(50);

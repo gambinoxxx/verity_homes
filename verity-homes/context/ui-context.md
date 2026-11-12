@@ -133,7 +133,12 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Also global: `.sec`, `.sec-head`, `.eyebrow`, `.h2`, `.lead`, `.link-arrow`,
     `.media` (image box with house fallback), `.reveal` / `.reveal-img` (+ `d1`–`d3`
     delays; `RevealObserver` adds `.in`; hidden only under `html.js`).
-  - Reusable: `PropertyCard`, `MarqueeBand` (`light`, `reverse`), `SaveButton`, `PillTicker`
+  - Inner pages: `PageHero` (`components/site/page-hero.tsx`: photo, giant title with gold
+    `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
+    `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`
+    + `legend.lbl` for groups), `.cta-card`.
+  - Reusable: `PropertyCard` (`cta="details"` on /properties, `"enquire"` elsewhere; the tag
+    carries `data-tag`), `MarqueeBand` (`light`, `reverse`), `SaveButton`, `PillTicker`
     (the `.pill` ticker; label read once by screen readers), `EnquiryForm` (field names match
     `enquirySchema`; Unit 7 wires it), `icons.tsx` (the design's own glyphs, copied from its
     `<symbol>` set).
@@ -168,4 +173,7 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
 - Reveal-on-scroll moves from 40px below with opacity 0 to rest, over 1s.
 - Image reveals use a clip-path wipe.
 - Card hover lifts the card 8px and zooms the image 1.08×.
-- Every animation is disabled under `prefers-reduced-motion`.
+- Every animation is disabled under `prefers-reduced-motion`. Transitions are set to
+  `0s` with no delay (not the design's `0.01ms`), so nothing is ever half-hidden for a frame
+  (that broke drawer focus and made e2e clicks land on the wrong element). Nothing in the app
+  listens for `transitionend`.
