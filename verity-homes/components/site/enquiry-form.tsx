@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useId, useRef, startTransition } from "react";
+import { onPlanSelected } from "@/lib/invest-plan-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { ArrowIcon } from "./icons";
 import { PillTicker } from "./pill-ticker";
@@ -38,16 +39,21 @@ type EnquiryFormProps = {
    * "card" (property sidebar, design `.card.enq`): name, phone, message, inspection checkbox.
    * "contact" (contact page, design `.c-grid form`): soft pill fields, first + last name
    * (sent together as `name`), phone, email, interest select, message, "Get a call back".
+   * "invest" (/invest, design "Investment enquiry"): name, phone, email, plan select (from
+   * `plans`, plus "Not sure yet"), amount in naira, "Request a call back".
    */
-  variant?: "full" | "card" | "contact";
+  variant?: "full" | "card" | "contact" | "invest";
   /** Heading shown at the top of the form. */
   heading?: string;
   /** Accessible name for the form; defaults to the heading. */
   label?: string;
   /** Property being enquired about (property page). */
   propertyId?: string;
-  /** Investment plan being enquired about (invest page, Unit 9). */
+  /** Investment plan being enquired about: preselected in the "invest" variant's plan select,
+   * a hidden field elsewhere. */
   planId?: string;
+  /** Published plans for the "invest" variant's select. */
+  plans?: { id: string; name: string }[];
   /** Fixed interest (sent as a hidden field instead of the chips). */
   interest?: EnquiryInterest;
   /** Prefilled message. */
@@ -69,6 +75,7 @@ export function EnquiryForm({
   label,
   propertyId,
   planId,
+  plans = [],
   interest,
   defaultMessage,
 }: EnquiryFormProps) {
@@ -76,6 +83,16 @@ export function EnquiryForm({
   const f = (name: string) => `${uid}-${name}`;
   const card = variant === "card";
   const contact = variant === "contact";
+  const invest = variant === "invest";
+  // Plan select (invest variant): uncontrolled, so form.reset() restores it like the other
+  // fields. A plan card's "I want to invest" preselects its plan through the ref.
+  const planRef = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    if (!invest) return;
+    return onPlanSelected((id) => {
+      if (planRef.current && plans.some((p) => p.id === id)) planRef.current.value = id;
+    });
+  }, [invest, plans]);
   const formRef = useRef<HTMLFormElement>(null);
   const startedAt = useRef(0);
   const submitting = useRef(false);
@@ -155,7 +172,7 @@ export function EnquiryForm({
       )}
       <input type="hidden" name="source" value={source} />
       {propertyId ? <input type="hidden" name="propertyId" value={propertyId} /> : null}
-      {planId ? <input type="hidden" name="planId" value={planId} /> : null}
+      {planId && !invest ? <input type="hidden" name="planId" value={planId} /> : null}
       {interest && !contact ? <input type="hidden" name="interest" value={interest} /> : null}
       {/* Honeypot: invisible to people, tempting to bots. Must stay empty. */}
       <div className={styles.hp} aria-hidden="true">
@@ -208,6 +225,44 @@ export function EnquiryForm({
             <label htmlFor={f("message")}>Message</label>
             <textarea {...field("message")} rows={5} defaultValue={defaultMessage} />
             {errorText("message")}
+          </div>
+        </>
+      ) : invest ? (
+        <>
+          <div className={styles.row}>
+            <div className={styles.fg}>
+              <label htmlFor={f("name")}>Full name</label>
+              <input {...field("name")} autoComplete="name" required />
+              {errorText("name")}
+            </div>
+            <div className={styles.fg}>
+              <label htmlFor={f("phone")}>Phone / WhatsApp</label>
+              <input {...field("phone")} type="tel" autoComplete="tel" required />
+              {errorText("phone")}
+            </div>
+          </div>
+          <div className={styles.fg}>
+            <label htmlFor={f("email")}>Email</label>
+            <input {...field("email")} type="email" autoComplete="email" />
+            {errorText("email")}
+          </div>
+          <div className={styles.row}>
+            <div className={styles.fg}>
+              <label htmlFor={f("plan")}>Plan</label>
+              <select id={f("plan")} name="planId" ref={planRef} defaultValue={planId ?? ""}>
+                <option value="">Not sure yet</option>
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.fg}>
+              <label htmlFor={f("amount")}>Amount (₦)</label>
+              <input {...field("amount")} inputMode="numeric" placeholder="e.g. 2,500,000" />
+              {errorText("amount")}
+            </div>
           </div>
         </>
       ) : card ? (
@@ -295,15 +350,15 @@ export function EnquiryForm({
         </div>
       ) : (
         <button className="btn btn-navy" type="submit" disabled={pending} aria-disabled={pending}>
-          {pending ? "Sending…" : "Send enquiry"}
-          {card || pending ? null : <ArrowIcon />}
+          {pending ? "Sending…" : invest ? "Request a call back" : "Send enquiry"}
+          {card || invest || pending ? null : <ArrowIcon />}
         </button>
       )}
       {/* Always rendered so screen readers announce the message when it appears. */}
       <p className={styles.ok} role="status" data-shown={state?.ok ? "" : undefined}>
         {state?.ok ? state.message : ""}
       </p>
-      {card || contact ? null : (
+      {card || contact || invest ? null : (
         <p className={styles.note}>By submitting, you agree to be contacted about your enquiry.</p>
       )}
     </form>

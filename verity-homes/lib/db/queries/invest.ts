@@ -49,7 +49,14 @@ export async function getPublishedPlans(): Promise<PlanView[]> {
 
 export type FaqView = { id: string; question: string; answer: string };
 
+/** Cache tag for FAQ reads. The admin FAQ actions (Unit 17) call updateTag(it). */
+export const FAQS_TAG = "faqs";
+
+/** Published FAQs for a page, in order. Cached until an FAQ changes (tag "faqs"). */
 export async function getFaqs(page: FaqPage): Promise<FaqView[]> {
+  "use cache";
+  cacheTag(FAQS_TAG);
+  cacheLife("max");
   return db.faq.findMany({
     where: { status: "PUBLISHED", page },
     orderBy: { sortOrder: "asc" },

@@ -12,7 +12,7 @@ import {
 } from "react";
 import { useHydrated } from "@/lib/use-hydrated";
 
-type RevealTag = "div" | "span" | "p" | "h2" | "li" | "blockquote" | "article" | "form";
+type RevealTag = "div" | "span" | "p" | "h2" | "li" | "blockquote" | "article" | "form" | "details";
 
 type RevealProps = HTMLAttributes<HTMLElement> &
   RevealOptions & {

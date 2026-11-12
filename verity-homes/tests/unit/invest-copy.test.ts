@@ -33,11 +33,20 @@ describe("investment copy", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("renders the disclaimer in every component that lists plans", () => {
-    const planFiles = sourceFiles("components/site").filter((f) =>
-      readFileSync(f, "utf8").includes("getPublishedPlans("),
+  it("renders the disclaimer wherever plans are listed (home section and /invest)", () => {
+    const files = [...sourceFiles("app/(site)"), ...sourceFiles("components/site")];
+    const listers = files.filter((f) =>
+      /getPublishedPlans\(|<PlanGrid|<PlanCard/.test(readFileSync(f, "utf8")),
     );
-    expect(planFiles.length).toBeGreaterThan(0);
-    for (const f of planFiles) expect(readFileSync(f, "utf8")).toContain("INVEST_DISCLAIMER");
+    expect(listers.length).toBeGreaterThanOrEqual(3); // home invest section, /invest page, its plans section
+    for (const f of listers) {
+      const src = readFileSync(f, "utf8");
+      // Either the file shows the disclaimer itself, or it delegates to the section that does.
+      expect(src, f).toMatch(/INVEST_DISCLAIMER|<InvestDisclaimer|<PlansSection/);
+    }
+    expect(readFileSync("components/site/invest/plans-section.tsx", "utf8")).toContain(
+      "<InvestDisclaimer",
+    );
+    expect(readFileSync("components/site/invest/plans.tsx", "utf8")).toContain("INVEST_DISCLAIMER");
   });
 });

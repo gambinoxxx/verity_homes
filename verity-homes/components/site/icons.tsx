@@ -261,3 +261,18 @@ export function FilterIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** Plus (#i-plus in design/index.html); rotated 45° it becomes the FAQ "close" cross. */
+export function PlusIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path
+        d="M12 5v14M5 12h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

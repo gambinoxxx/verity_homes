@@ -73,3 +73,20 @@ export async function findEnquirySource(name: string): Promise<string | null> {
   }[];
   return rows[0]?.source ?? null;
 }
+
+export type PlanRow = { id: string; name: string; status: string; highlighted: boolean };
+
+export async function getPlanRows(): Promise<PlanRow[]> {
+  return (await sql()`
+    SELECT id, name, status::text AS status, highlighted
+    FROM "InvestmentPlan" ORDER BY "sortOrder", "createdAt"`) as PlanRow[];
+}
+
+export type InvestEnquiryRow = { source: string; planId: string | null; amountKobo: string | null };
+
+export async function findInvestEnquiry(name: string): Promise<InvestEnquiryRow | null> {
+  const rows = (await sql()`
+    SELECT source::text AS source, "planId", "amountKobo"::text AS "amountKobo"
+    FROM "Enquiry" WHERE name = ${name} LIMIT 1`) as InvestEnquiryRow[];
+  return rows[0] ?? null;
+}

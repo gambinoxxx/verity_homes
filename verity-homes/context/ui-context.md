@@ -146,6 +146,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
     `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`
     + `legend.lbl` for groups), `.cta-card`.
+  - Investment: `PlanCard` / `PlanGrid` / `InvestSteps` / `InvestDisclaimer`
+    (`components/site/invest/plans.tsx`) are shared by the home invest section and /invest;
+    the copy lives in `lib/invest.ts`. `EnquiryForm` variants: `full`, `card`, `contact`,
+    `invest`.
   - Reusable: `PropertyCard` (`cta="details"` on /properties, `"enquire"` elsewhere; the tag
     carries `data-tag`), `MarqueeBand` (`light`, `reverse`), `SaveButton`, `PillTicker`
     (the `.pill` ticker; label read once by screen readers), `EnquiryForm` (field names match

@@ -128,7 +128,8 @@ yet never breaks the build or pages that don't use it:
     Components): the hero and sheet prerender, the results stream (◐ in the build output).
     URL params are parsed in `lib/validation/property-filters.ts`; every param falls back to
     "not set" on its own, so a bad URL never throws.
-  - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`, `lib/db/queries/invest.ts`).
+  - `getPublishedPlans()` is tagged `"plans"` (`PLANS_TAG`) and `getFaqs(page)` `"faqs"`
+    (`FAQS_TAG`), both in `lib/db/queries/invest.ts`.
   - `getLatestPosts()` is tagged `"posts"` (`POSTS_TAG`, `lib/db/queries/posts.ts`).
   - `getPublishedTestimonials()` is tagged `"testimonials"` and `getPublishedPartners()`
     `"partners"` (`TESTIMONIALS_TAG`, `PARTNERS_TAG`, `lib/db/queries/trust.ts`).
@@ -139,7 +140,7 @@ yet never breaks the build or pages that don't use it:
   | Unit | Admin area | Tags to update |
   | --- | --- | --- |
   | 14–15 | Properties, photos | `"properties"` |
-  | 17 | Plans (FAQs once cached) | `"plans"` |
+  | 17 | Plans + FAQs | `"plans"`, `"faqs"` |
   | 18 | Posts, categories | `"posts"` |
   | 19 | Testimonials, partners, settings | `"testimonials"`, `"partners"`, `"settings"` |
 - Vitest aliases `next/cache` to a no-op stub, so cached queries run directly

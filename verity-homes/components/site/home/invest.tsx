@@ -1,62 +1,10 @@
 import Image from "next/image";
-import { getPublishedPlans, type PlanView } from "@/lib/db/queries/invest";
+import { getPublishedPlans } from "@/lib/db/queries/invest";
 import { getPublishedPartners, type PartnerView } from "@/lib/db/queries/trust";
-import { formatNaira, PAYOUT_LABEL } from "@/lib/format";
-import { INVEST_DISCLAIMER, INVEST_LEAD, INVEST_STEPS } from "@/lib/invest";
-import { CheckIcon } from "../icons";
-import styles from "./invest.module.css";
+import { INVEST_LEAD } from "@/lib/invest";
+import { InvestDisclaimer, InvestSteps, PlanGrid } from "../invest/plans";
 import { Reveal } from "../reveal";
-
-const DELAYS = [0, 1, 2, 3] as const;
-
-function PlanCard({ plan, index }: { plan: PlanView; index: number }) {
-  return (
-    <Reveal
-      as="article"
-      className={`${styles.plan} ${plan.highlighted ? styles.featured : ""}`}
-      delay={DELAYS[index % 3]}
-    >
-      <div className={styles.planTop}>
-        <h3>{plan.name}</h3>
-        {plan.badge ? <span className={styles.badge}>{plan.badge}</span> : null}
-      </div>
-      <div className={styles.rate}>
-        <small>Expected return</small>
-        <div>
-          {/* 0 means the rate is not approved yet: keep the design's placeholder. */}
-          {plan.returnRatePercent > 0 ? (
-            plan.returnRatePercent
-          ) : (
-            <>
-              <span className="ph" aria-hidden="true">
-                —
-              </span>
-              <span className="sr-only">Rate to be confirmed</span>
-            </>
-          )}
-          %<span> per annum</span>
-        </div>
-      </div>
-      <ul>
-        <li>
-          <CheckIcon />
-          Minimum: <strong>{formatNaira(plan.minimumKobo)}</strong>
-        </li>
-        <li>
-          <CheckIcon />
-          Tenure: <strong>{plan.tenureMonths} months</strong>
-        </li>
-        <li>
-          <CheckIcon />
-          Payout: <strong>{PAYOUT_LABEL[plan.payoutFrequency]}</strong>
-        </li>
-      </ul>
-      <a className={`btn ${plan.highlighted ? "btn-navy" : "btn-white"}`} href="#contact">
-        I want to invest
-      </a>
-    </Reveal>
-  );
-}
+import styles from "./invest.module.css";
 
 function PartnerTile({ partner }: { partner: PartnerView }) {
   return partner.logoUrl ? (
@@ -91,24 +39,10 @@ export async function Invest() {
           </Reveal>
         </div>
 
-        <ol className={styles.steps}>
-          {INVEST_STEPS.map((s, i) => (
-            <Reveal as="li" key={s.title} className={styles.step} delay={DELAYS[i]}>
-              <b aria-hidden="true">{String(i + 1).padStart(2, "0")}</b>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
-            </Reveal>
-          ))}
-        </ol>
+        <InvestSteps />
+        <PlanGrid plans={plans} ctaHref="#contact" />
 
-        {plans.length > 0 ? (
-          <div className={styles.plans}>
-            {plans.map((p, i) => (
-              <PlanCard key={p.id} plan={p} index={i} />
-            ))}
-          </div>
-        ) : null}
-
+        {/* design/index.html puts the disclaimer after the partner marquee. */}
         <Reveal className={`${styles.partners} ${partners.length === 0 ? styles.noPartners : ""}`}>
           {partners.length > 0 ? (
             <>
@@ -132,7 +66,7 @@ export async function Invest() {
               </div>
             </>
           ) : null}
-          <p className={styles.disclaimer}>{INVEST_DISCLAIMER}</p>
+          <InvestDisclaimer />
         </Reveal>
       </div>
     </section>

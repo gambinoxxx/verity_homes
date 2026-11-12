@@ -43,6 +43,7 @@ fieldset.fg {
   font-weight: 700;
 }
 .fg input,
+.fg select,
 .fg textarea {
   border: 1px solid var(--border-input);
   border-radius: 10px;
@@ -61,6 +62,7 @@ fieldset.fg {
   resize: vertical;
 }
 .fg input:focus,
+.fg select:focus,
 .fg textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
@@ -138,6 +140,15 @@ fieldset.fg {
 }
 .ok {
   margin: 0;
+}
+/* Empty until success: kept in the accessibility tree (a live region must exist before its
+   text changes) but out of the layout, so it adds no flex gap. */
+.ok:not([data-shown]) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 .ok[data-shown] {
   background: var(--state-success-bg);
