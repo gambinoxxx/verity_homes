@@ -4,7 +4,6 @@ import {
   type PropertyFilters,
   type PropertyPage,
 } from "@/lib/db/queries/properties";
-import { prefetchFor } from "@/lib/nav";
 import { pageNumbers, resultsLabel } from "@/lib/property-list";
 import { propertiesHref } from "@/lib/validation/property-filters";
 import { ArrowIcon } from "../icons";
@@ -45,7 +44,7 @@ export function Results({ filters, result }: ResultsProps) {
               <Link className="btn btn-outline-dark" href="/properties" scroll={false}>
                 Clear filters
               </Link>
-              <Link className="btn btn-gold" href="/contact" prefetch={prefetchFor("/contact")}>
+              <Link className="btn btn-gold" href="/contact#message">
                 Make a request
               </Link>
             </div>

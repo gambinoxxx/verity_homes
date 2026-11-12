@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useId, useRef, startTransition } from "react";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { ArrowIcon } from "./icons";
+import { PillTicker } from "./pill-ticker";
 import styles from "./enquiry-form.module.css";
 
 const INTERESTS = [
@@ -13,7 +14,17 @@ const INTERESTS = [
   { value: "MANAGEMENT", label: "Management" },
 ] as const;
 
-type EnquiryInterest = "BUYING" | "RENTING" | "LAND" | "INVESTING" | "MANAGEMENT";
+/** Contact page select (Unit 8). */
+const CONTACT_INTERESTS = [
+  { value: "BUYING", label: "Buying" },
+  { value: "RENTING", label: "Renting" },
+  { value: "LAND", label: "Land" },
+  { value: "INVESTING", label: "Investing" },
+  { value: "MANAGEMENT", label: "Management" },
+  { value: "LISTING", label: "Listing my property" },
+] as const;
+
+type EnquiryInterest = "BUYING" | "RENTING" | "LAND" | "INVESTING" | "MANAGEMENT" | "LISTING";
 
 /** Field order on screen: the first one with an error gets focus. */
 const FIELD_ORDER: EnquiryField[] = ["name", "phone", "email", "amount", "message"];
@@ -25,8 +36,10 @@ type EnquiryFormProps = {
   /**
    * "full" (home/contact): name, phone, email, interest chips, message.
    * "card" (property sidebar, design `.card.enq`): name, phone, message, inspection checkbox.
+   * "contact" (contact page, design `.c-grid form`): soft pill fields, first + last name
+   * (sent together as `name`), phone, email, interest select, message, "Get a call back".
    */
-  variant?: "full" | "card";
+  variant?: "full" | "card" | "contact";
   /** Heading shown at the top of the form. */
   heading?: string;
   /** Accessible name for the form; defaults to the heading. */
@@ -62,6 +75,7 @@ export function EnquiryForm({
   const uid = useId();
   const f = (name: string) => `${uid}-${name}`;
   const card = variant === "card";
+  const contact = variant === "contact";
   const formRef = useRef<HTMLFormElement>(null);
   const startedAt = useRef(0);
   const submitting = useRef(false);
@@ -81,9 +95,12 @@ export function EnquiryForm({
       startedAt.current = Date.now();
       return;
     }
+    // By id: on the contact variant the name error sits on the first-name input.
     const first = FIELD_ORDER.find((k) => state.fieldErrors?.[k]);
-    const el = first ? form.elements.namedItem(first) : null;
+    const el = first ? form.ownerDocument.getElementById(f(first)) : null;
     if (el instanceof HTMLElement) el.focus();
+    // f() is stable for the life of the component (useId).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
@@ -109,7 +126,7 @@ export function EnquiryForm({
   return (
     <form
       ref={formRef}
-      className={card ? styles.card : styles.form}
+      className={card ? styles.card : contact ? styles.contact : styles.form}
       id={id}
       noValidate
       {...(label ? { "aria-label": label } : { "aria-labelledby": f("h") })}
@@ -119,21 +136,81 @@ export function EnquiryForm({
         submitting.current = true;
         const data = new FormData(e.currentTarget);
         data.set("startedAt", String(startedAt.current));
+        if (contact) {
+          const full = `${data.get("firstName") ?? ""} ${data.get("lastName") ?? ""}`.trim();
+          data.set("name", full);
+          data.delete("firstName");
+          data.delete("lastName");
+        }
         startTransition(() => formAction(data));
       }}
     >
-      <h3 id={f("h")}>{heading}</h3>
+      {contact ? (
+        <>
+          <PillTicker label="Quick enquiry" />
+          <h2 id={f("h")}>{heading}</h2>
+        </>
+      ) : (
+        <h3 id={f("h")}>{heading}</h3>
+      )}
       <input type="hidden" name="source" value={source} />
       {propertyId ? <input type="hidden" name="propertyId" value={propertyId} /> : null}
       {planId ? <input type="hidden" name="planId" value={planId} /> : null}
-      {interest ? <input type="hidden" name="interest" value={interest} /> : null}
+      {interest && !contact ? <input type="hidden" name="interest" value={interest} /> : null}
       {/* Honeypot: invisible to people, tempting to bots. Must stay empty. */}
       <div className={styles.hp} aria-hidden="true">
         <label htmlFor={f("company")}>Company</label>
         <input id={f("company")} name="company" tabIndex={-1} autoComplete="off" />
       </div>
 
-      {card ? (
+      {contact ? (
+        <>
+          <div className={styles.two}>
+            <div className={styles.fg}>
+              <label htmlFor={f("name")}>
+                First name
+                <Req />
+              </label>
+              <input {...field("name")} name="firstName" autoComplete="given-name" required />
+              {errorText("name")}
+            </div>
+            <div className={styles.fg}>
+              <label htmlFor={f("last")}>Last name</label>
+              <input id={f("last")} name="lastName" autoComplete="family-name" />
+            </div>
+          </div>
+          <div className={styles.two}>
+            <div className={styles.fg}>
+              <label htmlFor={f("phone")}>
+                Phone / WhatsApp
+                <Req />
+              </label>
+              <input {...field("phone")} type="tel" autoComplete="tel" required />
+              {errorText("phone")}
+            </div>
+            <div className={styles.fg}>
+              <label htmlFor={f("email")}>Email</label>
+              <input {...field("email")} type="email" autoComplete="email" />
+              {errorText("email")}
+            </div>
+          </div>
+          <div className={styles.fg}>
+            <label htmlFor={f("interest")}>I&apos;m interested in</label>
+            <select id={f("interest")} name="interest" defaultValue={interest ?? "BUYING"}>
+              {CONTACT_INTERESTS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.fg}>
+            <label htmlFor={f("message")}>Message</label>
+            <textarea {...field("message")} rows={5} defaultValue={defaultMessage} />
+            {errorText("message")}
+          </div>
+        </>
+      ) : card ? (
         <>
           <div className={styles.fg}>
             <label htmlFor={f("name")}>Full name</label>
@@ -205,17 +282,40 @@ export function EnquiryForm({
           {formError}
         </p>
       ) : null}
-      <button className="btn btn-navy" type="submit" disabled={pending} aria-disabled={pending}>
-        {pending ? "Sending…" : "Send enquiry"}
-        {card || pending ? null : <ArrowIcon />}
-      </button>
+      {contact ? (
+        <div className={styles.submitRow}>
+          <p className={styles.note}>
+            Required fields are marked <span aria-hidden="true">*</span>. We&apos;ll never share
+            your details.
+          </p>
+          <button className="btn btn-gold" type="submit" disabled={pending} aria-disabled={pending}>
+            {pending ? "Sending…" : "Get a call back"}
+            {pending ? null : <ArrowIcon />}
+          </button>
+        </div>
+      ) : (
+        <button className="btn btn-navy" type="submit" disabled={pending} aria-disabled={pending}>
+          {pending ? "Sending…" : "Send enquiry"}
+          {card || pending ? null : <ArrowIcon />}
+        </button>
+      )}
       {/* Always rendered so screen readers announce the message when it appears. */}
       <p className={styles.ok} role="status" data-shown={state?.ok ? "" : undefined}>
         {state?.ok ? state.message : ""}
       </p>
-      {card ? null : (
+      {card || contact ? null : (
         <p className={styles.note}>By submitting, you agree to be contacted about your enquiry.</p>
       )}
     </form>
+  );
+}
+
+/** Required-field marker (the note under the form explains it). */
+function Req() {
+  return (
+    <span className={styles.req} aria-hidden="true">
+      {" "}
+      *
+    </span>
   );
 }

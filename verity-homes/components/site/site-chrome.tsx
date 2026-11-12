@@ -23,7 +23,8 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       </a>
       <ScrollProgress />
       <Preloader />
-      <Header whatsappHref={wa ?? "/contact"} />
+      {/* No WhatsApp number yet: the button goes to the contact form instead. */}
+      <Header whatsappHref={wa ?? "/contact#message"} />
       <main id="main">{children}</main>
       <Footer settings={settings} />
       <WhatsAppFloat href={wa} />

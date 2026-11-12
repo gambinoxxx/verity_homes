@@ -30,7 +30,6 @@ export const UNBUILT_ROUTES: readonly string[] = [
   "/privacy", // Unit 10
   "/blog", // Unit 11
   "/blog/*", // Unit 11
-  "/contact", // Unit 8
 ];
 
 /** `prefetch` prop for a <Link>: false for routes not built yet, otherwise Next's default. */

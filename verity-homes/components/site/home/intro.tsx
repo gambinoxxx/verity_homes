@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "../icons";
 import { Logo } from "../logo";
 import { Reveal } from "../reveal";
@@ -76,7 +75,7 @@ export function Intro() {
             ))}
           </div>
           <Reveal className={styles.cta} delay={3}>
-            <Link className="link-arrow" href="/contact" prefetch={prefetchFor("/contact")}>
+            <Link className="link-arrow" href="/contact#message">
               Book a consultation <ArrowIcon />
             </Link>
           </Reveal>

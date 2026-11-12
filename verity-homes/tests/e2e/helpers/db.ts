@@ -48,3 +48,28 @@ export async function cleanUpE2eRows(
   if (subscriberEmails.length)
     await db`DELETE FROM "Subscriber" WHERE email = ANY(${subscriberEmails})`;
 }
+
+export type SettingsRow = {
+  phone: string | null;
+  email: string | null;
+  whatsapp: string | null;
+  officeArea: string;
+  officeAddress: string | null;
+  showFullAddress: boolean;
+  mapQuery: string;
+};
+
+export async function getSettingsRow(): Promise<SettingsRow> {
+  const rows = (await sql()`
+    SELECT phone, email, whatsapp, "officeArea", "officeAddress", "showFullAddress", "mapQuery"
+    FROM "SiteSettings" WHERE id = 1`) as SettingsRow[];
+  if (!rows[0]) throw new Error("SiteSettings row missing — run npm run db:test:reset");
+  return rows[0];
+}
+
+export async function findEnquirySource(name: string): Promise<string | null> {
+  const rows = (await sql()`SELECT source::text AS source FROM "Enquiry" WHERE name = ${name}`) as {
+    source: string;
+  }[];
+  return rows[0]?.source ?? null;
+}

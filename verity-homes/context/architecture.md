@@ -156,7 +156,9 @@ yet never breaks the build or pages that don't use it:
   never rendered.
 - **"Open in Google Maps" button:** links to
   `https://www.google.com/maps/search/?api=1&query=...` using the same query.
-- **Contact page:** uses `SiteSettings.mapQuery`.
+- **Contact page:** uses `SiteSettings.mapQuery` (`mapEmbedUrl(mapQuery, 14)`, "Open in Maps"
+  and "Get directions" via `mapsLink`). The visible address is `officeDisplay` (the area, or
+  `officeAddress` only when `showFullAddress` is on). Components in `components/site/contact/`.
 - **Admin map picker:** react-leaflet with OSM tiles
   (`https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`, with attribution).
   - Clicking the map or dragging the marker sets latitude and longitude.

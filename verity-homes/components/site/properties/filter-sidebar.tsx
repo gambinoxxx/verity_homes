@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { PropertyFilters } from "@/lib/db/queries/properties";
-import { prefetchFor } from "@/lib/nav";
 import { budgetTypeFor, priceOptions } from "@/lib/property-list";
 import { PROPERTY_TYPES, TITLE_DOCUMENTS, withoutKeys } from "@/lib/validation/property-filters";
 import { FilterIcon, SearchIcon } from "../icons";
@@ -57,7 +56,7 @@ export function FilterSidebar({ filters, areas }: FilterSidebarProps) {
       <div className="cta-card">
         <h2>Can&apos;t find it?</h2>
         <p>Tell us what you&apos;re looking for and we&apos;ll search for you.</p>
-        <Link className="btn btn-gold" href="/contact" prefetch={prefetchFor("/contact")}>
+        <Link className="btn btn-gold" href="/contact#message">
           Make a request
         </Link>
       </div>

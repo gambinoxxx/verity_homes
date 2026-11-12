@@ -120,6 +120,11 @@ placeholders. Differences in layout or style are not.
   `delivered@resend.dev` (forced in `playwright.config.ts`), never a real address.
 - Rows created by e2e are tagged `[E2E]` and removed after the run. Each enquiry test sends
   its own `x-forwarded-for` header so repeated runs don't hit the 5-per-hour rate limit.
+- `npm run db:test:reset` ends with `scripts/e2e-test-settings.ts`: fake WhatsApp, phone,
+  email and a private office address (`showFullAddress=false`) on the **test** branch, used
+  by property.spec.ts and contact.spec.ts. Settings are cached and pages prerendered when
+  the e2e server builds, so tests can't change them mid-run; states the build can't show are
+  unit-tested on the component instead (e.g. `tests/unit/contact-cards.test.ts`).
 - Reset the branch to a clean seed with `npm run db:test:reset`. Prisma refuses to let an
   AI agent run `migrate reset` without your explicit consent.
 

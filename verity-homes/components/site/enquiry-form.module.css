@@ -214,3 +214,81 @@ fieldset.fg {
   height: 18px;
   accent-color: var(--bg-navy);
 }
+
+/* Contact page variant: design/contact.html `.c-grid form` with `.ctl.soft` fields. */
+.contact {
+  display: flex;
+  flex-direction: column;
+}
+.contact h2 {
+  margin: 18px 0 24px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(38px, 4.4vw, 60px);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.contact .fg {
+  margin-bottom: 14px;
+}
+.contact .fg > label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.contact .fg input,
+.contact .fg select,
+.contact .fg textarea {
+  min-height: 48px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 22px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  width: 100%;
+}
+.contact .fg textarea {
+  border-radius: 22px;
+  padding: 16px 22px;
+  resize: vertical;
+}
+.contact .fg select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgb(200 162 78 / 0.18);
+}
+.req {
+  color: var(--state-error);
+}
+.submitRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+.submitRow .note {
+  max-width: 260px;
+}
+.contact .formError,
+.contact .ok[data-shown] {
+  margin-top: 14px;
+}
+@media (max-width: 520px) {
+  .two {
+    grid-template-columns: 1fr;
+  }
+}
+.contact .fg input[aria-invalid="true"],
+.contact .fg textarea[aria-invalid="true"] {
+  border-color: var(--state-error);
+}
