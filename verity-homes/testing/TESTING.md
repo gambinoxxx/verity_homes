@@ -145,15 +145,29 @@ Unset, they use the bundled Chromium as before (CI and other machines).
 
 ## 6. Admin tests with Clerk
 
-- Install `@clerk/testing` and call `clerkSetup()` in Playwright global
-  setup.
-- Create a test admin user in the Clerk **development** instance with
-  `publicMetadata.role = "admin"`. Put its credentials in `.env.test` as
-  `E2E_CLERK_USER_USERNAME` and `E2E_CLERK_USER_PASSWORD`.
-- In tests, call `setupClerkTestingToken({ page })`, then sign in with
-  `clerk.signIn`.
-- Before writing this, check the current `@clerk/testing` docs, because
-  its API changes.
+Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7.9.25`).
+
+- **Test users** live in the Clerk **development** instance. Use `+clerk_test` emails, and turn
+  off MFA for them.
+  - Admin: `publicMetadata` `{"role": "admin"}`. Put its credentials in `.env.test` as
+    `E2E_CLERK_USER_USERNAME` and `E2E_CLERK_USER_PASSWORD`.
+  - Viewer, no role: `E2E_CLERK_VIEWER_USERNAME` and `E2E_CLERK_VIEWER_PASSWORD`.
+- **Setup files** (`tests/e2e/setup/`):
+  - `global-setup.ts` calls `clerkSetup()` once in the main process, so every worker gets the
+    testing token.
+  - The `admin-setup` project (`auth.setup.ts`) signs both users in at `/admin/sign-in` with
+    `clerk.signIn` (password strategy). It saves their browser state to
+    `playwright/.auth/{admin,viewer}.json`, which is git-ignored.
+- **Projects:** `admin.spec.ts` runs only in the `admin-desktop` and `admin-mobile` projects,
+  which depend on `admin-setup`. Signed-in tests use
+  `test.use({ storageState: storageStateFor("admin") })`. The public `desktop` and `mobile`
+  projects never sign in.
+- **Signing out:** a test that signs out must sign in on its own, in a fresh context. Signing
+  out ends the session, and the saved state shares that session.
+- **Commands:**
+  - Admin tests only: `PW_CHANNEL=chrome npm run test:e2e -- --project=admin-desktop --project=admin-mobile`
+  - Compare a signed-in page with the design (needs the saved state from an e2e run):
+    `COMPARE_STORAGE_STATE=playwright/.auth/admin.json PW_CHANNEL=chrome npm run compare -- /admin admin.html`
 
 ## 7. Before launch (Unit 21)
 

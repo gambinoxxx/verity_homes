@@ -1,0 +1,253 @@
+/* design/assets/admin.css: shell, sidebar, topbar, content, panel (Unit 12). */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  /* admin.css sets no body line-height (normal), unlike the site's 1.6; text blocks that need
+     more (e.g. .panel p) set it themselves. */
+  line-height: normal;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: 260px;
+  flex: none;
+  background: var(--bg-navy-deep);
+  color: var(--text-on-navy-muted);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-on-navy);
+  text-decoration: none;
+  padding: 0 8px 22px;
+  border-bottom: 1px solid var(--border-navy-soft);
+}
+.brand svg {
+  width: 36px;
+  height: 36px;
+}
+.brand b {
+  font-family: var(--font-display);
+  letter-spacing: 2px;
+  font-size: 20px;
+  font-weight: 600;
+  display: block;
+  line-height: 1;
+}
+.brand small {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accent-soft);
+  font-weight: 700;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 18px;
+}
+.group {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  /* design #7F8CA3 is 4.3:1 on navy-deep at 11px; the muted-on-navy shade passes AA. */
+  color: var(--text-on-navy-faint);
+  padding: 16px 12px 6px;
+}
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14.5px;
+  min-height: 44px;
+  color: inherit;
+}
+.nav a svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.nav a:hover {
+  background: var(--admin-nav-hover);
+  color: var(--text-on-navy);
+}
+.nav a[aria-current="page"] {
+  background: var(--bg-navy-surface);
+  color: var(--text-on-navy);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+.foot {
+  margin-top: auto;
+  font-size: 13px;
+  padding: 12px;
+  border-top: 1px solid var(--border-navy-soft);
+}
+.foot a {
+  color: var(--accent-soft);
+  /* design keeps the browser underline; Tailwind preflight removes it */
+  text-decoration: underline;
+}
+
+/* ---- Main column ---- */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border-default);
+  padding: 14px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.titleWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.titleWrap > div {
+  min-width: 0;
+}
+.topbar h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+.crumb {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.menuToggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.menuToggle svg {
+  width: 20px;
+  height: 20px;
+}
+.content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.content > * {
+  min-width: 0;
+}
+.panel {
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 22px;
+}
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.panel p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.loading {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  .open {
+    transform: none;
+    box-shadow: 20px 0 60px rgb(0 0 0 / 0.3);
+  }
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    border: 0;
+    padding: 0;
+    background: rgb(7 18 38 / 0.45);
+    cursor: pointer;
+  }
+  .menuToggle {
+    display: inline-flex;
+  }
+  .content {
+    padding: 18px;
+  }
+  .topbar {
+    padding: 12px 18px;
+  }
+  /* only our name label: Clerk's user button has its own spans */
+  .userName {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}

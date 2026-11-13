@@ -183,6 +183,13 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
 - **Admin:** shadcn/ui (Button, Input, Select, Switch, Dialog, Table,
   Tabs, Sonner for toasts), themed with these tokens to look like
   `design/admin-*.html`.
+  - Shell (Unit 12): `components/admin/admin-shell.tsx` — `AdminShell` (layout), `AdminTopbar`
+    (each page: `title`, optional `crumb`/`actions`; the page's only `<h1>`), `AdminContent`
+    (`<main id="main">`). Styles in `admin-shell.module.css` (`.panel` for simple cards). Sidebar
+    items from `lib/admin-nav.ts`; group labels use `--text-on-navy-faint` (design `#7F8CA3`
+    fails AA at 11px); hover uses `--admin-nav-hover`. Glyphs in `components/admin/icons.tsx`.
+  - Sign-in / no-access: `components/admin/auth-screen.tsx` (navy screen, Verity ADMIN mark).
+    Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons
 

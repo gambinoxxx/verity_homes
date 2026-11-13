@@ -1,6 +1,8 @@
 // Usage: node scripts/compare-design.mjs <route> <design-file>
 //   e.g. node scripts/compare-design.mjs /properties properties.html
 // Needs the app running (npm run dev). Writes side-by-side PNGs to test-results/compare/.
+// Signed-in admin pages: COMPARE_STORAGE_STATE=playwright/.auth/admin.json (saved by the e2e
+// admin-setup project, TESTING.md §6) opens the app side as that Clerk test user.
 import { chromium } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -26,6 +28,7 @@ for (const [w, h, label] of [
     const page = await browser.newPage({
       viewport: { width: w, height: h },
       reducedMotion: "reduce",
+      storageState: name === "app" ? process.env.COMPARE_STORAGE_STATE || undefined : undefined,
     });
     await page.goto(url, { waitUntil: "networkidle" }).catch(() => {});
     // make scroll-reveal content visible in both

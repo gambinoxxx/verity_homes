@@ -2,6 +2,12 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+// Clerk is confined to lib/auth (context/architecture.md): pages and proxy.ts import from there.
+const CLERK_ONLY_IN_LIB_AUTH = {
+  group: ["@clerk/*"],
+  message: "Import Clerk only in lib/auth (use @/lib/auth or @/lib/auth/components).",
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -21,9 +27,15 @@ const eslintConfig = defineConfig([
               message: "Only lib/auth, lib/storage and lib/email may read feature secrets.",
             },
           ],
+          patterns: [CLERK_ONLY_IN_LIB_AUTH],
         },
       ],
     },
+  },
+  // lib/storage and lib/email may read their own secrets, but still not import Clerk.
+  {
+    files: ["lib/storage/**", "lib/email/**"],
+    rules: { "no-restricted-imports": ["error", { patterns: [CLERK_ONLY_IN_LIB_AUTH] }] },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

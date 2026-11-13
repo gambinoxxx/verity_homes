@@ -37,6 +37,7 @@
 
   /* One-off shades used by the design shell (design/assets/verity.css) */
   --text-prose: #2b3546; /* .prose body text (articles, privacy) */
+  --admin-nav-hover: #0f2241; /* design/assets/admin.css .sidebar nav a:hover */
   --accent-hover: #d6b464; /* .btn-gold:hover */
   --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */

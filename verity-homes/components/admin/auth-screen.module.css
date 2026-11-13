@@ -1,0 +1,95 @@
+/* /admin/sign-in and /admin/no-access: centred card on navy with the logo (Unit 12 prompt). */
+.screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-navy-deep);
+  color: var(--text-on-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-on-navy);
+  text-decoration: none;
+}
+.brand svg {
+  width: 44px;
+  height: 44px;
+}
+.brand b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+.brand small {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent-soft);
+}
+.loading {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  color: var(--text-on-navy-muted);
+  font-weight: 700;
+}
+.card {
+  width: min(420px, 100%);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+}
+.card h1 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+}
+.card p {
+  margin: 0 0 22px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.back {
+  color: var(--text-on-navy-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+/* design admin.css .btn.btn-navy */
+.signOut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--bg-navy);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.signOut:hover {
+  background: var(--admin-nav-hover);
+}

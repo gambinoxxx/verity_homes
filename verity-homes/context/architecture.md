@@ -29,23 +29,34 @@ Neon to another Postgres host, or from Blob to S3 or R2, must only require
 changing env vars and one adapter module.
 
 Clerk is the one hosted dependency. It holds admin logins only, and its
-code is confined to `lib/auth/`, `proxy.ts` (`middleware.ts` before Next
-16) and `app/admin/sign-in/`.
+code is confined to `lib/auth/` (enforced by ESLint `no-restricted-imports` on `@clerk/*`):
+`index.ts` (`requireAdmin`, `isAdmin`, `getAdminUser`, `ForbiddenError`), `proxy.ts`
+(`clerkMiddleware` for `/admin/*`), `roles.ts` (pure role/path helpers) and `components.tsx`
+(`AuthProvider`, `SignIn`, `UserButton`). The root `proxy.ts`, `app/admin/**` and
+`components/admin/**` import from there. `ClerkProvider` wraps `app/admin/layout.tsx` only, so
+no public page loads Clerk (Open question 42).
 
 ## System boundaries
 
 - `app/(site)/` — Public pages. Reads published content only and never
   calls Clerk.
-- `app/admin/` — The admin panel. Every page calls `requireAdmin()`.
-- `app/admin/sign-in/[[...sign-in]]/` — The Clerk `<SignIn />` page.
+- `app/admin/` — The admin panel. `layout.tsx`: `ClerkProvider` + `robots noindex`.
+  `(panel)/layout.tsx` calls `requireAdmin()` inside `<Suspense>` for every admin page and renders
+  the shell (`components/admin/admin-shell.tsx`); admin actions and routes call it again.
+- `app/admin/sign-in/[[...sign-in]]/` — The Clerk `<SignIn />` page (in `<Suspense>`).
+- `app/admin/no-access/` — 403 page for signed-in users without the admin role.
 - `app/api/blob/upload/` — Route handler that issues Vercel Blob client
   upload tokens, admin only.
 - `app/sitemap.ts`, `app/robots.ts` — SEO files.
 - `proxy.ts` — From Unit 6 (and `/blog/[slug]` from Unit 11): answers `/properties/[slug]` with the real status before the
   page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
   Components a page sends its shell (HTTP 200) first, so `notFound()` / `permanentRedirect()`
-  inside it cannot change the status. Unit 12 adds `clerkMiddleware` protecting `/admin/*`
-  except the sign-in page. `/blog/[slug]` uses `resolvePostSlug` (SlugRedirect entity `POST`).
+  inside it cannot change the status. `/blog/[slug]` uses `resolvePostSlug` (SlugRedirect entity
+  `POST`). `/admin/*` goes to `lib/auth/proxy.ts`: signed out → 307 to `/admin/sign-in`,
+  signed in without the role → HTTP 403 with the `/admin/no-access` page (URL unchanged). Next
+  ignores a proxy rewrite's `status`, so a GET page load fetches the static no-access page
+  (marked with an internal header that skips Clerk) and returns it as 403; RSC navigations and
+  Server Actions keep the plain rewrite. Sign-in and no-access stay open.
 - `prisma/` — `schema.prisma`, `migrations/` and `seed.ts`.
 - `lib/db/` — `client.ts` (the Prisma singleton) and `queries/*.ts`. This is
   the only place that imports the generated Prisma client.
@@ -189,7 +200,9 @@ yet never breaks the build or pages that don't use it:
 
 - Clerk handles sign-in. Public sign-ups are disabled in the Clerk dashboard
   and admins are invited.
-- There is one role: `publicMetadata.role === "admin"`.
+- There is one role: `publicMetadata.role === "admin"`. It is read from the session token claim
+  `metadata` when the token is customised (`{ "metadata": "{{user.public_metadata}}" }`), else
+  from the user via Clerk's Backend API (one lookup per check).
 - Protection has two layers:
   - `proxy.ts` redirects unauthenticated `/admin/*` requests to
     `/admin/sign-in`.

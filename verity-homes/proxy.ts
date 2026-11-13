@@ -1,4 +1,7 @@
-// Next 16 Proxy (formerly middleware). Unit 12 adds Clerk's /admin protection here.
+// Next 16 Proxy (formerly middleware).
+//
+// /admin/*: Clerk (lib/auth/proxy.ts) — signed out → 307 to /admin/sign-in, no admin role → 403.
+// Only admin paths run Clerk; public pages never do.
 //
 // /properties/[slug] and /blog/[slug]: with Cache Components the page sends its prerendered
 // shell (HTTP 200) before it can look the slug up, so notFound() / permanentRedirect() inside the
@@ -7,7 +10,9 @@
 // - published slug → render the page
 // - old slug in SlugRedirect → 308 to the current slug
 // - unknown or draft slug → 404 (rewritten to an unmatched path, which renders app/not-found.tsx)
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
+import { adminProxy } from "@/lib/auth/proxy";
+import { isAdminPath } from "@/lib/auth/roles";
 import { resolvePostSlug } from "@/lib/db/queries/posts";
 import { resolvePropertySlug } from "@/lib/db/queries/properties";
 
@@ -18,7 +23,9 @@ const SLUG_ROUTES = [
   { base: "/blog", resolve: resolvePostSlug },
 ] as const;
 
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  if (isAdminPath(request.nextUrl.pathname)) return adminProxy(request, event);
+
   const match = /^\/(properties|blog)\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
   const route = SLUG_ROUTES.find((r) => r.base === `/${match?.[1]}`);
   if (!match?.[2] || !route) return NextResponse.next();
@@ -41,5 +48,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/properties/:slug", "/blog/:slug"],
+  matcher: ["/admin", "/admin/:path*", "/properties/:slug", "/blog/:slug"],
 };

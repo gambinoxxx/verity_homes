@@ -6,7 +6,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 
 ## Current focus
 
-**Public site complete** (Units 1–11 done). Next: **Unit 12 — admin auth** (Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout).
+**Public site complete** (Units 1–11). Unit 12 (admin auth) done. Next: **Unit 13 — admin dashboard**.
 
 ## Units
 
@@ -23,7 +23,7 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 | 9 | Invest page: plans and FAQs from the database | done | `invest.html` | Done 2026-11-12: `app/(site)/invest/page.tsx` — `PageHero` + sheet (how-it-works split + navy steps), plans section (navy; highlighted = gold card; rate only when > 0 else placeholder; `formatNaira`, tenure months, `PAYOUT_LABEL`; disclaimer directly under the plans), FAQ (`getFaqs("INVEST")`, native `<details>`, sticky heading, hidden if none), `#start` investment enquiry (`EnquiryForm variant="invest"`: plan select + "Not sure yet", amount → `amountKobo`; "I want to invest" preselects the plan via `lib/invest-plan-select.ts`). Plan cards + steps extracted to `components/site/invest/plans.tsx` and shared with the home section (copy stays in `lib/invest.ts`). `getFaqs` cached, tag `"faqs"`. `/invest` out of `UNBUILT_ROUTES`. No FAQPage JSON-LD yet (answers are sample text) — **Unit 20**. Tests: `tests/e2e/invest.spec.ts`, `invest-copy.test.ts` now covers the page. |
 | 10 | About page (+ `/privacy`) | done | `about.html`, `post.html` | Done 2026-11-12: `app/(site)/about/page.tsx` — `PageHero` + sheet story split (dusk + building, company-story placeholder), values `MarqueeBand` (Honesty ✦ Clarity ✦ Care), three value cards, CEO (`CeoSection`, shared with home via `components/site/ceo.tsx`; full-bio + promise placeholders, **no DB field — Q4 open**), CAC trust card (`companyName`, `rcNumber`, `officeArea` from `getSiteSettings()`; `officeArea` added to the view), partner strip (`PartnerMarquee`, shared with home; published + consented only, hidden if none), navy CTA (Contact us → `/contact#message`, View properties → `/properties`). Sections in `components/site/about/`. `/privacy`: `PageHero variant="post"` + sheet + `.article`/`.prose` (now global, for Unit 11), **draft** notice from what the code does (`components/site/privacy/privacy-notice.tsx`), visible draft banner, owner placeholders (retention, response time, data location), email from settings or placeholder (Q39). `/about` + `/privacy` out of `UNBUILT_ROUTES`. No Organization JSON-LD here — **Unit 20** puts it in the root layout. Mobile CTA box stacks (deviation, Q38). Tests: `tests/e2e/about.spec.ts`, `/privacy` in `public.spec.ts`, `tests/unit/about-privacy.test.ts`; `scripts/e2e-test-settings.ts` now adds two non-public `[E2E]` partners on the test branch. |
 | 11 | Blog list and post page (Markdown) | done | `blog.html`, `post.html` | Done 2026-11-12: `/blog` — `PageHero` + sheet; `BlogBrowser` inside `<Suspense>` (◐) renders from the URL: `?category=` pills (links, `aria-current`), `?q=` (title + excerpt, case-insensitive, `next/form` GET), 6/page pager (page clamped), empty state "No articles found" + See all articles; sidebar (search, recent 3, categories with published counts, invest CTA). Params parsed per param in `lib/validation/blog-filters.ts` (never throws). `/blog/[slug]` — `generateStaticParams`, post hero (`PageHero variant="post"` over the cover, gold category tag, `formatDate` · reading time), Markdown body (`components/site/blog/markdown.tsx`: react-markdown 10.1.0 + remark-gfm 4.0.1, `skipHtml`, default `urlTransform`, external links `target=_blank rel="noopener noreferrer"`, `#` demoted to h2, images via next/image only for same-site paths / `MARKDOWN_IMAGE_HOSTS`, else skipped), share (WhatsApp `whatsappShareLink` title + URL, email, native share with copy fallback), author box (CEO photo only for Esther), 2 related (same category first, then newest). `proxy.ts` now resolves `/blog/:slug` too (308 from `SlugRedirect` POST, 404 for draft/unknown). Article JSON-LD + `generateMetadata` (canonical, OG image from the cover). All post reads cached, tag `"posts"`. Home latest posts + post-page "More articles" share `PostsSection` (`components/site/post-cards.tsx`). `UNBUILT_ROUTES` now empty. Tests: `tests/e2e/blog.spec.ts`, `/blog/<seeded slug>` in `public.spec.ts`, `tests/unit/markdown.test.ts` + `blog.test.ts`; fixtures in `scripts/e2e-test-settings.ts` (5 older posts, raw-HTML post, draft, old-slug redirect). Deviation: Q40. |
-| 12 | Admin auth: Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout | todo | `admin.html` (shell) | |
+| 12 | Admin auth: Clerk, `proxy.ts`, `/admin/sign-in`, `requireAdmin()`, admin layout | done | `admin.html` (shell) | Done 2026-11-12: `@clerk/nextjs@7.9.25`. Clerk confined to `lib/auth/` (ESLint `no-restricted-imports` on `@clerk/*` elsewhere): `index.ts` (`requireAdmin()` → redirect to sign-in when signed out, throws `ForbiddenError` (403) without `publicMetadata.role === "admin"`; `isAdmin()`; `getAdminUser()`), `proxy.ts` (`clerkMiddleware` for `/admin/*` only: signed out → 307 to `/admin/sign-in?redirect_url=…`, non-admin → HTTP 403 with the `/admin/no-access` page, URL unchanged — Next ignores a rewrite's `status`, so page loads fetch the static no-access page and return it as 403; RSC/Server Action requests keep the rewrite; sign-in + no-access open), `roles.ts` (pure, tested: role from session claims `metadata.role`, else one Backend API user lookup), `components.tsx` (`AuthProvider`, `SignIn`, `SignOutButton`, `UserButton`). Root `proxy.ts` dispatches `/admin` to Clerk, slugs as before. `ClerkProvider` in `app/admin/layout.tsx` only (Q42, approved) + `robots noindex`. `app/admin/sign-in/[[...sign-in]]` (`<SignIn path routing=path fallbackRedirectUrl=/admin>` in `<Suspense>`, navy screen + logo, no sign-up link), `app/admin/no-access` (403 page with "Sign out" → `/admin/sign-in`). `app/admin/(panel)/layout.tsx`: `<Suspense>` gate → `requireAdmin()` → `AdminShell` (sidebar from `lib/admin-nav.ts`, drawer ≤860px with Esc/backdrop/`inert`, topbar with Lagos-time greeting + `UserButton`); `/admin` is a placeholder until Unit 13. Tests: `tests/unit/admin-auth.test.ts`; `admin.spec.ts` (projects `admin-desktop`/`admin-mobile`, after `admin-setup`): signed-out redirects, sign-in form, "public pages make no Clerk requests", signed-in admin (shell, sidebar, topbar, desktop sidebar, mobile drawer Esc/tap-outside), viewer 403 at `/admin` + `/admin/enquiries`, viewer sign-out. Clerk test users via `@clerk/testing@2.2.55` (TESTING.md §6; ticket sign-in because password sign-in stops at Clerk Client Trust). Compared with `admin.html` at 1440/390: shell line-height set to `normal` like the design (topbar 77px, nav rows 44px), footer link underline restored; mobile user menu was hidden by `.user span` (fixed). Dashboard content, "Add property" and the Enquiries count badge are Unit 13. Playwright `PW_PORT` added (e2e server on another port when `npm run dev` holds 3000). |
 | 13 | Admin dashboard | todo | `admin.html` | |
 | 14 | Admin properties list + editor (fields, documents, featured/showcase) | todo | `admin-properties.html`, `admin-property-edit.html` | |
 | 15 | Admin property photos (Blob upload, reorder, alt text, delete) and **map picker** (Leaflet) | todo | `admin-property-edit.html` | |
@@ -61,11 +61,13 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 8. Real testimonials, with each client's consent.
 9. Real listings: photos, prices, areas, coordinates and title documents.
 10. Signature projects for the home showcase: names, areas and status.
-11. Admin users: Esther only, or staff too?
+11. Admin users: Esther only, or staff too? (Unit 12: access is any Clerk user with
+    `publicMetadata.role = "admin"`; sign-ups must be restricted in the Clerk dashboard.)
 12. Who owns the Clerk, Neon, Vercel and Resend accounts? Use a company
     email.
-13. `.env.local` has the real Neon values and `IP_HASH_SALT`. Clerk, Blob
-    and Resend values are still placeholders, needed from Units 7 and 12.
+13. `.env.local` has the real Neon values and `IP_HASH_SALT`. Clerk dev keys added 2026-11-12
+    (Unit 12). Still to tidy: the placeholder Clerk lines (`.env.local` 8–9, `.env.test`
+    10–11; the later real line wins) and a stray line 27 in `.env.local`. Blob is still a placeholder (Unit 15).
 14. ~~`seed.ts` failed typecheck on `titleDocument`.~~ Closed in Unit 2:
     the guard is now `"titleDocument" in data && data.titleDocument`.
 15. ~~Privacy and Terms links.~~ Closed 2026-11-11: `/privacy` is built in Unit 10 as a
@@ -199,3 +201,18 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
     been idle can exceed Vitest's 5 s timeout (seen twice: enquiry-action, subscribe-action); a
     rerun passes. Not changed in Unit 11. Options: a warm-up query in `tests/setup/env.ts`, or a
     longer `testTimeout` for DB tests only — owner/reviewer to choose.
+42. ~~Unit 12 deviation: `ClerkProvider` wraps `/admin` only.~~ Closed 2026-11-12: approved by the
+    owner. `admin.spec.ts` checks public pages make no Clerk requests and set no Clerk cookies.
+43. ~~Signed-in admin not tested yet.~~ Closed 2026-11-12: Clerk dev-instance test users (admin +
+    viewer) in `.env.test`; signed-in e2e tests on (TESTING.md §6). Shell compared with
+    `admin.html` at 1440/390. Found and fixed: viewer got 200 (not 403), sign-out on the 403 page
+    failed, mobile user menu hidden. Note: the `E2E_CLERK_*` logins are currently only in
+    `.env.local`; Playwright takes just those four names from it as a fallback — move them to
+    `.env.test`.
+44. ~~Clerk dashboard leftovers.~~ Closed 2026-11-12: app renamed "Verity Homes and Properties",
+    Google sign-in off (email + password only), sign-ups Restricted, session token customised.
+45. **Resend key in `.env.test` is rejected (2026-11-12).** The e2e "sends" enquiry test fails on
+    desktop + mobile: the enquiry row is saved, but Resend answers `validation_error: API key is
+    invalid`, so `emailSentAt` stays empty. `.env.test` was not changed by Unit 12 — the key was
+    probably revoked or rotated in Resend. Owner: put a valid `RESEND_API_KEY` in `.env.test` (and
+    check `.env.local` / Vercel), then rerun `tests/e2e/enquiry.spec.ts`.
