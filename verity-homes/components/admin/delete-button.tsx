@@ -1,26 +1,43 @@
 "use client";
 
-// Delete with a confirm dialog that names the property (native <dialog>: focus moves in, Esc
-// closes, focus returns to the button). Used in the list rows and the editor's danger zone.
+// Delete with a confirm dialog that names the item (native <dialog>: focus moves in, Esc
+// closes, focus returns to the button). Used for properties (Unit 14), plans and FAQs
+// (Unit 17). `action` is the item's server action (Zod → requireAdmin → delete).
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 import { toast } from "sonner";
-import { deleteProperty } from "@/lib/actions/property";
-import { AdminIcon } from "../icons";
-import ui from "../ui.module.css";
+import { AdminIcon } from "./icons";
+import ui from "./ui.module.css";
+
+type Result = { ok: true; message?: string; data?: unknown } | { ok: false; error: string };
 
 type Props = {
   id: string;
+  /** Shown in the dialog and the button's label: “Delete “<title>”?” */
   title: string;
-  /** "icon": the table's trash button; "panel": the editor's full-width danger button. */
+  /** "property", "plan", "FAQ" — for the button text. */
+  what: string;
+  action: (id: string) => Promise<Result>;
+  /** What deleting removes / keeps (the dialog's body). */
+  body: React.ReactNode;
+  /** "icon": a table row's trash button; "panel": the editor's full-width danger button. */
   variant: "icon" | "panel";
-  /** Where to go after deleting (the editor leaves its page); default: stay and refresh. */
+  /** Where to go after deleting (an editor leaves its page); default: stay and refresh. */
   redirectTo?: string;
-  /** Called just before navigating away (the editor clears its unsaved-changes guard). */
+  /** Called just before navigating away (an editor clears its unsaved-changes guard). */
   onDeleted?: () => void;
 };
 
-export function DeletePropertyButton({ id, title, variant, redirectTo, onDeleted }: Props) {
+export function DeleteButton({
+  id,
+  title,
+  what,
+  action,
+  body,
+  variant,
+  redirectTo,
+  onDeleted,
+}: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -28,13 +45,13 @@ export function DeletePropertyButton({ id, title, variant, redirectTo, onDeleted
 
   const confirm = () =>
     startTransition(async () => {
-      const res = await deleteProperty(id);
+      const res = await action(id);
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
       dialog.current?.close();
-      toast.success(res.message);
+      toast.success(res.message ?? `Deleted “${title}”.`);
       onDeleted?.();
       if (redirectTo) router.push(redirectTo);
       else router.refresh();
@@ -59,15 +76,12 @@ export function DeletePropertyButton({ id, title, variant, redirectTo, onDeleted
           onClick={() => dialog.current?.showModal()}
         >
           <AdminIcon name="trash" />
-          Delete property
+          Delete {what}
         </button>
       )}
       <dialog ref={dialog} className={ui.dialog} aria-labelledby={headingId}>
         <h2 id={headingId}>Delete “{title}”?</h2>
-        <p>
-          This removes the listing and all its photos and documents. Its web address will stop
-          working. This can&apos;t be undone.
-        </p>
+        <div className={ui.dialogBody}>{body}</div>
         <div className={ui.dialogActions}>
           <button
             type="button"
@@ -83,10 +97,14 @@ export function DeletePropertyButton({ id, title, variant, redirectTo, onDeleted
             onClick={confirm}
             disabled={pending}
           >
-            {pending ? "Deleting…" : "Delete property"}
+            {pending ? "Deleting…" : `Delete ${what}`}
           </button>
         </div>
       </dialog>
     </>
   );
 }
+
+/** The property dialog text (Unit 14). */
+export const PROPERTY_DELETE_BODY =
+  "This removes the listing and all its photos and documents. Its web address will stop working. This can't be undone.";

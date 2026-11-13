@@ -2,6 +2,7 @@
 // button is client-side. Mobile: the table scrolls inside its box.
 import Image from "next/image";
 import Link from "next/link";
+import { deleteProperty } from "@/lib/actions/property";
 import type { AdminPropertyList } from "@/lib/db/queries/admin-properties";
 import { LISTING_LABEL, formatPrice, timeAgo } from "@/lib/format";
 import {
@@ -10,7 +11,7 @@ import {
 } from "@/lib/validation/admin-property-filters";
 import { AdminIcon } from "../icons";
 import ui from "../ui.module.css";
-import { DeletePropertyButton } from "./delete-property-button";
+import { DeleteButton, PROPERTY_DELETE_BODY } from "../delete-button";
 import styles from "./properties.module.css";
 
 const TABS = [
@@ -129,7 +130,14 @@ export function PropertyTable({ list, now }: { list: AdminPropertyList; now: Dat
                   >
                     <AdminIcon name="pen" />
                   </Link>
-                  <DeletePropertyButton id={p.id} title={p.title} variant="icon" />
+                  <DeleteButton
+                    id={p.id}
+                    title={p.title}
+                    what="property"
+                    action={deleteProperty}
+                    body={PROPERTY_DELETE_BODY}
+                    variant="icon"
+                  />
                 </div>
               </td>
             </tr>

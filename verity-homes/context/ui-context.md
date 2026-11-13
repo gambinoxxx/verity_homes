@@ -204,6 +204,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Enquiries inbox (Unit 16): `components/admin/enquiries/` (`enquiries.module.css`: split
     view, unread/selected rows with a stretched name link, `.detail` panel; full-screen with a
     Back link at ≤ 860 px). Status badges `ui.bNew/bContacted/bClosed`; gold button `ui.gold`.
+  - Plans + FAQs (Unit 17) reuse the properties list/editor styles: `components/admin/plans/`,
+    `components/admin/faqs/`. Shared: `components/admin/delete-button.tsx` (confirm dialog for
+    properties, plans, FAQs), `components/admin/reorder.tsx` (`useReorder` drag + `MoveButtons`
+    ↑↓). Plan top-bar “Add plan” uses the dashboard's icon-only-on-phones button.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

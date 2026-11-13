@@ -47,7 +47,8 @@ test("enquiry form validates, then succeeds", async ({ page }) => {
   const form = page.getByRole("form", { name: /enquire about this property/i });
   await form.getByRole("button", { name: /send enquiry/i }).click();
   await expect(form.getByText(/name is required|enter your name/i)).toBeVisible();
-  await form.getByLabel(/full name/i).fill("Playwright Tester");
+  // "[SAMPLE] E2E …" names are swept by tests/e2e/setup/global-teardown.ts after every run (Q50).
+  await form.getByLabel(/full name/i).fill("[SAMPLE] E2E Playwright Tester");
   await form.getByLabel(/phone/i).fill("08030000000");
   await page.waitForTimeout(3_100); // minimum fill time (anti-bot)
   await form.getByRole("button", { name: /send enquiry/i }).click();

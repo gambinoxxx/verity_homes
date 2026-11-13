@@ -11,6 +11,9 @@ export const BUILT_ADMIN_ROUTES: ReadonlySet<string> = new Set([
   "/admin/properties", // Unit 14
   "/admin/properties/new", // Unit 14
   "/admin/enquiries", // Unit 16
+  "/admin/plans", // Unit 17
+  "/admin/plans/new", // Unit 17
+  "/admin/faqs", // Unit 17
 ]);
 
 /** Public pages (e.g. /privacy) count as built; admin paths must be in the list. */
@@ -31,7 +34,7 @@ export type QuickAction = {
 export const QUICK_ACTIONS: readonly QuickAction[] = [
   { label: "Add a property", href: ADD_PROPERTY_HREF, icon: "plus" },
   { label: "Write a blog post", href: "/admin/posts/new", icon: "pen" }, // Unit 18
-  { label: "Edit investment plans", href: "/admin/plans", icon: "chart" }, // Unit 17
+  { label: "Edit investment plans", href: "/admin/plans", icon: "chart" },
   { label: "Update contact details", href: "/admin/settings", icon: "gear" }, // Unit 19
 ];
 

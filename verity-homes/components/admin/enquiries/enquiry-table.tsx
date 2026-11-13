@@ -108,7 +108,11 @@ export function EnquiryTable({
                     </Link>
                   ) : e.plan ? (
                     plansBuilt ? (
-                      <Link className={styles.above} href="/admin/plans" prefetch={false}>
+                      <Link
+                        className={styles.above}
+                        href={`/admin/plans/${e.plan.id}`}
+                        prefetch={false}
+                      >
                         Plan: {e.plan.name}
                       </Link>
                     ) : (

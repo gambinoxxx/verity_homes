@@ -1,4 +1,5 @@
 // Home page behaviour (Unit 4). Runs on desktop (1440) and mobile (390) with seeded [SAMPLE] data.
+import { getPlanRows } from "./helpers/db";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -53,9 +54,13 @@ test("signature projects show the seeded showcase listings with status pills", a
 });
 
 test("invest section shows plans, the placeholder rate and the disclaimer", async ({ page }) => {
-  await page.goto("/");
   const section = page.locator("#invest");
-  await expect(section.locator("article")).toHaveCount(3);
+  // Plans are site-wide; the admin plans test (Unit 17) may publish one meanwhile.
+  await expect(async () => {
+    await page.goto("/");
+    const published = (await getPlanRows()).filter((p) => p.status === "PUBLISHED").length;
+    await expect(section.locator("article")).toHaveCount(published, { timeout: 2_000 });
+  }).toPass({ timeout: 45_000 });
   await expect(section.getByText("₦1,000,000")).toBeVisible();
   await expect(section.getByText("Rate to be confirmed").first()).toBeAttached();
   await expect(section.getByText(/Investment returns are subject to the terms/)).toBeVisible();

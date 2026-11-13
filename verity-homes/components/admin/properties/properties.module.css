@@ -187,3 +187,28 @@
     width: 100%;
   }
 }
+
+/* ---- Reorderable rows (Unit 17: plans, FAQs reuse this table) ---- */
+.table tr[draggable="true"] {
+  cursor: grab;
+}
+.table tr[data-dragging="true"] {
+  opacity: 0.45;
+}
+.handle {
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-weight: 800;
+  letter-spacing: 1px;
+  user-select: none;
+}
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  color: var(--text-muted);
+  font-size: 13px;
+  max-width: 520px;
+}

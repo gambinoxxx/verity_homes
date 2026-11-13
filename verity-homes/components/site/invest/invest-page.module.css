@@ -85,6 +85,7 @@
   font-size: 16px;
   line-height: 1.75;
   max-width: 760px;
+  white-space: pre-line; /* single line breaks typed in the admin are kept (Unit 17) */
 }
 
 .start {

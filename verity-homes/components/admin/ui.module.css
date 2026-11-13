@@ -84,6 +84,11 @@
 .iconBtn:hover {
   border-color: var(--bg-navy);
 }
+.iconBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  border-color: var(--border-input);
+}
 
 /* ---- Status badges (.b-pub / .b-draft) ---- */
 .badge {
@@ -256,10 +261,14 @@
   font-size: 18px;
   font-weight: 800;
 }
-.dialog p {
+.dialog p,
+.dialogBody {
   margin: 0 0 20px;
   color: var(--text-muted);
   font-size: 14px;
+}
+.dialogBody p {
+  margin: 0 0 8px;
 }
 .dialogActions {
   display: flex;

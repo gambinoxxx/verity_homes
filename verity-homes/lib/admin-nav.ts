@@ -1,7 +1,8 @@
 // Admin sidebar (design/admin.html), in design order. Pages arrive unit by unit; links to admin
 // pages that don't exist yet are not prefetched (admin-only, like lib/nav.ts UNBUILT_ROUTES).
 
-export type AdminIcon = "dash" | "home" | "chart" | "pen" | "quote" | "hand" | "inbox" | "gear";
+export type AdminIcon =
+  "dash" | "home" | "chart" | "faq" | "pen" | "quote" | "hand" | "inbox" | "gear";
 export type AdminNavItem = { label: string; href: string; icon: AdminIcon; unit: number };
 export type AdminNavGroup = { label: string | null; items: readonly AdminNavItem[] };
 
@@ -12,6 +13,7 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
     items: [
       { label: "Properties", href: "/admin/properties", icon: "home", unit: 14 },
       { label: "Investment plans", href: "/admin/plans", icon: "chart", unit: 17 },
+      { label: "FAQs", href: "/admin/faqs", icon: "faq", unit: 17 },
       { label: "Blog posts", href: "/admin/posts", icon: "pen", unit: 18 },
       { label: "Testimonials", href: "/admin/testimonials", icon: "quote", unit: 19 },
       { label: "Partners", href: "/admin/partners", icon: "hand", unit: 19 },

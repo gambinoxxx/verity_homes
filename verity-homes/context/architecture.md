@@ -88,6 +88,10 @@ no public page loads Clerk (Open question 42).
 - `lib/db/queries/admin-enquiries.ts` + `lib/actions/enquiry-admin.ts` — the inbox reads and
   the status / note actions (they `revalidatePath("/admin", "layout")` so the sidebar badge and
   dashboard update).
+- `lib/actions/plan.ts`, `lib/actions/faq.ts` + `lib/db/queries/admin-plans.ts` +
+  `lib/db/mutations/plans.ts` — plans and FAQs admin (Unit 17); actions `updateTag("plans")` /
+  `updateTag("faqs")`. Only one plan is highlighted: `clearOtherHighlights()` runs in the same
+  transaction as the save.
 - `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
   apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).

@@ -303,3 +303,47 @@ export async function aPublishedProperty(): Promise<{ id: string; slug: string; 
     ORDER BY "createdAt" LIMIT 1`) as { id: string; slug: string; title: string }[];
   return rows[0]!;
 }
+
+// ---- Admin plans + FAQs (Unit 17) ----
+
+export type PlanSnapshot = { id: string; highlighted: boolean; sortOrder: number }[];
+
+/** Highlight + order of every plan, to put back after a test that changes them. */
+export async function snapshotPlans(): Promise<PlanSnapshot> {
+  return (await sql()`SELECT id, highlighted, "sortOrder" FROM "InvestmentPlan"`) as PlanSnapshot;
+}
+
+/** Deletes "[SAMPLE] E2E …" plans, then restores the snapshot's highlight and order. */
+export async function restorePlans(snapshot: PlanSnapshot): Promise<void> {
+  const db = sql();
+  await db`DELETE FROM "InvestmentPlan" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
+  for (const p of snapshot) {
+    await db`UPDATE "InvestmentPlan" SET highlighted = ${p.highlighted}, "sortOrder" = ${p.sortOrder}
+             WHERE id = ${p.id}`;
+  }
+}
+
+export async function planByName(
+  name: string,
+): Promise<{ id: string; status: string; highlighted: boolean; minimumKobo: string } | null> {
+  const rows = (await sql()`
+    SELECT id, status::text AS status, highlighted, "minimumKobo"::text AS "minimumKobo"
+    FROM "InvestmentPlan" WHERE name = ${name} LIMIT 1`) as {
+    id: string;
+    status: string;
+    highlighted: boolean;
+    minimumKobo: string;
+  }[];
+  return rows[0] ?? null;
+}
+
+export async function highlightedPlanNames(): Promise<string[]> {
+  const rows = (await sql()`SELECT name FROM "InvestmentPlan" WHERE highlighted`) as {
+    name: string;
+  }[];
+  return rows.map((r) => r.name);
+}
+
+export async function deleteE2eFaqs(): Promise<void> {
+  await sql()`DELETE FROM "Faq" WHERE question LIKE ${"[SAMPLE] E2E %"}`;
+}

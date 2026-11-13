@@ -20,6 +20,15 @@ const PATHS: Record<
     </>
   ),
   chart: <path d="M3 17l6-6 4 4 8-8M15 7h6v6" strokeLinecap="round" strokeLinejoin="round" />,
+  faq: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path
+        d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"
+        strokeLinecap="round"
+      />
+    </>
+  ),
   pen: <path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" strokeLinejoin="round" />,
   quote: <path d="M5 17V12c0-3 2-5 5-5M14 17v-5c0-3 2-5 5-5M5 17h4v-5H5M14 17h4v-5h-4" />,
   hand: <path d="M3 12l4-4 5 2 3-2 6 5-5 5-4-2-3 2z" strokeLinecap="round" />,

@@ -57,6 +57,7 @@ describe("admin sidebar", () => {
       "Dashboard",
       "Properties",
       "Investment plans",
+      "FAQs",
       "Blog posts",
       "Testimonials",
       "Partners",

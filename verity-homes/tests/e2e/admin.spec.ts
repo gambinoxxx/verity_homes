@@ -77,6 +77,7 @@ test.describe("signed-in admin", () => {
       "Dashboard",
       "Properties",
       "Investment plans",
+      "FAQs",
       "Blog posts",
       "Testimonials",
       "Partners",
@@ -231,7 +232,11 @@ test.describe("admin dashboard", () => {
     await expect(
       page.locator("header").getByRole("link", { name: "Add property" }),
     ).toHaveAttribute("href", "/admin/properties/new");
-    for (const label of ["Write a blog post", "Edit investment plans", "Update contact details"]) {
+    await expect(quick.getByRole("link", { name: "Edit investment plans" })).toHaveAttribute(
+      "href",
+      "/admin/plans",
+    );
+    for (const label of ["Write a blog post", "Update contact details"]) {
       const item = quick.getByText(label);
       await expect(item).toBeVisible();
       await expect(item).toContainText("Coming soon");
@@ -252,7 +257,15 @@ test.describe("admin dashboard", () => {
 test.describe("signed-in non-admin", () => {
   test.use({ storageState: storageStateFor("viewer") });
 
-  for (const path of ["/admin", "/admin/enquiries", "/admin/properties", "/admin/properties/new"]) {
+  for (const path of [
+    "/admin",
+    "/admin/enquiries",
+    "/admin/properties",
+    "/admin/properties/new",
+    "/admin/plans",
+    "/admin/plans/new",
+    "/admin/faqs",
+  ]) {
     test(`gets 403 "No admin access" at ${path}`, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.status()).toBe(403);

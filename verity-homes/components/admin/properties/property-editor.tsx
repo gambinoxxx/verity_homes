@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import {
   createProperty,
+  deleteProperty,
   publishProperty,
   unpublishProperty,
   updateProperty,
@@ -48,7 +49,7 @@ import {
 } from "@/lib/validation/property";
 import { AdminIcon } from "../icons";
 import ui from "../ui.module.css";
-import { DeletePropertyButton } from "./delete-property-button";
+import { DeleteButton, PROPERTY_DELETE_BODY } from "../delete-button";
 import {
   FeaturesInput,
   Field,
@@ -989,7 +990,10 @@ export function PropertyEditor({
           {property ? (
             <section className={ui.panel} aria-labelledby={sid("sec-danger")}>
               <h2 id={sid("sec-danger")}>Danger zone</h2>
-              <DeletePropertyButton
+              <DeleteButton
+                what="property"
+                action={deleteProperty}
+                body={PROPERTY_DELETE_BODY}
                 id={property.id}
                 title={getValues("title") || "this property"}
                 variant="panel"
