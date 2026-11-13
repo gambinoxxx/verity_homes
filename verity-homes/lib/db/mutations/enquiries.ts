@@ -1,7 +1,7 @@
 // Writes and lookups for the public enquiry and newsletter actions (lib/actions/*).
 import "server-only";
 import { db } from "@/lib/db/client";
-import type { EnquiryInterest, EnquirySource } from "@/lib/generated/prisma/client";
+import type { EnquiryInterest, EnquirySource, EnquiryStatus } from "@/lib/generated/prisma/client";
 
 /** Enquiries saved from this IP hash since `since` (rate limit, counted in the database). */
 export function countEnquiriesSince(ipHash: string, since: Date): Promise<number> {
@@ -49,4 +49,20 @@ export async function markEnquiryEmailSent(id: string): Promise<void> {
 /** Adds the email to the newsletter list; a repeat sign-up is not an error. */
 export async function upsertSubscriber(email: string): Promise<void> {
   await db.subscriber.upsert({ where: { email }, create: { email }, update: {} });
+}
+
+// ---- Admin inbox (Unit 16) ----
+
+/** null → no such enquiry. */
+export async function updateEnquiryStatus(id: string, status: EnquiryStatus) {
+  const found = await db.enquiry.findUnique({ where: { id }, select: { id: true } });
+  if (!found) return null;
+  return db.enquiry.update({ where: { id }, data: { status }, select: { id: true, status: true } });
+}
+
+/** null → no such enquiry. An empty note is stored as null. */
+export async function updateEnquiryNote(id: string, note: string | null) {
+  const found = await db.enquiry.findUnique({ where: { id }, select: { id: true } });
+  if (!found) return null;
+  return db.enquiry.update({ where: { id }, data: { note }, select: { id: true, note: true } });
 }

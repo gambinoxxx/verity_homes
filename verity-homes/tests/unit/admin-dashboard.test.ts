@@ -53,6 +53,7 @@ describe("built admin routes", () => {
       "/admin",
       "/admin/properties",
       "/admin/properties/new",
+      "/admin/enquiries",
     ]);
     expect(isAdminRouteBuilt("/admin")).toBe(true);
     expect(isAdminRouteBuilt("/admin/properties/new")).toBe(true);

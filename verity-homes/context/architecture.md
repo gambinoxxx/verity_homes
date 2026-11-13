@@ -82,6 +82,12 @@ no public page loads Clerk (Open question 42).
 - `app/api/blob/upload/route.ts` — client-upload tokens for property photos (Unit 15). The
   proxy runs `clerkMiddleware()` for `/api/blob/*` without redirects; the route answers 401/403.
   Rows are saved by the `addPropertyPhoto` server action, never by Blob's completion webhook.
+- `app/api/admin/enquiries/export/route.ts` — CSV export of the filtered enquiries (Unit 16),
+  admin only (401/403); `/api/admin/*` runs `clerkMiddleware()` without redirects, like
+  `/api/blob/*`.
+- `lib/db/queries/admin-enquiries.ts` + `lib/actions/enquiry-admin.ts` — the inbox reads and
+  the status / note actions (they `revalidatePath("/admin", "layout")` so the sidebar badge and
+  dashboard update).
 - `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
   apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).

@@ -87,6 +87,8 @@ export default defineConfig({
   },
   // Clerk testing token for the signed-in admin tests (TESTING.md §6).
   globalSetup: "./tests/e2e/setup/global-setup.ts",
+  // Sweeps leftover "[SAMPLE] E2E …" rows and e2e/ Blob files, even after an interrupted run.
+  globalTeardown: "./tests/e2e/setup/global-teardown.ts",
   projects: [
     // Public site: no Clerk sign-in needed.
     {

@@ -201,6 +201,9 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Photos + map (Unit 15): `photos-field.tsx` (design `.drop/.photos/.photo` in
     `editor.module.css`) and `map-picker.tsx` (Leaflet, gold `divIcon` pin `.pin`, map box
     `.map` 280 px). Leaflet's CSS is imported only by the picker (admin only).
+  - Enquiries inbox (Unit 16): `components/admin/enquiries/` (`enquiries.module.css`: split
+    view, unread/selected rows with a stretched name link, `.detail` panel; full-screen with a
+    Back link at ≤ 860 px). Status badges `ui.bNew/bContacted/bClosed`; gold button `ui.gold`.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

@@ -1,0 +1,235 @@
+/* /admin/enquiries (design/admin-enquiries.html): .split-view, tr.unread / tr.sel, .detail
+   (.who, .av, dl, blockquote, .acts). Toolbar, tabs, table and pager come from
+   ../properties/properties.module.css. */
+.splitView {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 24px;
+  align-items: start;
+}
+.splitView > * {
+  min-width: 0;
+}
+
+/* ---- Rows: the name is a link stretched over the whole row ---- */
+.row {
+  position: relative;
+}
+.row:hover {
+  background: var(--admin-table-head);
+}
+.row a.open {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+.row a.open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.row a.open:focus-visible {
+  outline: none;
+}
+.row:has(a.open:focus-visible) {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+.unread a.open {
+  font-weight: 800;
+}
+.selected,
+.selected:hover {
+  background: var(--drop-hover);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+/* links inside the row (the related property) sit above the stretched link */
+.row .above {
+  position: relative;
+  z-index: 1;
+  color: var(--accent-text);
+  font-weight: 700;
+}
+.muted {
+  color: var(--text-muted);
+}
+.via {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---- Detail panel ---- */
+.detail {
+  position: sticky;
+  top: 88px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 22px;
+}
+.back {
+  display: none;
+}
+.who {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.who h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+.who p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.av {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-navy);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex: none;
+}
+.dl {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 14px;
+  margin: 16px 0;
+}
+.dl dt {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.dl dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dl a {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+.message {
+  margin: 0;
+  background: var(--bg-subtle);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.noMessage {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+.acts > * {
+  min-width: 0;
+}
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+.note label {
+  font-size: 13px;
+  font-weight: 700;
+}
+.note textarea {
+  min-height: 80px;
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 12px;
+  font: inherit;
+  font-size: 14.5px;
+  line-height: 1.5;
+  resize: vertical;
+  color: var(--text-primary);
+}
+.note textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.noteStatus {
+  min-height: 18px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.noteError {
+  color: var(--state-error);
+  font-weight: 700;
+}
+.placeholder {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  padding: 24px 8px;
+}
+.placeholder b {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+@media (max-width: 1100px) {
+  .splitView {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .detail {
+    position: static;
+  }
+  .placeholderPanel {
+    display: none;
+  }
+}
+
+/* Phones: the open enquiry takes the whole screen, with a Back link to the list. */
+@media (max-width: 860px) {
+  .detail {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: 0;
+    border-radius: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px 18px 32px;
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .dl {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
+}
+@media (max-width: 400px) {
+  .acts {
+    grid-template-columns: 1fr;
+  }
+}

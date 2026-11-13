@@ -175,7 +175,10 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
 - `playwright.config.ts` sets `BLOB_PATH_PREFIX=e2e/` for its test server, so every upload
   goes under `e2e/properties/<id>/` in Blob. `tests/e2e/helpers/blob.ts` checks files exist
   and deletes everything under that folder in `afterAll`.
-- Needs a real `BLOB_READ_WRITE_TOKEN` in `.env.test`.
+- Needs a real `BLOB_READ_WRITE_TOKEN` in `.env.test`, for a **public** Blob store.
+- `tests/e2e/setup/global-teardown.ts` runs after every Playwright run, even an interrupted one.
+  It removes properties titled "[SAMPLE] E2E …" (and their redirects) and every Blob file under
+  `e2e/`, so a dropped connection can't leave test data behind.
 
 ## 7. Before launch (Unit 21)
 

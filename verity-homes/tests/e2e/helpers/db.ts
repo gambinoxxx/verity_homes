@@ -227,3 +227,79 @@ export async function propertyLocation(
   }[];
   return rows[0]!;
 }
+
+// ---- Admin enquiries (Unit 16) ----
+
+export type FixtureEnquiry = {
+  name: string;
+  phone: string;
+  email?: string | null;
+  interest:
+    | "BUYING"
+    | "RENTING"
+    | "LAND"
+    | "INVESTING"
+    | "MANAGEMENT"
+    | "DEVELOPMENT"
+    | "LISTING"
+    | "OTHER";
+  status?: "NEW" | "CONTACTED" | "CLOSED";
+  message?: string;
+  source?: "HOME_PAGE" | "PROPERTY_PAGE" | "INVEST_PAGE" | "CONTACT_PAGE";
+  propertyId?: string | null;
+  wantsInspection?: boolean;
+  amountKobo?: bigint | null;
+  minutesAgo?: number;
+};
+
+/** Inserts enquiries directly (names must start "[SAMPLE] E2E "); returns their ids in order. */
+export async function insertE2eEnquiries(rows: FixtureEnquiry[]): Promise<string[]> {
+  const db = sql();
+  const ids: string[] = [];
+  for (const r of rows) {
+    if (!r.name.startsWith("[SAMPLE] E2E "))
+      throw new Error("fixture names must start '[SAMPLE] E2E '");
+    const id = `e2e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const at = new Date(Date.now() - (r.minutesAgo ?? 0) * 60_000);
+    await db`
+      INSERT INTO "Enquiry" (id, name, phone, email, interest, message, source, status,
+        "propertyId", "wantsInspection", "amountKobo", "createdAt", "updatedAt")
+      VALUES (${id}, ${r.name}, ${r.phone}, ${r.email ?? null}, ${r.interest}::"EnquiryInterest",
+        ${r.message ?? ""}, ${r.source ?? "CONTACT_PAGE"}::"EnquirySource",
+        ${r.status ?? "NEW"}::"EnquiryStatus", ${r.propertyId ?? null}, ${r.wantsInspection ?? false},
+        ${r.amountKobo === undefined || r.amountKobo === null ? null : r.amountKobo.toString()},
+        ${at.toISOString()}, ${at.toISOString()})`;
+    ids.push(id);
+  }
+  return ids;
+}
+
+export async function enquiryState(
+  id: string,
+): Promise<{ status: string; note: string | null } | null> {
+  const rows =
+    (await sql()`SELECT status::text AS status, note FROM "Enquiry" WHERE id = ${id}`) as {
+      status: string;
+      note: string | null;
+    }[];
+  return rows[0] ?? null;
+}
+
+export async function deleteE2eEnquiries(ids: string[]): Promise<void> {
+  if (ids.length) await sql()`DELETE FROM "Enquiry" WHERE id = ANY(${ids})`;
+}
+
+export async function newEnquiryCount(): Promise<number> {
+  const rows = (await sql()`SELECT count(*)::int AS n FROM "Enquiry" WHERE status = 'NEW'`) as {
+    n: number;
+  }[];
+  return rows[0]!.n;
+}
+
+/** A published seed property to link fixture enquiries to. */
+export async function aPublishedProperty(): Promise<{ id: string; slug: string; title: string }> {
+  const rows = (await sql()`
+    SELECT id, slug, title FROM "Property" WHERE status = 'PUBLISHED' AND title NOT LIKE ${"[SAMPLE] E2E %"}
+    ORDER BY "createdAt" LIMIT 1`) as { id: string; slug: string; title: string }[];
+  return rows[0]!;
+}

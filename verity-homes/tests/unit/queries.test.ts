@@ -2,6 +2,9 @@
 // Prepare it first:  npm run db:test:reset   (migrate reset + seed on the test branch)
 import { existsSync, readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { setDatabaseTimeouts } from "./helpers/test-db";
+
+setDatabaseTimeouts();
 
 // ---- safety: refuse to run without .env.test, or against the dev database ----------------
 function hostOf(url: string | undefined): string | null {

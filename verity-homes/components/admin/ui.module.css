@@ -42,6 +42,14 @@
 .ghost:not(:disabled):hover {
   border-color: var(--bg-navy);
 }
+/* design .btn-gold */
+.gold {
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+}
+.gold:not(:disabled):hover {
+  background: var(--accent-hover);
+}
 .danger {
   background: var(--bg-base);
   border-color: var(--danger-border);
@@ -100,6 +108,19 @@
   color: var(--success-tag-text);
 }
 .draft {
+  background: var(--badge-neutral-bg);
+  color: var(--text-muted);
+}
+/* enquiry statuses (design .b-new / .b-contacted / .b-closed) */
+.bNew {
+  background: var(--badge-new-bg);
+  color: var(--badge-new-text);
+}
+.bContacted {
+  background: var(--badge-contacted-bg);
+  color: var(--badge-contacted-text);
+}
+.bClosed {
   background: var(--badge-neutral-bg);
   color: var(--text-muted);
 }

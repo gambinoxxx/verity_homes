@@ -1,7 +1,8 @@
 // Next 16 Proxy (formerly middleware).
 //
 // /admin/*: Clerk (lib/auth/proxy.ts) — signed out → 307 to /admin/sign-in, no admin role → 403.
-// /api/blob/*: Clerk runs (no redirects) so the upload route can check the admin itself.
+// /api/blob/*, /api/admin/*: Clerk runs (no redirects) so those routes check the admin
+// themselves and answer 401/403.
 // Only admin paths run Clerk; public pages never do.
 //
 // /properties/[slug] and /blog/[slug]: with Cache Components the page sends its prerendered
@@ -50,5 +51,5 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/api/blob/:path*", "/properties/:slug", "/blog/:slug"],
+  matcher: ["/admin", "/admin/:path*", "/api/blob/:path*", "/api/admin/:path*", "/properties/:slug", "/blog/:slug"],
 };

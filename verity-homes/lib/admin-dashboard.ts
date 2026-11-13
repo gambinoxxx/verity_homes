@@ -10,6 +10,7 @@ export const BUILT_ADMIN_ROUTES: ReadonlySet<string> = new Set([
   "/admin",
   "/admin/properties", // Unit 14
   "/admin/properties/new", // Unit 14
+  "/admin/enquiries", // Unit 16
 ]);
 
 /** Public pages (e.g. /privacy) count as built; admin paths must be in the list. */
