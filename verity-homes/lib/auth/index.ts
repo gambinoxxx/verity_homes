@@ -7,6 +7,7 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { clerkEnv } from "@/lib/env";
 import { SIGN_IN_PATH, isAdminRole, roleFromClaims } from "./roles";
 
@@ -26,14 +27,15 @@ export type AdminUser = { userId: string; firstName: string | null; imageUrl: st
 type AccessStatus =
   { kind: "signed-out" } | { kind: "forbidden" } | { kind: "admin"; userId: string };
 
-async function accessStatus(): Promise<AccessStatus> {
+// Once per request: the layout, the page and each admin query all call requireAdmin().
+const accessStatus = cache(async (): Promise<AccessStatus> => {
   clerkEnv(); // clear error naming the missing Clerk variables, never their values
   const { userId, sessionClaims } = await auth();
   if (!userId) return { kind: "signed-out" };
   const fromClaims = roleFromClaims(sessionClaims);
   const role = fromClaims.known ? fromClaims.role : (await currentUser())?.publicMetadata.role;
   return isAdminRole(role) ? { kind: "admin", userId } : { kind: "forbidden" };
-}
+});
 
 /**
  * Signed out → redirect to /admin/sign-in. Signed in without publicMetadata.role "admin" →

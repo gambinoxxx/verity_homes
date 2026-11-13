@@ -1,7 +1,7 @@
 // Admin glyphs copied from the <symbol> set in design/admin.html (stroke only, currentColor).
 import type { AdminIcon as AdminIconName } from "@/lib/admin-nav";
 
-const PATHS: Record<AdminIconName | "menu" | "close" | "ext", React.ReactNode> = {
+const PATHS: Record<AdminIconName | "menu" | "close" | "ext" | "plus", React.ReactNode> = {
   dash: (
     <>
       <rect x="3" y="3" width="8" height="8" rx="2" />
@@ -34,6 +34,7 @@ const PATHS: Record<AdminIconName | "menu" | "close" | "ext", React.ReactNode> =
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" strokeWidth="2" strokeLinecap="round" />,
   close: <path d="M6 6l12 12M18 6 6 18" strokeWidth="2" strokeLinecap="round" />,
+  plus: <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round" />,
   ext: <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" strokeLinecap="round" strokeLinejoin="round" />,
 };
 

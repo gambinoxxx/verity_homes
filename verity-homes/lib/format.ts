@@ -105,3 +105,19 @@ export const SOURCE_LABEL = {
   INVEST_PAGE: "Invest page",
   CONTACT_PAGE: "Contact page",
 } as const;
+
+/**
+ * Short relative time for admin lists: "Just now", "5 min ago", "3 h ago", "Yesterday",
+ * "4 days ago"; a week or older → the date ("12 Nov 2026").
+ */
+export function timeAgo(date: Date, now: Date = new Date()): string {
+  const minutes = Math.floor((now.getTime() - date.getTime()) / 60_000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return formatDate(date);
+}

@@ -23,6 +23,7 @@ const Ctx = createContext<ShellContext | null>(null);
 const SIDEBAR_ID = "admin-sidebar";
 const TOGGLE_ID = "admin-menu-toggle";
 const MOBILE = "(max-width: 860px)";
+const ENQUIRIES_HREF = "/admin/enquiries";
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(false);
@@ -40,9 +41,11 @@ type AdminShellProps = {
   children: React.ReactNode;
   greeting: string;
   firstName: string | null;
+  /** NEW enquiries: the count badge on the sidebar's "Enquiries" link (hidden at 0). */
+  newEnquiries: number;
 };
 
-export function AdminShell({ children, greeting, firstName }: AdminShellProps) {
+export function AdminShell({ children, greeting, firstName, newEnquiries }: AdminShellProps) {
   const pathname = usePathname();
   const mobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -110,6 +113,12 @@ export function AdminShell({ children, greeting, firstName }: AdminShellProps) {
                   >
                     <AdminIcon name={item.icon} />
                     {item.label}
+                    {item.href === ENQUIRIES_HREF && newEnquiries > 0 ? (
+                      <span className={styles.count} data-testid="new-enquiries-badge">
+                        {newEnquiries}
+                        <span className="sr-only"> new</span>
+                      </span>
+                    ) : null}
                   </Link>
                 ))}
               </div>

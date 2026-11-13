@@ -1,4 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
+import { PRIVACY_REVIEWED } from "../../lib/privacy";
+import { dashboardCounts, latestEnquiryIds, setupFacts } from "./helpers/db";
 import { signInAs, storageStateFor } from "./setup/clerk-users";
 
 // Admin protection (Units 12+). Runs in the admin-desktop / admin-mobile projects; the signed-in
@@ -59,7 +61,7 @@ for (const path of ["/", "/properties", "/blog", "/contact"]) {
 test.describe("signed-in admin", () => {
   test.use({ storageState: storageStateFor("admin") });
 
-  test("sees the dashboard placeholder, sidebar and topbar", async ({ page }) => {
+  test("sees the dashboard, sidebar and topbar", async ({ page }) => {
     const res = await page.goto("/admin");
     expect(res?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
@@ -78,7 +80,7 @@ test.describe("signed-in admin", () => {
       "Blog posts",
       "Testimonials",
       "Partners",
-      "Enquiries",
+      /^Enquiries(\d+ new)?$/, // + the NEW-count badge
       "Site settings",
     ]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
@@ -117,6 +119,137 @@ test.describe("signed-in admin", () => {
     await page.mouse.click(340, 500);
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(sidebar).not.toBeInViewport();
+  });
+});
+
+// ---- Unit 13: dashboard (live numbers from the TEST database) ----
+// Other workers may add enquiries while these run, so each check re-reads the page and the DB
+// together until they agree (toPass). Nothing here writes to or wipes shared test data.
+test.describe("admin dashboard", () => {
+  test.use({ storageState: storageStateFor("admin") });
+
+  const statValue = (page: Page, key: string) =>
+    page.locator(`[data-stat="${key}"] b`).innerText().then(Number);
+
+  test("stats match the database, each card links to its list", async ({ page }) => {
+    await expect(async () => {
+      await page.goto("/admin");
+      const shown = {
+        newEnquiries: await statValue(page, "new-enquiries"),
+        published: await statValue(page, "published"),
+        drafts: await statValue(page, "drafts"),
+        plans: await statValue(page, "plans"),
+      };
+      const db = await dashboardCounts();
+      expect(shown).toEqual({
+        newEnquiries: db.newEnquiries,
+        published: db.published,
+        drafts: db.drafts,
+        plans: db.plans,
+      });
+      await expect(page.locator('[data-stat="published"] span')).toHaveText(
+        `${db.featured} featured on the home page`,
+      );
+    }).toPass({ timeout: 45_000 });
+
+    await expect(page.locator('[data-stat="plans"] span')).toHaveText("Live on /invest");
+    for (const [key, href] of [
+      ["new-enquiries", "/admin/enquiries"],
+      ["published", "/admin/properties"],
+      ["drafts", "/admin/properties"],
+      ["plans", "/admin/plans"],
+    ] as const) {
+      await expect(page.locator(`[data-stat="${key}"]`)).toHaveAttribute("href", href);
+    }
+    // The design's "Sample data" alert is not built.
+    await expect(page.getByText(/Sample data — every number/)).toHaveCount(0);
+  });
+
+  test("latest enquiries: newest 5 first, each links to the inbox", async ({ page }) => {
+    const panel = page.getByRole("region", { name: "Latest enquiries" });
+    await expect(async () => {
+      await page.goto("/admin");
+      const ids = await latestEnquiryIds(5);
+      const hrefs = await panel
+        .getByRole("listitem")
+        .getByRole("link")
+        .evaluateAll((as) => as.map((a) => a.getAttribute("href")));
+      expect(hrefs).toEqual(ids.map((id) => `/admin/enquiries?id=${id}`));
+    }).toPass({ timeout: 45_000 });
+    const first = panel.getByRole("listitem").first();
+    if (await first.count()) {
+      await expect(first.locator("time")).toHaveText(/ago|Just now|Yesterday|\d{4}/);
+      await expect(first.getByText(/^(New|Contacted|Closed)$/)).toBeVisible();
+    } else {
+      await expect(panel).toContainText("No enquiries yet");
+    }
+  });
+
+  test("sidebar badge shows the NEW enquiry count", async ({ page }) => {
+    await expect(async () => {
+      await page.goto("/admin");
+      const { newEnquiries } = await dashboardCounts();
+      const badge = page.getByTestId("new-enquiries-badge");
+      if (newEnquiries === 0) await expect(badge).toHaveCount(0);
+      else expect(await badge.textContent()).toBe(`${newEnquiries} new`);
+    }).toPass({ timeout: 45_000 });
+  });
+
+  test("setup checklist lists exactly what the data says is missing", async ({ page }) => {
+    await page.goto("/admin");
+    const facts = await setupFacts();
+    const expected = [
+      !facts.whatsappSet && "whatsapp",
+      !facts.emailSet && "email",
+      facts.realPublished < 1 && "property",
+      !PRIVACY_REVIEWED && "privacy",
+    ].filter(Boolean);
+    const card = page.getByTestId("setup-checklist");
+    if (!expected.length) {
+      await expect(card).toHaveCount(0);
+      return;
+    }
+    await expect(card.locator("[data-item]")).toHaveCount(expected.length);
+    expect(
+      await card
+        .locator("[data-item]")
+        .evaluateAll((els) => els.map((e) => e.getAttribute("data-item"))),
+    ).toEqual(expected);
+    if (expected.includes("privacy")) {
+      await expect(card.locator('[data-item="privacy"] a')).toHaveAttribute("href", "/privacy");
+    }
+  });
+
+  test("quick actions and Add property say 'Coming soon' until their pages exist", async ({
+    page,
+  }) => {
+    await page.goto("/admin");
+    const quick = page.getByRole("region", { name: "Quick actions" });
+    for (const label of [
+      "Add a property",
+      "Write a blog post",
+      "Edit investment plans",
+      "Update contact details",
+    ]) {
+      const item = quick.getByText(label);
+      await expect(item).toBeVisible();
+      await expect(item).toContainText("Coming soon");
+    }
+    const add = page.locator("header").getByText("Add property");
+    await expect(add).toBeAttached();
+    await expect(page.locator('header [aria-disabled="true"]')).toHaveAttribute(
+      "data-href",
+      "/admin/properties/new",
+    );
+  });
+
+  test("the top bar greeting stays on one line", async ({ page }) => {
+    await page.goto("/admin");
+    const crumb = page.getByText(/^Good (morning|afternoon|evening)/);
+    const box = await crumb.boundingBox();
+    expect(box?.height ?? 0).toBeLessThan(24); // one 13px line
+    const scroll = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(scroll).toBeLessThanOrEqual(page.viewportSize()!.width);
   });
 });
 

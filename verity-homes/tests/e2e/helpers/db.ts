@@ -107,3 +107,45 @@ export async function countPublishedPosts(): Promise<number> {
     SELECT count(*)::int AS n FROM "Post" WHERE status = 'PUBLISHED'`) as { n: number }[];
   return rows[0]?.n ?? 0;
 }
+
+// ---- Admin dashboard (Unit 13) ----
+
+export type DashboardCounts = {
+  newEnquiries: number;
+  published: number;
+  featured: number;
+  drafts: number;
+  plans: number;
+};
+
+export async function dashboardCounts(): Promise<DashboardCounts> {
+  const rows = (await sql()`
+    SELECT
+      (SELECT count(*)::int FROM "Enquiry" WHERE status = 'NEW') AS "newEnquiries",
+      (SELECT count(*)::int FROM "Property" WHERE status = 'PUBLISHED') AS published,
+      (SELECT count(*)::int FROM "Property" WHERE status = 'PUBLISHED' AND featured) AS featured,
+      (SELECT count(*)::int FROM "Property" WHERE status = 'DRAFT') AS drafts,
+      (SELECT count(*)::int FROM "InvestmentPlan" WHERE status = 'PUBLISHED') AS plans`) as DashboardCounts[];
+  return rows[0]!;
+}
+
+/** Ids of the newest enquiries, in dashboard order (createdAt desc, id desc). */
+export async function latestEnquiryIds(limit = 5): Promise<string[]> {
+  const rows = (await sql()`
+    SELECT id FROM "Enquiry" ORDER BY "createdAt" DESC, id DESC LIMIT ${limit}`) as {
+    id: string;
+  }[];
+  return rows.map((r) => r.id);
+}
+
+export type SetupFacts = { whatsappSet: boolean; emailSet: boolean; realPublished: number };
+
+export async function setupFacts(): Promise<SetupFacts> {
+  const rows = (await sql()`
+    SELECT
+      coalesce((SELECT btrim(whatsapp) <> '' FROM "SiteSettings" WHERE id = 1), false) AS "whatsappSet",
+      coalesce((SELECT btrim(email) <> '' FROM "SiteSettings" WHERE id = 1), false) AS "emailSet",
+      (SELECT count(*)::int FROM "Property"
+        WHERE status = 'PUBLISHED' AND title NOT LIKE '[SAMPLE]%') AS "realPublished"`) as SetupFacts[];
+  return rows[0]!;
+}

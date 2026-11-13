@@ -38,6 +38,12 @@
   /* One-off shades used by the design shell (design/assets/verity.css) */
   --text-prose: #2b3546; /* .prose body text (articles, privacy) */
   --admin-nav-hover: #0f2241; /* design/assets/admin.css .sidebar nav a:hover */
+  /* admin.css status badges: .b-new / .b-contacted / .b-closed (Unit 13) */
+  --badge-new-bg: #fdf3df;
+  --badge-new-text: #8a5a00;
+  --badge-contacted-bg: #e6eefb;
+  --badge-contacted-text: #1d4ed8;
+  --badge-neutral-bg: #eef0f3;
   --accent-hover: #d6b464; /* .btn-gold:hover */
   --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */

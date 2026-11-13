@@ -91,6 +91,16 @@
   color: var(--text-on-navy);
   box-shadow: inset 3px 0 0 var(--accent-primary);
 }
+/* design .sidebar nav a .count (NEW enquiries) */
+.count {
+  margin-left: auto;
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
 .foot {
   margin-top: auto;
   font-size: 13px;
@@ -140,6 +150,10 @@
   font-size: 13px;
   color: var(--text-muted);
   font-weight: 600;
+  /* one line; ellipsis rather than wrapping in the narrow mobile top bar */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .right {
   display: flex;

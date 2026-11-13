@@ -189,6 +189,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     items from `lib/admin-nav.ts`; group labels use `--text-on-navy-faint` (design `#7F8CA3`
     fails AA at 11px); hover uses `--admin-nav-hover`. Glyphs in `components/admin/icons.tsx`.
   - Sign-in / no-access: `components/admin/auth-screen.tsx` (navy screen, Verity ADMIN mark).
+  - Dashboard (Unit 13): `components/admin/dashboard/` (`dashboard.module.css` ports admin.css
+    `.stats/.stat/.grid2/.panel/.list/.badge/.quick`). Status badge colours are tokens
+    `--badge-new-*`, `--badge-contacted-*`, `--badge-neutral-bg`. Unbuilt admin targets render a
+    "Coming soon" pill instead of a link (`lib/admin-dashboard.ts` `BUILT_ADMIN_ROUTES`).
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

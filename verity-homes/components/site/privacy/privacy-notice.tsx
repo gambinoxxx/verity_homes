@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
+import { PRIVACY_REVIEWED } from "@/lib/privacy";
 import styles from "./privacy.module.css";
 
 /** Change this whenever the notice text changes. */
@@ -31,9 +32,11 @@ export function PrivacyNotice({ companyName, rcNumber, officeDisplay, email }: P
 
   return (
     <>
-      <p className={styles.banner} role="note" data-testid="privacy-draft-banner">
-        <strong>Draft</strong> — to be reviewed by Verity Homes and Properties before launch.
-      </p>
+      {PRIVACY_REVIEWED ? null : (
+        <p className={styles.banner} role="note" data-testid="privacy-draft-banner">
+          <strong>Draft</strong> — to be reviewed by Verity Homes and Properties before launch.
+        </p>
+      )}
       <div className="prose">
         <p className={styles.updated}>
           Last updated: <time dateTime="2026-11-12">{formatDate(PRIVACY_LAST_UPDATED)}</time>

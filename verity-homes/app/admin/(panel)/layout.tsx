@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import styles from "@/components/admin/admin-shell.module.css";
 import { greetingFor } from "@/lib/admin-nav";
 import { ForbiddenError, NO_ACCESS_PATH, getAdminUser, requireAdmin } from "@/lib/auth";
+import { getNewEnquiryCount } from "@/lib/db/queries/admin";
 
 /**
  * Every admin page except sign-in / no-access. requireAdmin() runs here for every page (proxy.ts
@@ -28,9 +29,13 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
     if (e instanceof ForbiddenError) redirect(NO_ACCESS_PATH);
     throw e; // includes requireAdmin's redirect to sign-in
   }
-  const user = await getAdminUser();
+  const [user, newEnquiries] = await Promise.all([getAdminUser(), getNewEnquiryCount()]);
   return (
-    <AdminShell greeting={greetingFor(new Date())} firstName={user?.firstName ?? null}>
+    <AdminShell
+      greeting={greetingFor(new Date())}
+      firstName={user?.firstName ?? null}
+      newEnquiries={newEnquiries}
+    >
       {children}
     </AdminShell>
   );

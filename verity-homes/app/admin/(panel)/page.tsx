@@ -1,23 +1,39 @@
 import type { Metadata } from "next";
 import { AdminContent, AdminTopbar } from "@/components/admin/admin-shell";
-import styles from "@/components/admin/admin-shell.module.css";
+import {
+  AddPropertyButton,
+  LatestEnquiries,
+  QuickActions,
+  SetupChecklist,
+  StatCards,
+  dashboardStyles as styles,
+} from "@/components/admin/dashboard/dashboard";
+import { setupChecklist } from "@/lib/admin-dashboard";
+import { getDashboardStats, getLatestEnquiries, getSetupStatus } from "@/lib/db/queries/admin";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-// Unit 12 ships the shell only. Unit 13 builds the dashboard (stats, latest enquiries,
-// quick actions) from design/admin.html.
-export default function AdminDashboardPage() {
+/**
+ * /admin (design/admin.html, without its "Sample data" alert). Live, uncached numbers: each
+ * query calls requireAdmin() itself. Rendered inside the (panel) layout's <Suspense> gate.
+ */
+export default async function AdminDashboardPage() {
+  const [stats, latest, setup] = await Promise.all([
+    getDashboardStats(),
+    getLatestEnquiries(5),
+    getSetupStatus(),
+  ]);
+  const now = new Date();
   return (
     <>
-      <AdminTopbar title="Dashboard" />
+      <AdminTopbar title="Dashboard" actions={<AddPropertyButton />} />
       <AdminContent>
-        <section className={styles.panel} aria-labelledby="welcome-h">
-          <h2 id="welcome-h">You&apos;re signed in</h2>
-          <p>
-            The dashboard — new enquiries, listings and quick actions — is coming next. Use the menu
-            to move around the admin area as each section is added.
-          </p>
-        </section>
+        <StatCards stats={stats} />
+        <div className={styles.grid2}>
+          <LatestEnquiries items={latest} now={now} />
+          <QuickActions />
+        </div>
+        <SetupChecklist items={setupChecklist(setup)} />
       </AdminContent>
     </>
   );

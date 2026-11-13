@@ -73,7 +73,10 @@ no public page loads Clerk (Open question 42).
 - `lib/db/mutations/` — Writes for public actions (`enquiries.ts`: rate-limit count,
   published property/plan lookup, save enquiry, mark email sent, upsert subscriber).
 - `lib/ip-hash.ts` — client IP from `x-forwarded-for` / `x-real-ip`, `sha256(ip + salt)`.
-- `lib/auth/` — `requireAdmin()` and `isAdmin()`.
+- `lib/auth/` — `requireAdmin()` and `isAdmin()` (the access check runs once per request,
+  `React.cache`).
+- `lib/db/queries/admin.ts` — admin-only reads (dashboard). Each function calls
+  `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).
 - `lib/property-detail.ts` — Property page helpers: facts strip, description paragraphs,
   WhatsApp text, meta description and `RealEstateListing` JSON-LD (area + city only).
 - `lib/maps.ts` — Builds map embed URLs and "Open in Google Maps" links from
