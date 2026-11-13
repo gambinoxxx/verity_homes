@@ -10,13 +10,17 @@ for (const user of ["admin", "viewer"] as ClerkTestUser[]) {
     // The proxy decides by role: admin → dashboard (200), viewer → no-access (403). Check the
     // page too: a failed sign-in lands on the sign-in page, which is also a 200.
     const res = await page.goto("/admin");
-    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin$/, { timeout: 30_000 });
     if (user === "admin") {
       expect(res?.status()).toBe(200);
-      await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible({
+        timeout: 30_000,
+      });
     } else {
       expect(res?.status()).toBe(403);
-      await expect(page.getByRole("heading", { level: 1, name: "No admin access" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "No admin access" })).toBeVisible({
+        timeout: 30_000,
+      });
     }
     await page.context().storageState({ path: storageStateFor(user) });
   });

@@ -82,3 +82,11 @@ export function adminProxy(request: NextRequest, event: NextFetchEvent) {
   }
   return clerkProxy(request, event);
 }
+
+/**
+ * Admin API routes (/api/blob/*): Clerk runs so the route can call requireAdmin(), but nothing
+ * is redirected here — the route answers 401/403 as JSON itself.
+ */
+export const adminApiProxy = clerkMiddleware(() => {
+  clerkEnv();
+});

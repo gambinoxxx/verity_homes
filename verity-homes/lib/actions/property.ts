@@ -124,6 +124,14 @@ export async function updateProperty(
     }
     const row = await savePropertyEdits(current.id, d, slug, current);
     refreshPublicPages(current.slug, row.slug);
+    // Removed photos: rows are gone; now their Blob files (a failure only leaves orphans).
+    if (row.removedPhotoUrls.length) {
+      try {
+        await remove(row.removedPhotoUrls);
+      } catch (e) {
+        console.error("updateProperty: photo clean-up failed:", e instanceof Error ? e.message : e);
+      }
+    }
     return { ok: true, data: { id: row.id, slug: row.slug }, message: "Changes saved." };
   } catch (e) {
     console.error("updateProperty failed:", e instanceof Error ? e.message : e);

@@ -113,7 +113,7 @@ export type AdminPropertyEditor = {
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
-  images: { id: string; url: string; alt: string }[];
+  images: { id: string; url: string; alt: string; width: number | null; height: number | null }[];
   values: PropertyFormValues;
 };
 
@@ -123,7 +123,10 @@ export async function getAdminProperty(id: string): Promise<AdminPropertyEditor 
   const p = await db.property.findUnique({
     where: { id },
     include: {
-      images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, alt: true } },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, url: true, alt: true, width: true, height: true },
+      },
       documents: { orderBy: { sortOrder: "asc" } },
     },
   });
@@ -165,6 +168,20 @@ export async function getAdminProperty(id: string): Promise<AdminPropertyEditor 
       projectStatus: p.projectStatus ?? "",
       seoTitle: p.seoTitle ?? "",
       seoDescription: p.seoDescription ?? "",
+      photos: p.images.map((i) => ({ id: i.id, alt: i.alt })),
+      removedPhotoIds: [],
     },
   };
+}
+
+/** For the upload route: does the property exist, and how many photos does it have? */
+export async function getPhotoUploadState(
+  id: string,
+): Promise<{ exists: boolean; photoCount: number }> {
+  await requireAdmin();
+  const row = await db.property.findUnique({
+    where: { id },
+    select: { _count: { select: { images: true } } },
+  });
+  return { exists: row !== null, photoCount: row?._count.images ?? 0 };
 }

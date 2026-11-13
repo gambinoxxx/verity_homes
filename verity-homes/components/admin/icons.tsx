@@ -2,7 +2,7 @@
 import type { AdminIcon as AdminIconName } from "@/lib/admin-nav";
 
 const PATHS: Record<
-  AdminIconName | "menu" | "close" | "ext" | "plus" | "eye" | "trash" | "x",
+  AdminIconName | "menu" | "close" | "ext" | "plus" | "eye" | "trash" | "x" | "up" | "down",
   React.ReactNode
 > = {
   dash: (
@@ -46,6 +46,8 @@ const PATHS: Record<
   ),
   trash: <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" strokeLinejoin="round" />,
   x: <path d="M6 6l12 12M18 6 6 18" strokeWidth="2" strokeLinecap="round" />,
+  up: <path d="M12 19V5M6 11l6-6 6 6" strokeWidth="2" strokeLinecap="round" />,
+  down: <path d="M12 5v14M6 13l6 6 6-6" strokeWidth="2" strokeLinecap="round" />,
   ext: <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" strokeLinecap="round" strokeLinejoin="round" />,
 };
 

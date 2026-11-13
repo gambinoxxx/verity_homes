@@ -53,9 +53,15 @@ function loadTestEnv() {
     for (const name of CLERK_TEST_USER_VARS) {
       if (!process.env[name] && local[name]) process.env[name] = local[name];
     }
+    // Same for the Blob token while .env.test still has the placeholder (uploads go to e2e/).
+    if (/\.\.\.$/.test(process.env.BLOB_READ_WRITE_TOKEN ?? "...") && local.BLOB_READ_WRITE_TOKEN) {
+      process.env.BLOB_READ_WRITE_TOKEN = local.BLOB_READ_WRITE_TOKEN;
+    }
   }
   // Enquiry emails from e2e go to Resend's test inbox only, whatever .env.test says.
   process.env.ENQUIRY_NOTIFY_TO = "delivered@resend.dev";
+  // Photos uploaded by e2e go under e2e/ in Blob, so tests can find and delete them.
+  process.env.BLOB_PATH_PREFIX = "e2e/";
 }
 
 loadTestEnv();
@@ -94,7 +100,13 @@ export default defineConfig({
       use: { ...devices["Pixel 7"], channel, viewport: mobile },
     },
     // Admin: signs the Clerk test users in once (playwright/.auth/*.json), then runs admin.spec.
-    { name: "admin-setup", testMatch: /setup\/auth\.setup\.ts/, use: { channel } },
+    {
+      name: "admin-setup",
+      testMatch: /setup\/auth\.setup\.ts/,
+      // Signing in goes through Clerk's servers; one retry absorbs a rare page-settling race.
+      retries: 1,
+      use: { channel },
+    },
     {
       name: "admin-desktop",
       testMatch: /admin(-[a-z-]+)?\.spec\.ts/,

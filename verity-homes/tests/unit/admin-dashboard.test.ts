@@ -193,16 +193,22 @@ describe("admin queries (test branch)", async () => {
   });
 
   it("stats match direct counts", async () => {
-    const stats = await q.getDashboardStats();
-    expect(stats).toEqual({
-      newEnquiries: await db.enquiry.count({ where: { status: "NEW" } }),
-      publishedProperties: await db.property.count({ where: { status: "PUBLISHED" } }),
-      featuredProperties: await db.property.count({
-        where: { status: "PUBLISHED", featured: true },
-      }),
-      draftProperties: await db.property.count({ where: { status: "DRAFT" } }),
-      publishedPlans: await db.investmentPlan.count({ where: { status: "PUBLISHED" } }),
-    });
+    // Other test files write enquiries to the same branch in parallel: re-read until both agree.
+    await vi.waitFor(
+      async () => {
+        const stats = await q.getDashboardStats();
+        expect(stats).toEqual({
+          newEnquiries: await db.enquiry.count({ where: { status: "NEW" } }),
+          publishedProperties: await db.property.count({ where: { status: "PUBLISHED" } }),
+          featuredProperties: await db.property.count({
+            where: { status: "PUBLISHED", featured: true },
+          }),
+          draftProperties: await db.property.count({ where: { status: "DRAFT" } }),
+          publishedPlans: await db.investmentPlan.count({ where: { status: "PUBLISHED" } }),
+        });
+      },
+      { timeout: 20_000, interval: 500 },
+    );
   });
 
   it("latest enquiries: at most 5, newest first", async () => {

@@ -7,6 +7,8 @@ import type { NextConfig } from "next";
  *   lib/maps.ts builds www.google.com URLs; Google may answer from maps.google.com).
  * - frame-ancestors: nobody else may frame the site (clickjacking).
  * - object-src / base-uri: no plugins, no <base> hijacking.
+ * There is no img-src / connect-src yet, so Blob photos, the admin map's OpenStreetMap tiles and
+ * Blob uploads need no CSP entry (Unit 15). Add them here if those directives are introduced.
  */
 const CSP = [
   "frame-src 'self' https://www.google.com https://maps.google.com",
@@ -18,6 +20,10 @@ const CSP = [
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  images: {
+    // Property photos uploaded to Vercel Blob (Unit 15); /samples/ seed images are local.
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
+  },
   partialPrefetching: true,
   async headers() {
     return [

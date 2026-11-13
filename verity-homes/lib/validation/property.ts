@@ -6,6 +6,7 @@
 // project status without "showcase".
 import { z } from "zod";
 import { koboFromNaira } from "@/lib/format";
+import { ALT_MAX, MAX_PHOTOS } from "@/lib/property-photos";
 
 export const LISTING_TYPES = ["SALE", "RENT", "LAND", "OFF_PLAN"] as const;
 export const PROPERTY_TYPES = [
@@ -149,6 +150,21 @@ export const propertySchema = z
     projectStatus: z.union([z.literal(""), z.enum(PROJECT_STATUSES)]),
     seoTitle: text(LIMITS.seoTitle, "Keep the SEO title under 70 characters"),
     seoDescription: text(LIMITS.seoDescription, "Keep the SEO description under 160 characters"),
+    /** Unit 15: existing photos in their new order, with alt text (url etc. are display-only). */
+    photos: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(40),
+          alt: text(ALT_MAX, `Keep each photo description under ${ALT_MAX} characters`),
+        }),
+      )
+      .max(MAX_PHOTOS)
+      .optional(),
+    /** Photos removed in the editor; deleted (row + Blob file) only when the property is saved. */
+    removedPhotoIds: z
+      .array(z.string().min(1).max(40))
+      .max(MAX_PHOTOS * 2)
+      .optional(),
   })
   .superRefine((v, ctx) => {
     if (!v.priceOnRequest && v.price !== "") {
@@ -234,6 +250,7 @@ export const propertySchema = z
       projectStatus: v.showcase && v.projectStatus !== "" ? v.projectStatus : null,
       seoTitle: v.seoTitle === "" ? null : v.seoTitle,
       seoDescription: v.seoDescription === "" ? null : v.seoDescription,
+      photos: v.photos ? { items: v.photos, removedIds: v.removedPhotoIds ?? [] } : undefined,
     };
   });
 
@@ -270,6 +287,8 @@ export const EMPTY_PROPERTY: PropertyFormValues = {
   projectStatus: "",
   seoTitle: "",
   seoDescription: "",
+  photos: [],
+  removedPhotoIds: [],
 };
 
 export type PublishField = "title" | "area" | "price";
@@ -324,6 +343,7 @@ export const FIELD_LABEL: Record<string, string> = {
   projectStatus: "Project status",
   seoTitle: "SEO title",
   seoDescription: "SEO description",
+  photos: "Photos",
 };
 
 // ---- Action inputs ----

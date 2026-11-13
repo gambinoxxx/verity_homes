@@ -35,10 +35,11 @@ const m = {
     priceOnRequest: false,
     publishedAt: null as Date | null,
   })),
-  savePropertyEdits: vi.fn(async (id: string, _d: unknown, slug: string) => ({
+  savePropertyEdits: vi.fn(async (...[id, , slug]: [string, unknown, string, unknown]) => ({
     id,
     slug,
     status: "DRAFT",
+    removedPhotoUrls: [] as string[],
   })),
   setPropertyStatus: vi.fn(async (...[id, status]: [string, string, Date?]) => ({
     id,
@@ -148,6 +149,35 @@ describe("admin writes, then updates the 'properties' tag", () => {
     );
     expect(revalidatePath).toHaveBeenCalledWith("/properties/old-slug");
     expect(revalidatePath).toHaveBeenCalledWith("/properties/new-slug");
+  });
+
+  it("saving removes the Blob files of photos removed in the editor", async () => {
+    m.savePropertyEdits.mockResolvedValueOnce({
+      id: "p1",
+      slug: "old-slug",
+      status: "DRAFT",
+      removedPhotoUrls: ["https://x.public.blob.vercel-storage.com/e2e/p.webp"],
+    });
+    const res = await actions.updateProperty("p1", {
+      ...valid,
+      photos: [{ id: "keep", alt: "Pool" }],
+      removedPhotoIds: ["gone"],
+    });
+    expect(res.ok).toBe(true);
+    expect(m.savePropertyEdits).toHaveBeenCalledWith(
+      "p1",
+      expect.objectContaining({
+        photos: { items: [{ id: "keep", alt: "Pool" }], removedIds: ["gone"] },
+      }),
+      "old-slug",
+      expect.anything(),
+    );
+    expect(remove).toHaveBeenCalledWith(["https://x.public.blob.vercel-storage.com/e2e/p.webp"]);
+  });
+
+  it("no removed photos → no Blob call", async () => {
+    await actions.updateProperty("p1", valid);
+    expect(remove).not.toHaveBeenCalled();
   });
 
   it("a published property can't be saved without what publishing needs", async () => {

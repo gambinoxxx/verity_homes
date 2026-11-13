@@ -180,9 +180,8 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Shell: `<SiteChrome>` (`components/site/site-chrome.tsx`) = skip link,
     scroll progress, preloader, header + drawer, `<main id="main">`, footer,
     WhatsApp float (only when a number is set), back-to-top.
-- **Admin:** shadcn/ui (Button, Input, Select, Switch, Dialog, Table,
-  Tabs, Sonner for toasts), themed with these tokens to look like
-  `design/admin-*.html`.
+- **Admin:** no shadcn/ui (owner decision, Q46). Port `design/assets/admin.css` into CSS
+  modules next to the components and match `design/admin-*.html`.
   - Shell (Unit 12): `components/admin/admin-shell.tsx` — `AdminShell` (layout), `AdminTopbar`
     (each page: `title`, optional `crumb`/`actions`; the page's only `<h1>`), `AdminContent`
     (`<main id="main">`). Styles in `admin-shell.module.css` (`.panel` for simple cards). Sidebar
@@ -199,6 +198,9 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `editor.module.css`). Toasts: sonner `<AdminToaster />` in the (panel) layout. Editor element
     ids are prefixed per instance (`IdScope`, `useId`), since Next keeps the previous page mounted
     but hidden.
+  - Photos + map (Unit 15): `photos-field.tsx` (design `.drop/.photos/.photo` in
+    `editor.module.css`) and `map-picker.tsx` (Leaflet, gold `divIcon` pin `.pin`, map box
+    `.map` 280 px). Leaflet's CSS is imported only by the picker (admin only).
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

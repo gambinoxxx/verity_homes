@@ -93,8 +93,9 @@ export async function savePropertyEdits(
   d: PropertyData,
   slug: string,
   previous: { slug: string; status: "DRAFT" | "PUBLISHED" },
-) {
+): Promise<{ id: string; slug: string; status: string; removedPhotoUrls: string[] }> {
   return db.$transaction(async (tx) => {
+    const removedPhotoUrls = d.photos ? await syncPhotos(tx, id, d.photos) : [];
     const updated = await tx.property.update({
       where: { id },
       data: {
@@ -119,8 +120,45 @@ export async function savePropertyEdits(
         });
       }
     }
-    return updated;
+    return { ...updated, removedPhotoUrls };
   });
+}
+
+type Tx = Parameters<Parameters<typeof db.$transaction>[0]>[0];
+
+/**
+ * Photos as the editor left them: `removedIds` are deleted (their URLs returned so the caller
+ * removes the Blob files after the commit); `items` get their new order and alt text. Photos
+ * not mentioned (e.g. uploaded in another tab) are kept, after the listed ones.
+ */
+async function syncPhotos(
+  tx: Tx,
+  propertyId: string,
+  photos: NonNullable<PropertyData["photos"]>,
+): Promise<string[]> {
+  const existing = await tx.propertyImage.findMany({
+    where: { propertyId },
+    select: { id: true, url: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  const removedIds = new Set(photos.removedIds);
+  const removed = existing.filter((e) => removedIds.has(e.id));
+  if (removed.length) {
+    await tx.propertyImage.deleteMany({
+      where: { propertyId, id: { in: removed.map((r) => r.id) } },
+    });
+  }
+  const listed = new Map(photos.items.map((p, i) => [p.id, { alt: p.alt, sortOrder: i }]));
+  let next = photos.items.length;
+  for (const e of existing) {
+    if (removedIds.has(e.id)) continue;
+    const p = listed.get(e.id);
+    await tx.propertyImage.update({
+      where: { id: e.id },
+      data: p ? { sortOrder: p.sortOrder, alt: p.alt } : { sortOrder: next++ },
+    });
+  }
+  return removed.map((r) => r.url);
 }
 
 export function setPropertyStatus(id: string, status: "DRAFT" | "PUBLISHED", publishedAt?: Date) {
@@ -146,5 +184,33 @@ export async function deletePropertyRow(id: string) {
     await tx.property.delete({ where: { id } });
     await tx.slugRedirect.deleteMany({ where: { entity: "PROPERTY", toSlug: row.slug } });
     return { slug: row.slug, title: row.title, imageUrls: row.images.map((i) => i.url) };
+  });
+}
+
+/**
+ * Adds an uploaded photo at the end (sortOrder = last + 1), up to `max` per property.
+ * null → the property is gone or already full.
+ */
+export async function insertPropertyPhoto(
+  propertyId: string,
+  photo: { url: string; pathname: string; width: number; height: number; alt: string },
+  max: number,
+) {
+  return db.$transaction(async (tx) => {
+    const property = await tx.property.findUnique({
+      where: { id: propertyId },
+      select: { slug: true, _count: { select: { images: true } } },
+    });
+    if (!property || property._count.images >= max) return null;
+    const last = await tx.propertyImage.findFirst({
+      where: { propertyId },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
+    const row = await tx.propertyImage.create({
+      data: { propertyId, ...photo, sortOrder: (last?.sortOrder ?? -1) + 1 },
+      select: { id: true, url: true, alt: true, width: true, height: true },
+    });
+    return { photo: row, slug: property.slug };
   });
 }

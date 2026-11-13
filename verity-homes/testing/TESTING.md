@@ -170,6 +170,13 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
   - Compare a signed-in page with the design (needs the saved state from an e2e run):
     `COMPARE_STORAGE_STATE=playwright/.auth/admin.json PW_CHANNEL=chrome npm run compare -- /admin admin.html`
 
+### Photo uploads in e2e (Unit 15)
+
+- `playwright.config.ts` sets `BLOB_PATH_PREFIX=e2e/` for its test server, so every upload
+  goes under `e2e/properties/<id>/` in Blob. `tests/e2e/helpers/blob.ts` checks files exist
+  and deletes everything under that folder in `afterAll`.
+- Needs a real `BLOB_READ_WRITE_TOKEN` in `.env.test`.
+
 ## 7. Before launch (Unit 21)
 
 - The full suite passes on the Vercel preview URL:

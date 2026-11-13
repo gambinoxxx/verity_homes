@@ -7,6 +7,7 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 import { clerkEnv } from "@/lib/env";
 import { SIGN_IN_PATH, isAdminRole, roleFromClaims } from "./roles";
@@ -29,6 +30,8 @@ type AccessStatus =
 
 // Once per request: the layout, the page and each admin query all call requireAdmin().
 const accessStatus = cache(async (): Promise<AccessStatus> => {
+  // Admin data is always request-time: never let a prerender reach the queries after this.
+  await connection();
   clerkEnv(); // clear error naming the missing Clerk variables, never their values
   const { userId, sessionClaims } = await auth();
   if (!userId) return { kind: "signed-out" };
@@ -46,6 +49,11 @@ export async function requireAdmin(): Promise<{ userId: string }> {
   if (status.kind === "signed-out") redirect(SIGN_IN_PATH);
   if (status.kind === "forbidden") throw new ForbiddenError();
   return { userId: status.userId };
+}
+
+/** "admin" | "forbidden" | "signed-out", for API routes that answer 401/403 themselves. */
+export async function adminAccess(): Promise<AccessStatus["kind"]> {
+  return (await accessStatus()).kind;
 }
 
 /** True only for a signed-in admin. Never redirects or throws. */

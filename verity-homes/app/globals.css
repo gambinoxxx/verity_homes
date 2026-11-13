@@ -52,6 +52,7 @@
   --serp-url: #0f7b3e; /* Google preview */
   --serp-title: #1a0dab;
   --alert-warn-text: #6b4700;
+  --drop-hover: #fffbf1; /* .drop:hover */
   --accent-hover: #d6b464; /* .btn-gold:hover */
   --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */

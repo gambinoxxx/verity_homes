@@ -39,3 +39,8 @@ export function isPublicAdminPath(pathname: string): boolean {
 export function isAdminPath(pathname: string): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/");
 }
+
+/** Admin-only API routes: Clerk must run for these too (proxy.ts), without page redirects. */
+export function isAdminApiPath(pathname: string): boolean {
+  return pathname === "/api/blob" || pathname.startsWith("/api/blob/");
+}

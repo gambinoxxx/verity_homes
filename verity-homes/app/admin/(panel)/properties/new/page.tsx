@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { AdminContent, AdminTopbar } from "@/components/admin/admin-shell";
 import { EditorCancel, PropertyEditor } from "@/components/admin/properties/property-editor";
 import { siteHost } from "@/components/admin/properties/site-host";
+import { blobPathPrefix } from "@/lib/storage";
 import { requireAdmin } from "@/lib/auth";
 import { EMPTY_PROPERTY } from "@/lib/validation/property";
 
@@ -16,7 +17,11 @@ export default async function NewPropertyPage() {
     <>
       <AdminTopbar title="Add property" crumb="Properties / New" actions={<EditorCancel />} />
       <AdminContent>
-        <PropertyEditor initialValues={EMPTY_PROPERTY} siteHost={siteHost()} />
+        <PropertyEditor
+          initialValues={EMPTY_PROPERTY}
+          siteHost={siteHost()}
+          uploadPrefix={blobPathPrefix()}
+        />
       </AdminContent>
     </>
   );

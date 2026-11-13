@@ -1,6 +1,7 @@
 // Next 16 Proxy (formerly middleware).
 //
 // /admin/*: Clerk (lib/auth/proxy.ts) — signed out → 307 to /admin/sign-in, no admin role → 403.
+// /api/blob/*: Clerk runs (no redirects) so the upload route can check the admin itself.
 // Only admin paths run Clerk; public pages never do.
 //
 // /properties/[slug] and /blog/[slug]: with Cache Components the page sends its prerendered
@@ -11,8 +12,8 @@
 // - old slug in SlugRedirect → 308 to the current slug
 // - unknown or draft slug → 404 (rewritten to an unmatched path, which renders app/not-found.tsx)
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
-import { adminProxy } from "@/lib/auth/proxy";
-import { isAdminPath } from "@/lib/auth/roles";
+import { adminApiProxy, adminProxy } from "@/lib/auth/proxy";
+import { isAdminApiPath, isAdminPath } from "@/lib/auth/roles";
 import { resolvePostSlug } from "@/lib/db/queries/posts";
 import { resolvePropertySlug } from "@/lib/db/queries/properties";
 
@@ -25,6 +26,7 @@ const SLUG_ROUTES = [
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   if (isAdminPath(request.nextUrl.pathname)) return adminProxy(request, event);
+  if (isAdminApiPath(request.nextUrl.pathname)) return adminApiProxy(request, event);
 
   const match = /^\/(properties|blog)\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
   const route = SLUG_ROUTES.find((r) => r.base === `/${match?.[1]}`);
@@ -48,5 +50,5 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/properties/:slug", "/blog/:slug"],
+  matcher: ["/admin", "/admin/:path*", "/api/blob/:path*", "/properties/:slug", "/blog/:slug"],
 };

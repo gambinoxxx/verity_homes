@@ -184,3 +184,46 @@ export async function findPropertyByTitle(title: string): Promise<{
   }[];
   return rows[0] ?? null;
 }
+
+// ---- Admin photos + map (Unit 15) ----
+
+/** A published [SAMPLE] E2E property to attach photos to; returns its id and slug. */
+export async function insertE2eProperty(
+  title: string,
+  slug: string,
+): Promise<{ id: string; slug: string }> {
+  const id = `e2e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  await sql()`
+    INSERT INTO "Property" (id, slug, title, "listingType", "propertyType", status, area, city,
+      "priceOnRequest", "publishedAt", "createdAt", "updatedAt")
+    VALUES (${id}, ${slug}, ${title}, 'SALE', 'DETACHED', 'PUBLISHED', 'Yaba', 'Lagos',
+      true, now(), now(), now())`;
+  return { id, slug };
+}
+
+export async function propertyPhotos(
+  propertyId: string,
+): Promise<{ id: string; url: string; alt: string; sortOrder: number; width: number | null }[]> {
+  return (await sql()`
+    SELECT id, url, alt, "sortOrder", width FROM "PropertyImage"
+    WHERE "propertyId" = ${propertyId} ORDER BY "sortOrder"`) as {
+    id: string;
+    url: string;
+    alt: string;
+    sortOrder: number;
+    width: number | null;
+  }[];
+}
+
+export async function propertyLocation(
+  propertyId: string,
+): Promise<{ latitude: string | null; longitude: string | null; showExactLocation: boolean }> {
+  const rows = (await sql()`
+    SELECT latitude::text AS latitude, longitude::text AS longitude, "showExactLocation"
+    FROM "Property" WHERE id = ${propertyId}`) as {
+    latitude: string | null;
+    longitude: string | null;
+    showExactLocation: boolean;
+  }[];
+  return rows[0]!;
+}

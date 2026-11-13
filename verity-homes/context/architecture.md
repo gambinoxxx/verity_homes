@@ -10,7 +10,7 @@ installing, and never install a pre-release (`-rc`, `-beta`). Prisma's npm
 | Layer | Technology | Role |
 | --- | --- | --- |
 | Framework | Next.js 16 (App Router) + TypeScript (strict) | Public pages, admin panel, server actions and route handlers in one app |
-| UI | Tailwind CSS 4 + shadcn/ui (admin only) | Public pages are custom components matching `design/`; shadcn primitives for admin forms, dialogs and tables |
+| UI | Tailwind CSS 4 + CSS modules | Public and admin pages are custom components matching `design/`. No shadcn/ui (owner decision, Q46): admin styles are ported from `design/assets/admin.css` into CSS modules; confirms use a native `<dialog>` |
 | Database | Neon (serverless Postgres) | System of record for all content and enquiries |
 | ORM | Prisma 7 (`prisma-client` generator + `@prisma/adapter-neon`) | Typed client, schema in `prisma/schema.prisma`, Prisma Migrate |
 | Auth | Clerk (`@clerk/nextjs`) | Admin sign-in only, invitation only |
@@ -66,7 +66,8 @@ no public page loads Clerk (Open question 42).
   Zod, checks `requireAdmin()` for admin actions, writes, then calls
   `revalidatePath`.
 - `lib/validation/` — Zod schemas shared by forms and actions.
-- `lib/storage/` — Blob wrapper (`upload`, `remove`). The only importer of
+- `lib/storage/` — Blob wrapper: `remove`, `handlePhotoUpload` (token route), `blobPathPrefix`
+  (server, `index.ts`) and `uploadPhotoFile` (browser, `client.ts`). The only importer of
   `@vercel/blob`.
 - `lib/email/` — Resend client and templates. The only importer of `resend`.
   `client.ts` (lazy client), `enquiry-template.ts` (pure: subject/HTML/text),
@@ -77,7 +78,12 @@ no public page loads Clerk (Open question 42).
 - `lib/auth/` — `requireAdmin()` and `isAdmin()` (the access check runs once per request,
   `React.cache`).
 - `lib/db/queries/admin.ts` and `admin-properties.ts` — admin-only reads (dashboard, property
-  list and editor). Each function calls
+  list and editor).
+- `app/api/blob/upload/route.ts` — client-upload tokens for property photos (Unit 15). The
+  proxy runs `clerkMiddleware()` for `/api/blob/*` without redirects; the route answers 401/403.
+  Rows are saved by the `addPropertyPhoto` server action, never by Blob's completion webhook.
+- `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
+  apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).
 - `lib/property-detail.ts` — Property page helpers: facts strip, description paragraphs,
   WhatsApp text, meta description and `RealEstateListing` JSON-LD (area + city only).
@@ -101,7 +107,8 @@ no public page loads Clerk (Open question 42).
 - `lib/nav.ts` — Main nav links, active-link matching, and `UNBUILT_ROUTES`
   (no `<Link>` prefetch for pages that don't exist yet).
 - `components/admin/` — Admin tables, forms and the map picker.
-- `components/ui/` — Generated shadcn primitives.
+- `components/ui/` — Not used (no shadcn/ui, Q46). Shared admin controls live in
+  `components/admin/ui.module.css`.
 
 ## Storage model
 

@@ -223,12 +223,78 @@
   color: var(--text-muted);
 }
 
-/* ---- Photos (read-only until Unit 15) ---- */
+/* ---- Photos (design .drop / .photos / .photo) ---- */
+.drop {
+  border: 2px dashed var(--border-input);
+  border-radius: 14px;
+  padding: 26px;
+  text-align: center;
+  background: var(--admin-table-head);
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.drop b {
+  color: var(--text-primary);
+}
+.drop svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  color: var(--accent-text);
+  margin: 0 auto 6px;
+}
+.drop:hover,
+.dropOver {
+  border-color: var(--accent-primary);
+  background: var(--drop-hover);
+}
+.drop[aria-disabled="true"] {
+  cursor: not-allowed;
+  border-color: var(--border-input);
+  background: var(--admin-table-head);
+}
+.dropHint {
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+.uploads {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.uploads li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px 110px;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.uploads li[data-status="error"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+.uploadName {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uploads progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent-primary);
+}
+.uploadStatus {
+  color: var(--text-muted);
+  text-align: right;
+}
 .photos {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 14px;
+  margin: 14px 0 0;
   list-style: none;
   padding: 0;
 }
@@ -238,34 +304,140 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg-base);
-  margin: 0;
+  cursor: grab;
 }
-.photo img {
+.dragging {
+  opacity: 0.45;
+}
+.photo img,
+.photoMissing {
   width: 100%;
   height: 110px;
   object-fit: cover;
   display: block;
+  background: var(--bg-subtle);
 }
-.photo figcaption {
+.f .photo input,
+.photo input {
+  width: 100%;
+  border: 0;
   border-top: 1px solid var(--border-default);
+  border-radius: 0;
   padding: 8px 10px;
+  font: inherit;
   font-size: 12.5px;
   min-height: 36px;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+.photo input:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
 }
 .cover {
   position: absolute;
   top: 8px;
   left: 8px;
+  z-index: 1;
   background: var(--accent-primary);
   color: var(--bg-navy-deep);
   font-size: 11px;
   font-weight: 800;
   padding: 4px 8px;
   border-radius: 999px;
+}
+.ops {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+.ops button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 0;
+  background: rgb(255 255 255 / 0.92);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+.ops button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.ops svg {
+  width: 14px;
+  height: 14px;
+}
+.dragHandle {
+  position: absolute;
+  bottom: 44px;
+  left: 8px;
+  background: rgb(7 18 38 / 0.7);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+.altWarn {
+  margin-top: 14px;
+}
+
+/* ---- Map picker ---- */
+.map {
+  position: relative;
+  height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border-input);
+  background: var(--bg-subtle);
+  margin-top: 4px;
+  z-index: 0; /* keep Leaflet panes under the sticky top bar */
+}
+.map :global(.leaflet-container) {
+  height: 100%;
+  width: 100%;
+  font: inherit;
+}
+.mapLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.mapBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+.mapMsg {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.mapMsgError {
+  color: var(--state-error);
+  font-weight: 700;
+}
+/* Leaflet divIcon for the gold pin (passed as className) */
+.pin {
+  background: none;
+  border: 0;
+}
+.pin svg {
+  width: 36px;
+  height: 36px;
+  color: var(--accent-primary);
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.35));
 }
 .comingNext {
   border: 2px dashed var(--border-input);

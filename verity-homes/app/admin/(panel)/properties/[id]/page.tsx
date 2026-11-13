@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AdminContent, AdminTopbar } from "@/components/admin/admin-shell";
 import { EditorCancel, PropertyEditor } from "@/components/admin/properties/property-editor";
 import { siteHost } from "@/components/admin/properties/site-host";
+import { blobPathPrefix } from "@/lib/storage";
 import { getAdminProperty } from "@/lib/db/queries/admin-properties";
 
 export const metadata: Metadata = { title: "Edit property" };
@@ -35,6 +36,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
           }}
           initialValues={property.values}
           siteHost={siteHost()}
+          uploadPrefix={blobPathPrefix()}
         />
       </AdminContent>
     </>

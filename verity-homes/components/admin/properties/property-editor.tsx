@@ -5,7 +5,7 @@
 // actions. Fields that don't apply to the listing type are hidden (and cleared by the schema).
 // Photos and the map picker are Unit 15: their panels are here, read-only / with lat-lng inputs.
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, useTransition } from "react";
@@ -25,8 +25,10 @@ import {
   unpublishProperty,
   updateProperty,
 } from "@/lib/actions/property";
+import { geocodeArea } from "@/lib/actions/property-photos";
 import { LISTING_LABEL, PROJECT_STATUS_LABEL, TITLE_LABEL, formatDate } from "@/lib/format";
 import { metaDescription } from "@/lib/property-detail";
+import { MAX_PHOTOS, roundCoord } from "@/lib/property-photos";
 import { slugify } from "@/lib/slug";
 import {
   FIELD_LABEL,
@@ -57,6 +59,21 @@ import {
   useUnsavedChangesWarning,
 } from "./editor-inputs";
 import styles from "./editor.module.css";
+import { type PhotoInfo, PhotosField } from "./photos-field";
+
+/** Leaflet needs `window`: client-only, with a placeholder while it loads. */
+const MapPicker = dynamic(() => import("./map-picker"), {
+  ssr: false,
+  loading: () => <div className={styles.mapLoading}>Loading map…</div>,
+});
+
+const COORD_RE = /^-?\d{1,3}(\.\d+)?$/;
+const coordOrNull = (s: string | undefined, limit: number): number | null => {
+  const t = (s ?? "").trim();
+  if (!COORD_RE.test(t)) return null;
+  const n = Number(t);
+  return Math.abs(n) <= limit ? n : null;
+};
 
 const PROPERTY_TYPE_LABEL: Record<(typeof PROPERTY_TYPES)[number], string> = {
   DETACHED: "Detached",
@@ -124,16 +141,23 @@ export type PropertyEditorProps = {
     status: "DRAFT" | "PUBLISHED";
     createdAt: string;
     updatedAt: string;
-    images: { id: string; url: string; alt: string }[];
+    images: { id: string; url: string; alt: string; width: number | null; height: number | null }[];
   };
   initialValues: PropertyFormValues;
   /** Public site origin for the Google preview (NEXT_PUBLIC_SITE_URL host). */
   siteHost: string;
+  /** Blob folder prefix for uploads ("" or "e2e/" in Playwright runs). */
+  uploadPrefix: string;
 };
 
 type SaveMode = "draft" | "publish" | "save";
 
-export function PropertyEditor({ property, initialValues, siteHost }: PropertyEditorProps) {
+export function PropertyEditor({
+  property,
+  initialValues,
+  siteHost,
+  uploadPrefix,
+}: PropertyEditorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [slugTouched, setSlugTouched] = useState(Boolean(property));
@@ -161,8 +185,17 @@ export function PropertyEditor({ property, initialValues, siteHost }: PropertyEd
     setValue,
     setError,
     reset,
+    resetField,
+    getFieldState,
     formState: { errors, isDirty, submitCount },
   } = form;
+  const [initialPhotoInfo] = useState<Record<string, PhotoInfo>>(() =>
+    Object.fromEntries(
+      (property?.images ?? []).map((i) => [i.id, { url: i.url, width: i.width, height: i.height }]),
+    ),
+  );
+  const [geocoding, setGeocoding] = useState(false);
+  const [mapMsg, setMapMsg] = useState<{ text: string; error?: boolean } | null>(null);
 
   useUnsavedChangesWarning(isDirty && !pending);
 
@@ -171,6 +204,38 @@ export function PropertyEditor({ property, initialValues, siteHost }: PropertyEd
   const land = isLandListing({ listingType, propertyType: v.propertyType ?? "" });
   const showPeriod = showsPricePeriod(listingType);
   const showCompletion = showsCompletionDate(listingType);
+  const pinLat = coordOrNull(v.latitude, 90);
+  const pinLng = coordOrNull(v.longitude, 180);
+
+  const setPin = (lat: number, lng: number) => {
+    const opts = { shouldDirty: true, shouldValidate: submitCount > 0 };
+    setValue("latitude", roundCoord(lat), opts);
+    setValue("longitude", roundCoord(lng), opts);
+    setMapMsg(null);
+  };
+
+  const centreOnArea = async () => {
+    const area = getValues("area").trim();
+    if (!area) {
+      setMapMsg({ text: "Add the area first (e.g. Lekki), then try again.", error: true });
+      return;
+    }
+    setGeocoding(true);
+    setMapMsg(null);
+    try {
+      const res = await geocodeArea({ area, city: getValues("city") });
+      if (res.ok) {
+        setPin(res.data.lat, res.data.lng);
+        setMapMsg({ text: "Pin moved to the area centre — now drag it onto the property." });
+      } else {
+        setMapMsg({ text: res.error, error: true });
+      }
+    } catch {
+      setMapMsg({ text: "The map search didn't respond. Drag the pin instead.", error: true });
+    } finally {
+      setGeocoding(false);
+    }
+  };
 
   // New property: the web address follows the title until it's edited by hand.
   const title = v.title ?? "";
@@ -502,31 +567,26 @@ export function PropertyEditor({ property, initialValues, siteHost }: PropertyEd
             </div>
           </section>
 
-          {/* ---- Photos (Unit 15 adds upload, reorder and alt text) ---- */}
+          {/* ---- Photos ---- */}
           <section className={ui.panel} aria-labelledby={sid("sec-photos")}>
             <h2 id={sid("sec-photos")}>
               Photos
               <span className={ui.panelNote}>
-                {property?.images.length ?? 0} of 20 · first photo is the cover
+                {(v.photos ?? []).length} of {MAX_PHOTOS} · first photo is the cover
               </span>
             </h2>
-            <div className={styles.comingNext}>
-              <b>Photo upload comes next.</b> Adding, reordering and describing photos arrives in
-              the next update.
-            </div>
-            {property?.images.length ? (
-              <ul className={styles.photos} aria-label="Current photos">
-                {property.images.map((img, i) => (
-                  <li key={img.id}>
-                    <figure className={styles.photo}>
-                      {i === 0 ? <span className={styles.cover}>Cover</span> : null}
-                      <Image src={img.url} alt={img.alt} width={240} height={110} sizes="200px" />
-                      <figcaption>{img.alt || "No description yet"}</figcaption>
-                    </figure>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+            <PhotosField
+              propertyId={property?.id ?? null}
+              uploadPrefix={uploadPrefix}
+              initialInfo={initialPhotoInfo}
+              control={control}
+              register={register}
+              setValue={setValue}
+              getValues={getValues}
+              getFieldState={getFieldState}
+              resetField={resetField}
+              scope={scope}
+            />
           </section>
 
           {/* ---- Location ---- */}
@@ -563,10 +623,37 @@ export function PropertyEditor({ property, initialValues, siteHost }: PropertyEd
                 <input {...register("city")} {...cp("city", err("city"))} />
               </Field>
               <div className={`${styles.f} ${styles.full}`}>
-                <span className={styles.lbl}>Map pin</span>
-                <div className={styles.comingNext}>
-                  <b>The map picker comes next.</b> For now, enter the latitude and longitude (from
-                  Google Maps: right-click the spot and click the numbers to copy them).
+                <span className={styles.lbl} id={sid("map-label")}>
+                  Map pin
+                </span>
+                <span className={styles.hint}>
+                  Click the map or drag the pin so it sits on the property. The coordinates below
+                  update as you go, and typing them moves the pin.
+                </span>
+                <div className={styles.map} data-testid="map-picker">
+                  <MapPicker
+                    lat={pinLat}
+                    lng={pinLng}
+                    onPick={setPin}
+                    label="Map: click to place the property pin"
+                  />
+                </div>
+                <div className={styles.mapBar}>
+                  <button
+                    type="button"
+                    className={`${ui.btn} ${ui.ghost}`}
+                    onClick={centreOnArea}
+                    disabled={geocoding}
+                  >
+                    {geocoding ? "Finding the area…" : "Centre on area"}
+                  </button>
+                  <span
+                    className={`${styles.mapMsg} ${mapMsg?.error ? styles.mapMsgError : ""}`}
+                    role="status"
+                  >
+                    {mapMsg?.text ??
+                      "Moves the pin to the centre of the area and city above (OpenStreetMap search)."}
+                  </span>
                 </div>
               </div>
               <Field path="latitude" label="Latitude" error={err("latitude")}>
@@ -588,7 +675,7 @@ export function PropertyEditor({ property, initialValues, siteHost }: PropertyEd
               <div className={`${styles.f} ${styles.full}`}>
                 <Switch
                   label="Show exact location on the map"
-                  note="Off: the public map shows the area only, not the exact pin."
+                  note="On: the public map shows this pin. Off: it shows the area only (e.g. “Lekki, Lagos”) and says the exact address is shared at inspection."
                   id={fid("showExactLocation")}
                   aria-invalid={err("showExactLocation") ? true : undefined}
                   {...register("showExactLocation")}

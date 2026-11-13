@@ -27,6 +27,9 @@ function credentials(user: ClerkTestUser) {
  * pass. The password is still required in .env.test so the account can be used by hand.
  */
 export async function signInAs(page: Page, user: ClerkTestUser) {
+  // Wait for Clerk to finish loading first: signing in while the page is still settling can
+  // fail with "Resulting promise was garbage collected".
+  await clerk.loaded({ page });
   await clerk.signIn({ page, emailAddress: credentials(user).identifier });
 }
 
