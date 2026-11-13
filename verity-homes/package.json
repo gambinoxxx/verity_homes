@@ -21,16 +21,20 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.25",
+    "@hookform/resolvers": "6.0.2",
     "@prisma/adapter-neon": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@vercel/blob": "2.8.2",
     "dotenv": "^18.0.10",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-hook-form": "7.91.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "resend": "6.38.0",
     "server-only": "^0.0.1",
+    "sonner": "2.0.8",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -24,6 +24,33 @@ export function koboFromNaira(input: string): bigint {
   return BigInt(whole) * 100n + BigInt((frac + "00").slice(0, 2));
 }
 
+const groupThousands = (digits: string) => digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+/** Kobo → what the admin price input shows: "250,000,000" (".50" only when there are kobo). */
+export function nairaInputFromKobo(kobo: bigint | null): string {
+  if (kobo === null) return "";
+  const whole = groupThousands((kobo / 100n).toString());
+  const rest = kobo % 100n;
+  return rest === 0n ? whole : `${whole}.${rest.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Admin price input as she types: keeps digits and one decimal point (2 places), adds thousands
+ * separators. "2500000" → "2,500,000"; "₦1,2a3" → "123"; "10.555" → "10.55".
+ */
+export function formatNairaInput(raw: string): string {
+  const cleaned = raw.replace(/[^\d.]/g, "");
+  const dot = cleaned.indexOf(".");
+  const intPart = (dot === -1 ? cleaned : cleaned.slice(0, dot)).replace(/^0+(?=\d)/, "");
+  const grouped = groupThousands(intPart);
+  if (dot === -1) return grouped;
+  const frac = cleaned
+    .slice(dot + 1)
+    .replace(/\./g, "")
+    .slice(0, 2);
+  return `${grouped || "0"}.${frac}`;
+}
+
 const PERIOD: Record<PricePeriod, string> = {
   ONE_OFF: "",
   PER_YEAR: " / year",

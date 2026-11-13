@@ -149,3 +149,38 @@ export async function setupFacts(): Promise<SetupFacts> {
         WHERE status = 'PUBLISHED' AND title NOT LIKE '[SAMPLE]%') AS "realPublished"`) as SetupFacts[];
   return rows[0]!;
 }
+
+// ---- Admin properties (Unit 14) ----
+
+/** Removes properties this test created (by exact title) and any redirects to/from their slugs. */
+export async function cleanUpE2eProperties(titles: string[]): Promise<void> {
+  if (!titles.length) return;
+  const db = sql();
+  const rows = (await db`SELECT slug FROM "Property" WHERE title = ANY(${titles})`) as {
+    slug: string;
+  }[];
+  const slugs = rows.map((r) => r.slug);
+  await db`DELETE FROM "Property" WHERE title = ANY(${titles})`;
+  if (slugs.length)
+    await db`DELETE FROM "SlugRedirect" WHERE entity = 'PROPERTY'
+             AND ("toSlug" = ANY(${slugs}) OR "fromSlug" = ANY(${slugs}))`;
+}
+
+export async function findPropertyByTitle(title: string): Promise<{
+  id: string;
+  slug: string;
+  status: string;
+  publishedAt: Date | null;
+  address: string | null;
+} | null> {
+  const rows = (await sql()`
+    SELECT id, slug, status::text AS status, "publishedAt", address
+    FROM "Property" WHERE title = ${title} LIMIT 1`) as {
+    id: string;
+    slug: string;
+    status: string;
+    publishedAt: Date | null;
+    address: string | null;
+  }[];
+  return rows[0] ?? null;
+}

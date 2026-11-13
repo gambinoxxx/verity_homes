@@ -61,7 +61,8 @@ no public page loads Clerk (Open question 42).
 - `lib/db/` — `client.ts` (the Prisma singleton) and `queries/*.ts`. This is
   the only place that imports the generated Prisma client.
 - `lib/actions/` — Server actions grouped by entity (`enquiry.ts` → `createEnquiry`,
-  `subscribe.ts` → `subscribe`; Unit 7). Each one validates with
+  `subscribe.ts` → `subscribe`; Unit 7; `property.ts` → create/update/publish/unpublish/delete,
+  Unit 14, which also call `updateTag("properties")`). Each one validates with
   Zod, checks `requireAdmin()` for admin actions, writes, then calls
   `revalidatePath`.
 - `lib/validation/` — Zod schemas shared by forms and actions.
@@ -75,7 +76,8 @@ no public page loads Clerk (Open question 42).
 - `lib/ip-hash.ts` — client IP from `x-forwarded-for` / `x-real-ip`, `sha256(ip + salt)`.
 - `lib/auth/` — `requireAdmin()` and `isAdmin()` (the access check runs once per request,
   `React.cache`).
-- `lib/db/queries/admin.ts` — admin-only reads (dashboard). Each function calls
+- `lib/db/queries/admin.ts` and `admin-properties.ts` — admin-only reads (dashboard, property
+  list and editor). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).
 - `lib/property-detail.ts` — Property page helpers: facts strip, description paragraphs,
   WhatsApp text, meta description and `RealEstateListing` JSON-LD (area + city only).
@@ -129,7 +131,7 @@ yet never breaks the build or pages that don't use it:
 | Core: `env` | `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL`, `IP_HASH_SALT`, optional `DIRECT_URL` | At import; the build fails if invalid | Anything server-side |
 | `emailEnv()` | `RESEND_API_KEY`, `ENQUIRY_NOTIFY_TO`, `ENQUIRY_FROM` | First call (Unit 7) | `lib/email` only |
 | `clerkEnv()` | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | First call (Unit 12) | `lib/auth` only |
-| `blobEnv()` | `BLOB_READ_WRITE_TOKEN` | First call (Unit 15) | `lib/storage` only |
+| `blobEnv()` | `BLOB_READ_WRITE_TOKEN` | First Blob delete (Unit 14) or upload (Unit 15) | `lib/storage` only |
 
 - A feature getter throws an error that names the missing variables (never their
   values). There are no defaults or dummy values.

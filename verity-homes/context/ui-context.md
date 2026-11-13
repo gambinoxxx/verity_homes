@@ -193,6 +193,12 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `.stats/.stat/.grid2/.panel/.list/.badge/.quick`). Status badge colours are tokens
     `--badge-new-*`, `--badge-contacted-*`, `--badge-neutral-bg`. Unbuilt admin targets render a
     "Coming soon" pill instead of a link (`lib/admin-dashboard.ts` `BUILT_ADMIN_ROUTES`).
+  - Shared controls (Unit 14): `components/admin/ui.module.css` (`.btn` + `navy/ghost/danger`,
+    `.iconBtn`, `.badge` + `pub/draft`, `.input/.select`, `.switch`, `.panel`, `.alert`, `.dialog`).
+    Properties list and editor in `components/admin/properties/` (`properties.module.css`,
+    `editor.module.css`). Toasts: sonner `<AdminToaster />` in the (panel) layout. Editor element
+    ids are prefixed per instance (`IdScope`, `useId`), since Next keeps the previous page mounted
+    but hidden.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

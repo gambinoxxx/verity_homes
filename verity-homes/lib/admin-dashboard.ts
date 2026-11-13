@@ -6,7 +6,11 @@ import { INTEREST_LABEL } from "@/lib/format";
  * Admin pages that exist. Add each route in the unit that builds it; until then, quick actions
  * and the top bar's "Add property" show "Coming soon" instead of a link to a missing page.
  */
-export const BUILT_ADMIN_ROUTES: ReadonlySet<string> = new Set(["/admin"]);
+export const BUILT_ADMIN_ROUTES: ReadonlySet<string> = new Set([
+  "/admin",
+  "/admin/properties", // Unit 14
+  "/admin/properties/new", // Unit 14
+]);
 
 /** Public pages (e.g. /privacy) count as built; admin paths must be in the list. */
 export function isAdminRouteBuilt(href: string, built = BUILT_ADMIN_ROUTES): boolean {
@@ -15,7 +19,7 @@ export function isAdminRouteBuilt(href: string, built = BUILT_ADMIN_ROUTES): boo
   return built.has(path);
 }
 
-export const ADD_PROPERTY_HREF = "/admin/properties/new"; // Unit 14
+export const ADD_PROPERTY_HREF = "/admin/properties/new";
 
 export type QuickAction = {
   label: string;

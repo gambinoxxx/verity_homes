@@ -158,7 +158,8 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
   - The `admin-setup` project (`auth.setup.ts`) signs both users in at `/admin/sign-in` with
     `clerk.signIn` (password strategy). It saves their browser state to
     `playwright/.auth/{admin,viewer}.json`, which is git-ignored.
-- **Projects:** `admin.spec.ts` runs only in the `admin-desktop` and `admin-mobile` projects,
+- **Projects:** `admin.spec.ts` and `admin-*.spec.ts` (e.g. `admin-properties.spec.ts`) run only in
+  the `admin-desktop` and `admin-mobile` projects,
   which depend on `admin-setup`. Signed-in tests use
   `test.use({ storageState: storageStateFor("admin") })`. The public `desktop` and `mobile`
   projects never sign in.

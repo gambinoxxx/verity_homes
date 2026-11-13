@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AdminToaster } from "@/components/admin/toaster";
 import styles from "@/components/admin/admin-shell.module.css";
 import { greetingFor } from "@/lib/admin-nav";
 import { ForbiddenError, NO_ACCESS_PATH, getAdminUser, requireAdmin } from "@/lib/auth";
@@ -37,6 +38,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
       newEnquiries={newEnquiries}
     >
       {children}
+      <AdminToaster />
     </AdminShell>
   );
 }

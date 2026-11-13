@@ -85,25 +85,25 @@ export default defineConfig({
     // Public site: no Clerk sign-in needed.
     {
       name: "desktop",
-      testIgnore: [/admin\.spec\.ts/, /setup\//],
+      testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
       use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
     },
     {
       name: "mobile",
-      testIgnore: [/admin\.spec\.ts/, /setup\//],
+      testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
       use: { ...devices["Pixel 7"], channel, viewport: mobile },
     },
     // Admin: signs the Clerk test users in once (playwright/.auth/*.json), then runs admin.spec.
     { name: "admin-setup", testMatch: /setup\/auth\.setup\.ts/, use: { channel } },
     {
       name: "admin-desktop",
-      testMatch: /admin\.spec\.ts/,
+      testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
       dependencies: ["admin-setup"],
       use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
     },
     {
       name: "admin-mobile",
-      testMatch: /admin\.spec\.ts/,
+      testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
       dependencies: ["admin-setup"],
       use: { ...devices["Pixel 7"], channel, viewport: mobile },
     },

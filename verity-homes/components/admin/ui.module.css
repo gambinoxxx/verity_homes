@@ -1,0 +1,255 @@
+/* Shared admin controls ported from design/assets/admin.css (Unit 14): .btn variants,
+   .icon-btn, .badge (property status), .input/.select, .switch, .panel, .alert, dialog. */
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.navy {
+  background: var(--bg-navy);
+  color: #fff;
+}
+.navy:not(:disabled):hover {
+  background: var(--bg-navy-surface);
+}
+.ghost {
+  background: var(--bg-base);
+  border-color: var(--border-input);
+  color: var(--text-primary);
+}
+.ghost:not(:disabled):hover {
+  border-color: var(--bg-navy);
+}
+.danger {
+  background: var(--bg-base);
+  border-color: var(--danger-border);
+  color: var(--state-error);
+}
+.danger:not(:disabled):hover {
+  border-color: var(--state-error);
+}
+.dangerSolid {
+  background: var(--state-error);
+  color: #fff;
+}
+
+.iconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  text-decoration: none;
+  flex: none;
+}
+.iconBtn svg {
+  width: 16px;
+  height: 16px;
+}
+.iconBtn:hover {
+  border-color: var(--bg-navy);
+}
+
+/* ---- Status badges (.b-pub / .b-draft) ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pub {
+  background: var(--state-success-bg);
+  color: var(--success-tag-text);
+}
+.draft {
+  background: var(--badge-neutral-bg);
+  color: var(--text-muted);
+}
+
+/* ---- Inputs ---- */
+.input,
+.select {
+  min-height: 44px;
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* ---- Switch (design .switch) ---- */
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 44px;
+  cursor: pointer;
+}
+.switch small {
+  display: block;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+.switch input {
+  appearance: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--switch-off);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: none;
+}
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+.switch input:checked {
+  background: var(--bg-navy);
+}
+.switch input:checked::after {
+  transform: translateX(18px);
+}
+.switch input:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ---- Panel ---- */
+.panel {
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 22px;
+  min-width: 0;
+}
+.panel > h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.panelNote {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ---- Alerts ---- */
+.alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.warn {
+  background: var(--badge-new-bg);
+  color: var(--alert-warn-text);
+}
+.error {
+  background: var(--state-error-bg);
+  color: var(--state-error);
+}
+
+/* ---- Confirm dialog (native <dialog>) ---- */
+.dialog {
+  width: min(440px, calc(100vw - 32px));
+  border: 0;
+  border-radius: 16px;
+  padding: 24px;
+  color: var(--text-primary);
+  box-shadow: 0 24px 60px rgb(7 18 38 / 0.3);
+  line-height: 1.5;
+}
+.dialog::backdrop {
+  background: rgb(7 18 38 / 0.5);
+}
+.dialog h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.dialog p {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.dialogActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch input,
+  .switch input::after {
+    transition: none;
+  }
+}

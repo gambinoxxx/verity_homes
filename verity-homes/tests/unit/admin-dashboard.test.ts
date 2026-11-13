@@ -48,10 +48,15 @@ describe("enquiry rows", () => {
 });
 
 describe("built admin routes", () => {
-  it("only /admin is built so far; public pages always count as built", () => {
-    expect([...BUILT_ADMIN_ROUTES]).toEqual(["/admin"]);
+  it("dashboard + properties are built so far; public pages always count as built", () => {
+    expect([...BUILT_ADMIN_ROUTES]).toEqual([
+      "/admin",
+      "/admin/properties",
+      "/admin/properties/new",
+    ]);
     expect(isAdminRouteBuilt("/admin")).toBe(true);
-    expect(isAdminRouteBuilt("/admin/properties/new")).toBe(false);
+    expect(isAdminRouteBuilt("/admin/properties/new")).toBe(true);
+    expect(isAdminRouteBuilt("/admin/posts/new")).toBe(false);
     expect(isAdminRouteBuilt("/admin/settings?tab=contact")).toBe(false);
     expect(isAdminRouteBuilt("/privacy")).toBe(true);
     expect(isAdminRouteBuilt("/admin/plans", new Set(["/admin/plans"]))).toBe(true);

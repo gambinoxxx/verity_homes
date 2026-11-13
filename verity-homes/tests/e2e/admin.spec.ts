@@ -220,27 +220,22 @@ test.describe("admin dashboard", () => {
     }
   });
 
-  test("quick actions and Add property say 'Coming soon' until their pages exist", async ({
-    page,
-  }) => {
+  test("quick actions: built pages are links, the rest say 'Coming soon'", async ({ page }) => {
     await page.goto("/admin");
     const quick = page.getByRole("region", { name: "Quick actions" });
-    for (const label of [
-      "Add a property",
-      "Write a blog post",
-      "Edit investment plans",
-      "Update contact details",
-    ]) {
+    // Unit 14: adding a property is live.
+    await expect(quick.getByRole("link", { name: "Add a property" })).toHaveAttribute(
+      "href",
+      "/admin/properties/new",
+    );
+    await expect(
+      page.locator("header").getByRole("link", { name: "Add property" }),
+    ).toHaveAttribute("href", "/admin/properties/new");
+    for (const label of ["Write a blog post", "Edit investment plans", "Update contact details"]) {
       const item = quick.getByText(label);
       await expect(item).toBeVisible();
       await expect(item).toContainText("Coming soon");
     }
-    const add = page.locator("header").getByText("Add property");
-    await expect(add).toBeAttached();
-    await expect(page.locator('header [aria-disabled="true"]')).toHaveAttribute(
-      "data-href",
-      "/admin/properties/new",
-    );
   });
 
   test("the top bar greeting stays on one line", async ({ page }) => {
@@ -257,7 +252,7 @@ test.describe("admin dashboard", () => {
 test.describe("signed-in non-admin", () => {
   test.use({ storageState: storageStateFor("viewer") });
 
-  for (const path of ["/admin", "/admin/enquiries"]) {
+  for (const path of ["/admin", "/admin/enquiries", "/admin/properties", "/admin/properties/new"]) {
     test(`gets 403 "No admin access" at ${path}`, async ({ page }) => {
       const res = await page.goto(path);
       expect(res?.status()).toBe(403);

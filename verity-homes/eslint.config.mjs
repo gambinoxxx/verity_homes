@@ -8,6 +8,12 @@ const CLERK_ONLY_IN_LIB_AUTH = {
   message: "Import Clerk only in lib/auth (use @/lib/auth or @/lib/auth/components).",
 };
 
+// Vercel Blob is confined to lib/storage (uploads and deletes).
+const BLOB_ONLY_IN_LIB_STORAGE = {
+  group: ["@vercel/blob", "@vercel/blob/*"],
+  message: "Import Vercel Blob only in lib/storage.",
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -27,15 +33,24 @@ const eslintConfig = defineConfig([
               message: "Only lib/auth, lib/storage and lib/email may read feature secrets.",
             },
           ],
-          patterns: [CLERK_ONLY_IN_LIB_AUTH],
+          patterns: [CLERK_ONLY_IN_LIB_AUTH, BLOB_ONLY_IN_LIB_STORAGE],
         },
       ],
     },
   },
   // lib/storage and lib/email may read their own secrets, but still not import Clerk.
   {
-    files: ["lib/storage/**", "lib/email/**"],
+    files: ["lib/storage/**"],
     rules: { "no-restricted-imports": ["error", { patterns: [CLERK_ONLY_IN_LIB_AUTH] }] },
+  },
+  {
+    files: ["lib/email/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: [CLERK_ONLY_IN_LIB_AUTH, BLOB_ONLY_IN_LIB_STORAGE] },
+      ],
+    },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

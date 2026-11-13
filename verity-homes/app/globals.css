@@ -44,6 +44,14 @@
   --badge-contacted-bg: #e6eefb;
   --badge-contacted-text: #1d4ed8;
   --badge-neutral-bg: #eef0f3;
+  /* admin.css tables and forms (Unit 14) */
+  --admin-table-head: #fafbfc; /* th, .drop */
+  --danger-border: #f3c9c5; /* .btn-danger */
+  --switch-off: #d7dbe2; /* .switch input */
+  --focus-ring: rgba(200, 162, 78, 0.2); /* .f input:focus box-shadow */
+  --serp-url: #0f7b3e; /* Google preview */
+  --serp-title: #1a0dab;
+  --alert-warn-text: #6b4700;
   --accent-hover: #d6b464; /* .btn-gold:hover */
   --header-scrolled: rgba(7, 18, 38, 0.96); /* .header.scrolled */
   --border-navy-soft: #1a2d4d; /* .foot-bottom border */
