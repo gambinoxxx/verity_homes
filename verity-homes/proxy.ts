@@ -51,5 +51,12 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/api/blob/:path*", "/api/admin/:path*", "/properties/:slug", "/blog/:slug"],
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+    "/api/blob/:path*",
+    "/api/admin/:path*",
+    "/properties/:slug",
+    "/blog/:slug",
+  ],
 };
