@@ -15,8 +15,17 @@ vi.mock("next/cache", () => ({
 }));
 vi.mock("@/lib/db/queries/invest", () => ({ PLANS_TAG: "plans", FAQS_TAG: "faqs" }));
 const m = {
+  findPlanState: vi.fn(async () => ({
+    id: "plana1234567",
+    slug: "plan-a",
+    status: "DRAFT",
+    contractWith: "Verity Homes and Properties Ltd",
+    payoutTerms: "Paid at maturity.",
+    _count: { packages: 1 },
+  })),
+  isPlanSlugTaken: vi.fn(async () => false),
   insertPlan: vi.fn(async () => ({ id: "plan_new_123", cleared: 0 })),
-  savePlan: vi.fn(async () => ({ id: "plan_a_12345", cleared: 0 })),
+  savePlan: vi.fn(async () => ({ id: "plan_a_12345", cleared: 0, previousSlug: "plan-a" })),
   setPlanStatus: vi.fn(async () => ({ id: "plan_a_12345", status: "PUBLISHED" })),
   deletePlanRow: vi.fn(async () => ({ name: "P", enquiries: 2 })),
   reorderPlanRows: vi.fn(async () => true),
@@ -35,7 +44,11 @@ const FID = "faqa12345678";
 const validPlan = { ...EMPTY_PLAN, name: "[SAMPLE] Starter", minimum: "1,000,000" };
 const validFaq = { page: "INVEST", question: "Q?", answer: "A." };
 
-const writes = () => Object.values(m).reduce((n, f) => n + f.mock.calls.length, 0);
+const READS = new Set<unknown>([m.findPlanState, m.isPlanSlugTaken]);
+const writes = () =>
+  Object.values(m)
+    .filter((f) => !READS.has(f))
+    .reduce((n, f) => n + f.mock.calls.length, 0);
 
 beforeEach(() => {
   vi.clearAllMocks();

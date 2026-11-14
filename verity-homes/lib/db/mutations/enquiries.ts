@@ -24,6 +24,14 @@ export function findPlotRef(plotId: string, propertyId: string) {
   });
 }
 
+/** The package, only if it belongs to this (published) plan. Unit 17c. */
+export function findPackageRef(packageId: string, planId: string) {
+  return db.investmentPackage.findFirst({
+    where: { id: packageId, planId, plan: { status: "PUBLISHED" } },
+    select: { id: true },
+  });
+}
+
 /** The investment plan, if it exists and is published. */
 export function findPublishedPlanRef(id: string) {
   return db.investmentPlan.findFirst({
@@ -43,6 +51,8 @@ export type NewEnquiry = {
   planId: string | null;
   /** Unit 17b: the chosen plot (must belong to propertyId). */
   plotId?: string | null;
+  /** Unit 17c: the chosen package (must belong to planId). */
+  packageId?: string | null;
   wantsInspection: boolean;
   amountKobo: bigint | null;
   ipHash: string;

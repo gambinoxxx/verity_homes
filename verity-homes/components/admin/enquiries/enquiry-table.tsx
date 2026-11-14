@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { isAdminRouteBuilt } from "@/lib/admin-dashboard";
 import type { EnquiryList } from "@/lib/db/queries/admin-enquiries";
+import { packageName } from "@/lib/packages";
 import { plotName } from "@/lib/plots";
 import { lagosLongDate } from "@/lib/enquiry-inbox";
 import { INTEREST_LABEL, SOURCE_LABEL, timeAgo } from "@/lib/format";
@@ -111,17 +112,22 @@ export function EnquiryTable({
                       {e.plot ? <small className={styles.via}>{plotName(e.plot)}</small> : null}
                     </>
                   ) : e.plan ? (
-                    plansBuilt ? (
-                      <Link
-                        className={styles.above}
-                        href={`/admin/plans/${e.plan.id}`}
-                        prefetch={false}
-                      >
-                        Plan: {e.plan.name}
-                      </Link>
-                    ) : (
-                      <>Plan: {e.plan.name}</>
-                    )
+                    <>
+                      {plansBuilt ? (
+                        <Link
+                          className={styles.above}
+                          href={`/admin/plans/${e.plan.id}`}
+                          prefetch={false}
+                        >
+                          Plan: {e.plan.name}
+                        </Link>
+                      ) : (
+                        <>Plan: {e.plan.name}</>
+                      )}
+                      {e.package ? (
+                        <small className={styles.via}>{packageName(e.package)}</small>
+                      ) : null}
+                    </>
                   ) : (
                     <span className={styles.muted}>—</span>
                   )}

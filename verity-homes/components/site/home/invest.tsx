@@ -31,7 +31,7 @@ export async function Invest() {
         </div>
 
         <InvestSteps />
-        <PlanGrid plans={plans} ctaHref="#contact" />
+        <PlanGrid plans={plans} />
 
         {/* design/index.html puts the disclaimer after the partner marquee. */}
         <Reveal className={`${styles.partners} ${partners.length === 0 ? styles.noPartners : ""}`}>

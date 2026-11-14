@@ -129,6 +129,16 @@
   font-size: 15px;
   font-weight: 600;
 }
+/* Unit 17c: "Invest from ₦…" in the rate slot (longer than a %, so a little smaller) */
+.from div {
+  font-size: clamp(30px, 3vw, 40px);
+}
+.summary {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
 .plan ul {
   list-style: none;
   margin: 0;
@@ -162,6 +172,10 @@
   line-height: 1.7;
   color: var(--text-on-navy-faint);
   max-width: 760px;
+}
+/* On a white sheet (plan pages, Unit 17c): readable muted ink instead of the on-navy tint. */
+.disclaimer.onLight {
+  color: var(--text-muted);
 }
 
 @media (max-width: 960px) {

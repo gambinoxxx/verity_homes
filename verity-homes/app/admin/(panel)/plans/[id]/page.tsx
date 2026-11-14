@@ -28,6 +28,7 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
           key={`${plan.id}-${plan.updatedAt.toISOString()}-${plan.status}`}
           plan={{
             id: plan.id,
+            slug: plan.slug,
             status: plan.status,
             createdAt: plan.createdAt.toISOString(),
             updatedAt: plan.updatedAt.toISOString(),

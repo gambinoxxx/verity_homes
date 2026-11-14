@@ -29,17 +29,82 @@ function columns(d: PlanData) {
     tenureMonths: d.tenureMonths,
     payoutFrequency: d.payoutFrequency,
     highlighted: d.highlighted,
+    description: d.description,
+    partnerName: d.partnerName,
+    contractWith: d.contractWith,
+    payoutTerms: d.payoutTerms,
+    exitTerms: d.exitTerms,
   };
 }
 
-export async function insertPlan(d: PlanData) {
+function packageColumns(p: PlanData["packages"][number]) {
+  return {
+    label: p.label,
+    amountKobo: p.amountKobo,
+    returnAmountKobo: p.returnAmountKobo,
+    tenureMonths: p.tenureMonths,
+    sortOrder: p.sortOrder,
+  };
+}
+
+/**
+ * Packages as the editor left them (Unit 17c). Ids are kept — enquiries point at a package
+ * (packageId) — so existing ones are updated, new ones created, removed ones deleted (their
+ * enquiries keep the plan link; packageId becomes null).
+ */
+async function syncPackages(tx: Tx, planId: string, packages: PlanData["packages"]) {
+  const existing = await tx.investmentPackage.findMany({ where: { planId }, select: { id: true } });
+  const keep = new Set(packages.flatMap((p) => (p.id ? [p.id] : [])));
+  const gone = existing.filter((e) => !keep.has(e.id)).map((e) => e.id);
+  if (gone.length) await tx.investmentPackage.deleteMany({ where: { planId, id: { in: gone } } });
+  const known = new Set(existing.map((e) => e.id));
+  for (const p of packages) {
+    if (p.id && known.has(p.id)) {
+      await tx.investmentPackage.update({ where: { id: p.id }, data: packageColumns(p) });
+    } else {
+      await tx.investmentPackage.create({ data: { ...packageColumns(p), planId } });
+    }
+  }
+}
+
+/** True if another plan already uses this slug. */
+export async function isPlanSlugTaken(slug: string, exceptId?: string): Promise<boolean> {
+  const row = await db.investmentPlan.findFirst({
+    where: { slug, ...(exceptId ? { NOT: { id: exceptId } } : {}) },
+    select: { id: true },
+  });
+  return row !== null;
+}
+
+/** For the actions: current slug, status and what publishing needs. */
+export function findPlanState(id: string) {
+  return db.investmentPlan.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      slug: true,
+      status: true,
+      contractWith: true,
+      payoutTerms: true,
+      _count: { select: { packages: true } },
+    },
+  });
+}
+
+export async function insertPlan(d: PlanData, slug: string) {
   return db.$transaction(async (tx) => {
     const last = await tx.investmentPlan.findFirst({
       orderBy: { sortOrder: "desc" },
       select: { sortOrder: true },
     });
     const row = await tx.investmentPlan.create({
-      data: { ...columns(d), status: "DRAFT", sortOrder: (last?.sortOrder ?? -1) + 1 },
+      data: {
+        ...columns(d),
+        slug,
+        status: "DRAFT",
+        sortOrder: (last?.sortOrder ?? -1) + 1,
+        packages: { create: d.packages.map(packageColumns) },
+      },
       select: { id: true },
     });
     const cleared = d.highlighted ? await clearOtherHighlights(tx, row.id) : 0;
@@ -47,14 +112,35 @@ export async function insertPlan(d: PlanData) {
   });
 }
 
-/** null → no such plan. */
-export async function savePlan(id: string, d: PlanData) {
+/**
+ * null → no such plan. Changing a PUBLISHED plan's slug writes a SlugRedirect (PLAN), like
+ * properties: older redirects are re-pointed and a redirect from the new slug is dropped.
+ */
+export async function savePlan(id: string, d: PlanData, slug: string) {
   return db.$transaction(async (tx) => {
-    const found = await tx.investmentPlan.findUnique({ where: { id }, select: { id: true } });
+    const found = await tx.investmentPlan.findUnique({
+      where: { id },
+      select: { id: true, slug: true, status: true },
+    });
     if (!found) return null;
-    await tx.investmentPlan.update({ where: { id }, data: columns(d) });
+    await tx.investmentPlan.update({ where: { id }, data: { ...columns(d), slug } });
+    await syncPackages(tx, id, d.packages);
+    if (found.slug && found.slug !== slug) {
+      await tx.slugRedirect.deleteMany({ where: { entity: "PLAN", fromSlug: slug } });
+      await tx.slugRedirect.updateMany({
+        where: { entity: "PLAN", toSlug: found.slug },
+        data: { toSlug: slug },
+      });
+      if (found.status === "PUBLISHED") {
+        await tx.slugRedirect.upsert({
+          where: { entity_fromSlug: { entity: "PLAN", fromSlug: found.slug } },
+          create: { entity: "PLAN", fromSlug: found.slug, toSlug: slug },
+          update: { toSlug: slug },
+        });
+      }
+    }
     const cleared = d.highlighted ? await clearOtherHighlights(tx, id) : 0;
-    return { id, cleared };
+    return { id, cleared, previousSlug: found.slug };
   });
 }
 
@@ -76,7 +162,9 @@ export async function deletePlanRow(id: string) {
       select: { name: true, _count: { select: { enquiries: true } } },
     });
     if (!plan) return null;
+    const { slug } = (await tx.investmentPlan.findUnique({ where: { id }, select: { slug: true } })) ?? {};
     await tx.investmentPlan.delete({ where: { id } });
+    if (slug) await tx.slugRedirect.deleteMany({ where: { entity: "PLAN", toSlug: slug } });
     return { name: plan.name, enquiries: plan._count.enquiries };
   });
 }

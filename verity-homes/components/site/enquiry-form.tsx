@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef, startTransition } from "react";
 import { onPlanSelected } from "@/lib/invest-plan-select";
+import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { ArrowIcon } from "./icons";
@@ -107,6 +108,23 @@ export function EnquiryForm({
     // f() is stable for the life of the component (useId).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId]);
+  // Unit 17c: a package picked on a plan page fills the plan, amount, message and packageId.
+  const packageRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!invest || !planId) return;
+    return onPackageSelected((sel) => {
+      if (sel.planId !== planId) return;
+      if (packageRef.current) packageRef.current.value = sel.packageId;
+      if (planRef.current) planRef.current.value = sel.planId;
+      const doc = formRef.current?.ownerDocument;
+      const amount = doc?.getElementById(f("amount"));
+      if (amount instanceof HTMLInputElement) amount.value = sel.amount;
+      const message = doc?.getElementById(f("message"));
+      if (message instanceof HTMLTextAreaElement) message.value = sel.message;
+    });
+    // f() is stable for the life of the component (useId).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invest, planId]);
   const formRef = useRef<HTMLFormElement>(null);
   const startedAt = useRef(0);
   const submitting = useRef(false);
@@ -190,6 +208,15 @@ export function EnquiryForm({
         <input type="hidden" name="plotId" ref={plotRef} defaultValue="" data-testid="plot-id" />
       ) : null}
       {planId && !invest ? <input type="hidden" name="planId" value={planId} /> : null}
+      {planId && invest ? (
+        <input
+          type="hidden"
+          name="packageId"
+          ref={packageRef}
+          defaultValue=""
+          data-testid="package-id"
+        />
+      ) : null}
       {interest && !contact ? <input type="hidden" name="interest" value={interest} /> : null}
       {/* Honeypot: invisible to people, tempting to bots. Must stay empty. */}
       <div className={styles.hp} aria-hidden="true">
@@ -281,6 +308,14 @@ export function EnquiryForm({
               {errorText("amount")}
             </div>
           </div>
+          {planId ? (
+            // Plan pages (Unit 17c): the chosen package is written here, and sent.
+            <div className={styles.fg}>
+              <label htmlFor={f("message")}>Message</label>
+              <textarea {...field("message")} rows={3} defaultValue={defaultMessage} />
+              {errorText("message")}
+            </div>
+          ) : null}
         </>
       ) : card ? (
         <>

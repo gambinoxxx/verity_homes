@@ -37,6 +37,7 @@ export const enquirySchema = z.object({
   propertyId: z.string().optional(),
   planId: z.string().optional(),
   plotId: z.string().max(40).optional(), // Unit 17b: the plot chosen on an estate page
+  packageId: z.string().max(40).optional(), // Unit 17c: the package chosen on a plan page
   wantsInspection: z.coerce.boolean().default(false),
   amount: z.string().optional(), // naira text from the invest form; convert with koboFromNaira
   company: z.string().max(0, "Spam detected").optional().default(""), // honeypot: must stay empty

@@ -295,7 +295,7 @@ export function EnquiryCard({ property: p, whatsappNumber, whatsappText }: P & W
           className={`btn ${styles.wa}`}
           number={whatsappNumber}
           defaultText={whatsappText}
-          propertyId={p.id}
+          ownerId={p.id}
         >
           <WhatsAppIcon />
           Chat on WhatsApp
@@ -320,7 +320,7 @@ export function MobileBar({
         className={`btn ${styles.wa}`}
         number={whatsappNumber}
         defaultText={whatsappText}
-        propertyId={propertyId}
+        ownerId={propertyId}
       >
         <WhatsAppIcon />
         WhatsApp

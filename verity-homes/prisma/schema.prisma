@@ -95,6 +95,7 @@ enum FaqPage {
 enum RedirectEntity {
   PROPERTY
   POST
+  PLAN // Unit 17c: /invest/<slug>
 }
 
 // ---------------------------------------------------------------- properties
@@ -220,6 +221,35 @@ model InvestmentPlan {
   enquiries         Enquiry[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+
+  // Unit 17c: plan pages + packages. minimumKobo / returnRatePercent / tenureMonths are kept,
+  // but when a plan has packages the UI uses the packages (minimumKobo/tenureMonths are kept in
+  // step on save); clean-up later (see progress-tracker).
+  slug          String?             @unique // /invest/<slug>; required to publish
+  description   String              @default("") @db.Text // Markdown
+  partnerName   String?             // "In partnership with …"
+  contractWith  String?             // who the investor signs the agreement with
+  payoutTerms   String?             @db.Text
+  exitTerms     String?             @db.Text
+  coverUrl      String?
+  coverPathname String?
+  coverAlt      String              @default("")
+  packages      InvestmentPackage[]
+}
+
+/// Unit 17c: "invest X, receive Y at maturity" for a plan.
+model InvestmentPackage {
+  id               String         @id @default(cuid())
+  planId           String
+  plan             InvestmentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  label            String?
+  amountKobo       BigInt
+  returnAmountKobo BigInt         // expected amount at maturity, per the signed agreement
+  tenureMonths     Int
+  sortOrder        Int            @default(0)
+  enquiries        Enquiry[]
+
+  @@index([planId, sortOrder])
 }
 
 model Faq {
@@ -307,6 +337,8 @@ model Enquiry {
   plan            InvestmentPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
   plotId          String?         // Unit 17b: the plot the visitor chose
   plot            PropertyPlot?   @relation(fields: [plotId], references: [id], onDelete: SetNull)
+  packageId       String?            // Unit 17c: the investment package the visitor chose
+  package         InvestmentPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
   wantsInspection Boolean         @default(false)
   amountKobo      BigInt?         // investment enquiries
   status          EnquiryStatus   @default(NEW)

@@ -4,6 +4,7 @@ import "server-only";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { nairaInputFromKobo } from "@/lib/format";
+import { planFromAmountKobo } from "@/lib/invest";
 import type { FaqPageKey } from "@/lib/validation/faq";
 import type { PlanFormValues } from "@/lib/validation/plan";
 
@@ -19,6 +20,7 @@ export type AdminPlanRow = {
   status: "DRAFT" | "PUBLISHED";
   /** Enquiries that mention this plan (they keep their history if it's deleted). */
   enquiryCount: number;
+  packageCount: number;
 };
 
 export async function listAdminPlans(): Promise<AdminPlanRow[]> {
@@ -35,12 +37,15 @@ export async function listAdminPlans(): Promise<AdminPlanRow[]> {
       payoutFrequency: true,
       highlighted: true,
       status: true,
-      _count: { select: { enquiries: true } },
+      _count: { select: { enquiries: true, packages: true } },
+      packages: { select: { amountKobo: true } },
     },
   });
-  return rows.map(({ _count, minimumKobo, returnRatePercent, ...r }) => ({
+  return rows.map(({ _count, minimumKobo, returnRatePercent, packages, ...r }) => ({
     ...r,
-    minimumKobo: minimumKobo.toString(),
+    // Unit 17c: "from" = the smallest package when there are packages
+    minimumKobo: (planFromAmountKobo(packages) ?? minimumKobo).toString(),
+    packageCount: _count.packages,
     returnRatePercent: Number(returnRatePercent),
     enquiryCount: _count.enquiries,
   }));
@@ -48,6 +53,7 @@ export async function listAdminPlans(): Promise<AdminPlanRow[]> {
 
 export type AdminPlanEditor = {
   id: string;
+  slug: string | null;
   status: "DRAFT" | "PUBLISHED";
   createdAt: Date;
   updatedAt: Date;
@@ -59,11 +65,15 @@ export async function getAdminPlan(id: string): Promise<AdminPlanEditor | null> 
   await requireAdmin();
   const p = await db.investmentPlan.findUnique({
     where: { id },
-    include: { _count: { select: { enquiries: true } } },
+    include: {
+      _count: { select: { enquiries: true } },
+      packages: { orderBy: { sortOrder: "asc" } },
+    },
   });
   if (!p) return null;
   return {
     id: p.id,
+    slug: p.slug,
     status: p.status,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
@@ -77,6 +87,19 @@ export async function getAdminPlan(id: string): Promise<AdminPlanEditor | null> 
       tenureMonths: String(p.tenureMonths),
       payoutFrequency: p.payoutFrequency,
       highlighted: p.highlighted,
+      slug: p.slug ?? "",
+      description: p.description,
+      partnerName: p.partnerName ?? "",
+      contractWith: p.contractWith ?? "",
+      payoutTerms: p.payoutTerms ?? "",
+      exitTerms: p.exitTerms ?? "",
+      packages: p.packages.map((k) => ({
+        id: k.id,
+        label: k.label ?? "",
+        amount: nairaInputFromKobo(k.amountKobo),
+        receive: nairaInputFromKobo(k.returnAmountKobo),
+        tenureMonths: String(k.tenureMonths),
+      })),
     },
   };
 }

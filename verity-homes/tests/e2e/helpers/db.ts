@@ -77,11 +77,17 @@ export async function findEnquirySource(name: string): Promise<string | null> {
   return rows[0]?.source ?? null;
 }
 
-export type PlanRow = { id: string; name: string; status: string; highlighted: boolean };
+export type PlanRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  status: string;
+  highlighted: boolean;
+};
 
 export async function getPlanRows(): Promise<PlanRow[]> {
   return (await sql()`
-    SELECT id, name, status::text AS status, highlighted
+    SELECT id, name, slug, status::text AS status, highlighted
     FROM "InvestmentPlan" ORDER BY "sortOrder", "createdAt"`) as PlanRow[];
 }
 
@@ -313,10 +319,13 @@ export async function snapshotPlans(): Promise<PlanSnapshot> {
   return (await sql()`SELECT id, highlighted, "sortOrder" FROM "InvestmentPlan"`) as PlanSnapshot;
 }
 
-/** Deletes "[SAMPLE] E2E …" plans, then restores the snapshot's highlight and order. */
-export async function restorePlans(snapshot: PlanSnapshot): Promise<void> {
+/**
+ * Deletes this test's own plans (by name — never another worker's "[SAMPLE] E2E …" plan, which
+ * may be mid-test) and their redirects, then restores the snapshot's highlight and order.
+ */
+export async function restorePlans(snapshot: PlanSnapshot, names: string[]): Promise<void> {
   const db = sql();
-  await db`DELETE FROM "InvestmentPlan" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
+  await deleteE2ePlans(names);
   for (const p of snapshot) {
     await db`UPDATE "InvestmentPlan" SET highlighted = ${p.highlighted}, "sortOrder" = ${p.sortOrder}
              WHERE id = ${p.id}`;
@@ -346,4 +355,19 @@ export async function highlightedPlanNames(): Promise<string[]> {
 
 export async function deleteE2eFaqs(): Promise<void> {
   await sql()`DELETE FROM "Faq" WHERE question LIKE ${"[SAMPLE] E2E %"}`;
+}
+
+/** Deletes the named "[SAMPLE] E2E …" plans (packages cascade) and the redirects to them. */
+export async function deleteE2ePlans(names: string[]): Promise<void> {
+  const own = names.filter((n) => n.startsWith("[SAMPLE] E2E "));
+  if (!own.length) return;
+  const db = sql();
+  const rows = (await db`SELECT slug FROM "InvestmentPlan" WHERE name = ANY(${own})`) as {
+    slug: string | null;
+  }[];
+  const slugs = rows.flatMap((r) => (r.slug ? [r.slug] : []));
+  await db`DELETE FROM "InvestmentPlan" WHERE name = ANY(${own})`;
+  if (slugs.length)
+    await db`DELETE FROM "SlugRedirect" WHERE entity = 'PLAN'
+             AND ("toSlug" = ANY(${slugs}) OR "fromSlug" = ANY(${slugs}))`;
 }

@@ -5,7 +5,7 @@
 // themselves and answer 401/403.
 // Only admin paths run Clerk; public pages never do.
 //
-// /properties/[slug] and /blog/[slug]: with Cache Components the page sends its prerendered
+// /properties/[slug], /blog/[slug] and /invest/[slug] (Unit 17c): with Cache Components the page sends its prerendered
 // shell (HTTP 200) before it can look the slug up, so notFound() / permanentRedirect() inside the
 // page could not set the status (docs: file-conventions/loading.md "Status codes"). This check
 // runs first:
@@ -16,6 +16,7 @@ import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server
 import { adminApiProxy, adminProxy } from "@/lib/auth/proxy";
 import { isAdminApiPath, isAdminPath } from "@/lib/auth/roles";
 import { resolvePostSlug } from "@/lib/db/queries/posts";
+import { resolvePlanSlug } from "@/lib/db/queries/invest";
 import { resolvePropertySlug } from "@/lib/db/queries/properties";
 
 const NOT_FOUND_PATH = "/__not-found";
@@ -23,13 +24,14 @@ const NOT_FOUND_PATH = "/__not-found";
 const SLUG_ROUTES = [
   { base: "/properties", resolve: resolvePropertySlug },
   { base: "/blog", resolve: resolvePostSlug },
+  { base: "/invest", resolve: resolvePlanSlug }, // Unit 17c: plan pages
 ] as const;
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   if (isAdminPath(request.nextUrl.pathname)) return adminProxy(request, event);
   if (isAdminApiPath(request.nextUrl.pathname)) return adminApiProxy(request, event);
 
-  const match = /^\/(properties|blog)\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
+  const match = /^\/(properties|blog|invest)\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
   const route = SLUG_ROUTES.find((r) => r.base === `/${match?.[1]}`);
   if (!match?.[2] || !route) return NextResponse.next();
 
@@ -58,5 +60,6 @@ export const config = {
     "/api/admin/:path*",
     "/properties/:slug",
     "/blog/:slug",
+    "/invest/:slug",
   ],
 };

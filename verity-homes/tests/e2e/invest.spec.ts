@@ -37,36 +37,57 @@ test("only published plans render; the highlighted one is the gold card", async 
       const card = gold.filter({ hasText: p.name });
       // Gold card: the accent fill, with a navy button instead of a white one.
       await expect(card).toHaveCSS("background-color", "rgb(200, 162, 78)", { timeout: 2_000 });
-      await expect(card.getByRole("link", { name: "I want to invest" })).toHaveClass(/btn-navy/, {
+      await expect(card.getByRole("link", { name: /View plan/ })).toHaveClass(/btn-navy/, {
         timeout: 2_000,
       });
     }
   }).toPass({ timeout: 45_000 });
-  // A 0% rate is never shown as a number: the placeholder stands in.
+  // Summary cards only (Unit 17c): "Invest from", no rates or package rows.
   const cards = planCards(page);
-  await expect(cards.first().getByText("Rate to be confirmed")).toBeAttached();
-  await expect(cards.first()).not.toContainText(/\b0%/);
+  await expect(cards.first().getByText("Invest from")).toBeVisible();
+  await expect(cards.first()).not.toContainText(/%/);
 });
 
-test("'I want to invest' scrolls to #start with that plan preselected", async ({ page }) => {
+test("“View plan” opens the plan page; unknown slugs are 404", async ({ page }) => {
   await page.goto("/invest");
-  const second = planCards(page).nth(1);
-  const name = (await second.locator("h3").textContent())?.trim() ?? "";
+  const first = planCards(page).first();
+  const name = (await first.locator("h3").textContent())?.trim() ?? "";
   const plan = (await getPlanRows()).find((p) => p.name === name);
-  expect(plan, `plan "${name}" in the database`).toBeTruthy();
+  expect(plan?.slug, `plan "${name}" has a web address`).toBeTruthy();
+  await first.getByRole("link", { name: /View plan/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/invest/${plan!.slug}$`));
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  await expect(page.getByText(/Investment returns are subject to the terms/).first()).toBeVisible();
 
-  await second.getByRole("link", { name: "I want to invest" }).click();
-  await expect(page).toHaveURL(/#start$/);
-  const form = page.getByRole("form", { name: "Investment enquiry" });
-  await expect(form.getByLabel("Plan")).toHaveValue(plan!.id);
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const r = document.getElementById("start")!.getBoundingClientRect();
-        return r.top < window.innerHeight && r.bottom > 0;
-      }),
-    )
-    .toBe(true);
+  const res = await page.goto("/invest/no-such-plan-e2e");
+  expect(res?.status()).toBe(404);
+});
+
+test("the seeded 12-month plan: 3 packages with gain and % per year; stacked on phones", async ({
+  page,
+}) => {
+  const res = await page.goto("/invest/sample-12-month-plan");
+  test.skip(res?.status() === 404, "12-month sample plan not seeded in this database");
+  const rows = page
+    .getByRole("table", { name: "Investment packages" })
+    .locator("[data-package-amount]");
+  await expect(rows).toHaveCount(3);
+  await expect(rows.nth(0).locator('[data-cell="gain"]')).toContainText("₦500,000");
+  await expect(rows.nth(0).locator('[data-cell="per-year"]')).toContainText("5.0%");
+  await expect(rows.nth(2).locator('[data-cell="gain"]')).toContainText("₦2,500,000");
+  await expect(rows.nth(2).locator('[data-cell="per-year"]')).toContainText("8.3%");
+  await expect(page.getByTestId("plan-contract")).toContainText("Your agreement is with");
+  await expect(page.locator("main")).not.toContainText(/guarantee/i);
+  // No FAQPage or financial JSON-LD on plan pages.
+  const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
+  expect(ld.join(" ")).not.toMatch(/FAQPage|FinancialProduct|InvestmentOrDeposit/);
+  if (page.viewportSize()!.width < 800) {
+    const box = await rows.first().boundingBox();
+    expect(box!.width).toBeGreaterThan(page.viewportSize()!.width * 0.8);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      page.viewportSize()!.width,
+    );
+  }
 });
 
 test("FAQ items open and close with the mouse and the keyboard", async ({ page }) => {

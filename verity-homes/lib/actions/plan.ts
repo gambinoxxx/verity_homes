@@ -9,12 +9,20 @@ import { ForbiddenError, requireAdmin } from "@/lib/auth";
 import {
   deletePlanRow,
   insertPlan,
+  findPlanState,
+  isPlanSlugTaken,
   reorderPlanRows,
   savePlan,
   setPlanStatus,
 } from "@/lib/db/mutations/plans";
 import { PLANS_TAG } from "@/lib/db/queries/invest";
-import { orderSchema, planSchema, recordIdSchema } from "@/lib/validation/plan";
+import { uniqueSlug } from "@/lib/slug";
+import {
+  orderSchema,
+  planPublishIssues,
+  planSchema,
+  recordIdSchema,
+} from "@/lib/validation/plan";
 
 export type PlanActionResult<T = undefined> =
   | { ok: true; data: T; message: string }
@@ -37,10 +45,11 @@ async function admin(): Promise<boolean> {
   }
 }
 
-function refresh() {
+function refresh(...slugs: (string | null | undefined)[]) {
   updateTag(PLANS_TAG);
   revalidatePath("/");
   revalidatePath("/invest");
+  for (const s of new Set(slugs)) if (s) revalidatePath(`/invest/${s}`);
   revalidatePath("/admin", "layout");
 }
 
@@ -55,12 +64,18 @@ function parse(input: unknown) {
 const highlightNote = (cleared: number) =>
   cleared ? " It's now the highlighted plan (the other one isn't any more)." : "";
 
+const SLUG_TAKEN = "Another plan already uses this web address. Choose a different one.";
+
 export async function createPlan(input: unknown): Promise<PlanActionResult<{ id: string }>> {
   const p = parse(input);
   if (!p.ok) return p;
   if (!(await admin())) return { ok: false, error: MSG.forbidden };
   try {
-    const row = await insertPlan(p.data);
+    let slug = p.data.slug;
+    if (!slug) slug = await uniqueSlug(p.data.name, (s) => isPlanSlugTaken(s));
+    else if (await isPlanSlugTaken(slug))
+      return { ok: false, error: MSG.check, fieldErrors: { slug: SLUG_TAKEN } };
+    const row = await insertPlan(p.data, slug);
     refresh();
     return { ok: true, data: { id: row.id }, message: `Draft saved.${highlightNote(row.cleared)}` };
   } catch (e) {
@@ -79,9 +94,25 @@ export async function updatePlan(
   if (!p.ok) return p;
   if (!(await admin())) return { ok: false, error: MSG.forbidden };
   try {
-    const row = await savePlan(pid.data, p.data);
+    const current = await findPlanState(pid.data);
+    if (!current) return { ok: false, error: MSG.missing };
+    const slug =
+      p.data.slug || current.slug || (await uniqueSlug(p.data.name, (s) => isPlanSlugTaken(s)));
+    if (slug !== current.slug && (await isPlanSlugTaken(slug, current.id)))
+      return { ok: false, error: MSG.check, fieldErrors: { slug: SLUG_TAKEN } };
+    if (current.status === "PUBLISHED") {
+      // A live plan must stay publishable.
+      const issues = planPublishIssues({
+        packageCount: p.data.packages.length,
+        slug,
+        contractWith: p.data.contractWith,
+        payoutTerms: p.data.payoutTerms,
+      });
+      if (Object.keys(issues).length) return { ok: false, error: MSG.check, fieldErrors: issues };
+    }
+    const row = await savePlan(pid.data, p.data, slug);
     if (!row) return { ok: false, error: MSG.missing };
-    refresh();
+    refresh(row.previousSlug, slug);
     return {
       ok: true,
       data: { id: row.id },
@@ -109,6 +140,23 @@ async function setStatus(id: unknown, status: "DRAFT" | "PUBLISHED", done: strin
 }
 
 export async function publishPlan(id: unknown): Promise<PlanActionResult> {
+  const pid = recordIdSchema.safeParse(id);
+  if (!pid.success) return { ok: false, error: MSG.missing };
+  if (!(await admin())) return { ok: false, error: MSG.forbidden };
+  try {
+    const current = await findPlanState(pid.data);
+    if (!current) return { ok: false, error: MSG.missing };
+    const issues = planPublishIssues({
+      packageCount: current._count.packages,
+      slug: current.slug,
+      contractWith: current.contractWith,
+      payoutTerms: current.payoutTerms,
+    });
+    if (Object.keys(issues).length) return { ok: false, error: MSG.check, fieldErrors: issues };
+  } catch (e) {
+    console.error("publishPlan failed:", e instanceof Error ? e.message : e);
+    return { ok: false, error: MSG.failed };
+  }
   return setStatus(id, "PUBLISHED", "Published — it's live on /invest.");
 }
 

@@ -216,6 +216,16 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   `.terms` (cream); head shows “From ₦…”, “Initial deposit from ₦…” and “A development by …”.
   Select → `lib/plot-select.ts` event → the enquiry form (message + hidden `plotId`) and the
   WhatsApp buttons (`whatsapp-link.tsx`) follow the chosen plot.
+- **Plan pages (Unit 17c)**: home and /invest show summary plan cards only (name, badge,
+  “Invest from ₦…”, tenure, payout, one line, “View plan” → `/invest/<slug>`; the highlighted
+  plan stays the gold card). `/invest/[slug]`: page hero, partner + “Your agreement is with …”,
+  “Choose your package” (`components/site/invest/packages.tsx`, reusing the plot table — stacked
+  cards on phones) with You invest / You receive (expected) / Gain / Per year / Select, About
+  (Markdown), payout + exit terms, disclaimer, Invest FAQs and the investment enquiry form
+  (with a Message field on plan pages). Select → `lib/package-select.ts` event → the form
+  (plan, amount, message, hidden `packageId`) and the WhatsApp text. Admin plan editor:
+  “Plan page” and “Packages” panels (rows with a live “Gain ₦… · x.x% per year” preview);
+  the old minimum/rate/tenure fields are disabled with a note while packages exist.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

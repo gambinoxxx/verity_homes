@@ -43,7 +43,7 @@ export function EnquiryDetailPanel({
           ? `the ${e.plot.name} at ${e.property.title}`
           : e.property.title
         : null,
-      planName: e.plan?.name ?? null,
+      planName: e.plan ? (e.package ? `${e.plan.name} (${e.package.name})` : e.plan.name) : null,
     }),
   );
   return (
@@ -111,6 +111,12 @@ export function EnquiryDetailPanel({
                 ? ` (deposit ${formatNaira(e.plot.initialDepositKobo)})`
                 : ""}
             </dd>
+          </>
+        ) : null}
+        {e.package ? (
+          <>
+            <dt>Package</dt>
+            <dd data-testid="enquiry-package">{e.package.summary}</dd>
           </>
         ) : null}
         {e.plan ? (

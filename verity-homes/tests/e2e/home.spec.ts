@@ -53,7 +53,7 @@ test("signature projects show the seeded showcase listings with status pills", a
   }
 });
 
-test("invest section shows plans, the placeholder rate and the disclaimer", async ({ page }) => {
+test("invest section shows summary plan cards and the disclaimer", async ({ page }) => {
   const section = page.locator("#invest");
   // Plans are site-wide; the admin plans test (Unit 17) may publish one meanwhile.
   await expect(async () => {
@@ -62,7 +62,12 @@ test("invest section shows plans, the placeholder rate and the disclaimer", asyn
     await expect(section.locator("article")).toHaveCount(published, { timeout: 2_000 });
   }).toPass({ timeout: 45_000 });
   await expect(section.getByText("₦1,000,000")).toBeVisible();
-  await expect(section.getByText("Rate to be confirmed").first()).toBeAttached();
+  await expect(section.getByText("Invest from").first()).toBeVisible();
+  await expect(section.getByRole("link", { name: /View plan/ }).first()).toHaveAttribute(
+    "href",
+    /^\/invest\/[a-z0-9-]+$/,
+  );
+  await expect(section.locator("article").first()).not.toContainText(/%/);
   await expect(section.getByText(/Investment returns are subject to the terms/)).toBeVisible();
   await expect(page.locator("body")).not.toContainText(/guarantee/i);
 });

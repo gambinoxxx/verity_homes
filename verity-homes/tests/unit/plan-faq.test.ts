@@ -85,10 +85,21 @@ describe("FAQ validation", () => {
 const tx = {
   investmentPlan: {
     findFirst: vi.fn(async () => ({ sortOrder: 4 })),
-    findUnique: vi.fn(async () => ({ id: "plan_a_12345" })),
+    findUnique: vi.fn(async () => ({ id: "plan_a_12345", slug: "plan-a", status: "DRAFT" })),
     create: vi.fn(async () => ({ id: "plan_new_123" })),
     update: vi.fn(async () => ({})),
     updateMany: vi.fn(async () => ({ count: 1 })),
+  },
+  investmentPackage: {
+    findMany: vi.fn(async () => [] as { id: string }[]),
+    deleteMany: vi.fn(async () => ({ count: 0 })),
+    update: vi.fn(async () => ({})),
+    create: vi.fn(async () => ({})),
+  },
+  slugRedirect: {
+    deleteMany: vi.fn(async () => ({ count: 0 })),
+    updateMany: vi.fn(async () => ({ count: 0 })),
+    upsert: vi.fn(async () => ({})),
   },
 };
 vi.mock("@/lib/db/client", () => ({
@@ -101,9 +112,10 @@ describe("single-highlight transaction", async () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("highlighting a plan turns it off for every other plan, in the same transaction", async () => {
-    expect(await savePlan("plan_a_12345", { ...data, highlighted: true })).toEqual({
+    expect(await savePlan("plan_a_12345", { ...data, highlighted: true }, "plan-a")).toEqual({
       id: "plan_a_12345",
       cleared: 1,
+      previousSlug: "plan-a",
     });
     expect(tx.investmentPlan.updateMany).toHaveBeenCalledWith({
       where: { highlighted: true, NOT: { id: "plan_a_12345" } },
@@ -112,7 +124,7 @@ describe("single-highlight transaction", async () => {
   });
 
   it("a new highlighted plan clears the others too; sortOrder goes to the end", async () => {
-    await insertPlan({ ...data, highlighted: true });
+    await insertPlan({ ...data, highlighted: true }, "plan-new");
     expect(tx.investmentPlan.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ sortOrder: 5, status: "DRAFT" }) }),
     );
@@ -122,7 +134,7 @@ describe("single-highlight transaction", async () => {
   });
 
   it("not highlighted → the others are left alone", async () => {
-    await savePlan("plan_a_12345", { ...data, highlighted: false });
+    await savePlan("plan_a_12345", { ...data, highlighted: false }, "plan-a");
     expect(tx.investmentPlan.updateMany).not.toHaveBeenCalled();
   });
 });

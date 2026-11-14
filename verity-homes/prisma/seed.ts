@@ -229,13 +229,31 @@ async function main() {
     status: "DRAFT",
   });
 
-  for (const plan of PLANS) {
+  for (const { packages = [], ...plan } of PLANS) {
     const found = await db.investmentPlan.findFirst({
       where: { name: plan.name },
       select: { id: true },
     });
-    if (found) await db.investmentPlan.update({ where: { id: found.id }, data: plan });
-    else await db.investmentPlan.create({ data: plan });
+    const { id } = found
+      ? await db.investmentPlan.update({
+          where: { id: found.id },
+          data: plan,
+          select: { id: true },
+        })
+      : await db.investmentPlan.create({ data: plan, select: { id: true } });
+    // Packages are synced by position (update in place, so an enquiry's packageId survives).
+    const existing = await db.investmentPackage.findMany({
+      where: { planId: id },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true },
+    });
+    for (const [i, pkg] of packages.entries()) {
+      const data = { ...pkg, sortOrder: i };
+      if (existing[i]) await db.investmentPackage.update({ where: { id: existing[i].id }, data });
+      else await db.investmentPackage.create({ data: { ...data, planId: id } });
+    }
+    const surplus = existing.slice(packages.length).map((p) => p.id);
+    if (surplus.length) await db.investmentPackage.deleteMany({ where: { id: { in: surplus } } });
   }
 
   for (const faq of FAQS) {
@@ -296,6 +314,7 @@ async function main() {
 const PLANS = [
   {
     name: "[SAMPLE] Starter Plan",
+    slug: "sample-starter-plan",
     badge: "Starter",
     minimumKobo: N(1_000_000),
     returnRatePercent: 0,
@@ -307,6 +326,7 @@ const PLANS = [
   },
   {
     name: "[SAMPLE] Growth Plan",
+    slug: "sample-growth-plan",
     badge: "Most popular",
     minimumKobo: N(5_000_000),
     returnRatePercent: 0,
@@ -318,6 +338,7 @@ const PLANS = [
   },
   {
     name: "[SAMPLE] Premium Plan",
+    slug: "sample-premium-plan",
     badge: "Premium",
     minimumKobo: N(20_000_000),
     returnRatePercent: 0,
@@ -326,6 +347,33 @@ const PLANS = [
     highlighted: false,
     status: "PUBLISHED" as const,
     sortOrder: 2,
+  },
+  // Unit 17c: a plan with packages and its own page (/invest/sample-12-month-plan).
+  {
+    name: "[SAMPLE] 12-Month Plan",
+    slug: "sample-12-month-plan",
+    badge: "12 months",
+    summary: "[SAMPLE] Fixed packages over 12 months, per your signed agreement.",
+    description:
+      "[SAMPLE] Placeholder description. The owner will supply the project details, the partner, " +
+      "and how funds are used.\n\n- Pick a package\n- Sign the written agreement\n- " +
+      "Receive the expected amount at maturity, per your signed agreement",
+    partnerName: "[SAMPLE] Development partner",
+    contractWith: "[SAMPLE] Verity Homes and Properties Ltd",
+    payoutTerms: "[SAMPLE] Paid at maturity to your bank account, per your signed agreement.",
+    exitTerms: "[SAMPLE] Early exit terms — from the approved plan terms.",
+    minimumKobo: N(10_000_000),
+    returnRatePercent: 0,
+    tenureMonths: 12,
+    payoutFrequency: "AT_MATURITY" as const,
+    highlighted: false,
+    status: "PUBLISHED" as const,
+    sortOrder: 3,
+    packages: [
+      { amountKobo: N(10_000_000), returnAmountKobo: N(10_500_000), tenureMonths: 12 },
+      { amountKobo: N(20_000_000), returnAmountKobo: N(21_000_000), tenureMonths: 12 },
+      { amountKobo: N(30_000_000), returnAmountKobo: N(32_500_000), tenureMonths: 12 },
+    ],
   },
 ];
 

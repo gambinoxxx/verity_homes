@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import type { CsvEnquiry } from "@/lib/enquiry-inbox";
+import { packageName, packageSummary } from "@/lib/packages";
 import { plotName } from "@/lib/plots";
 import {
   type EnquiryFilters,
@@ -52,6 +53,9 @@ const rowSelect = {
   property: { select: { id: true, title: true } },
   plan: { select: { id: true, name: true } },
   plot: { select: { label: true, sizeSqm: true } }, // Unit 17b
+  package: {
+    select: { label: true, amountKobo: true, returnAmountKobo: true, tenureMonths: true },
+  }, // Unit 17c
 } satisfies Prisma.EnquirySelect;
 
 export type EnquiryRow = Prisma.EnquiryGetPayload<{ select: typeof rowSelect }>;
@@ -116,6 +120,8 @@ export type EnquiryDetail = {
   plan: { id: string; name: string; published: boolean } | null;
   /** Unit 17b: the plot chosen on an estate page. */
   plot: { name: string; priceKobo: bigint; initialDepositKobo: bigint | null } | null;
+  /** Unit 17c: the package chosen on a plan page. */
+  package: { name: string; summary: string } | null;
 };
 
 export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null> {
@@ -126,6 +132,9 @@ export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null>
       property: { select: { id: true, title: true, slug: true, status: true } },
       plan: { select: { id: true, name: true, status: true } },
       plot: { select: { label: true, sizeSqm: true, priceKobo: true, initialDepositKobo: true } },
+      package: {
+        select: { label: true, amountKobo: true, returnAmountKobo: true, tenureMonths: true },
+      },
     },
   });
   if (!e) return null;
@@ -160,6 +169,9 @@ export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null>
           initialDepositKobo: e.plot.initialDepositKobo,
         }
       : null,
+    package: e.package
+      ? { name: packageName(e.package), summary: packageSummary(e.package) }
+      : null,
   };
 }
 
@@ -182,15 +194,18 @@ export async function exportAdminEnquiries(f: EnquiryFilters): Promise<CsvEnquir
       property: { select: { title: true } },
       plan: { select: { name: true } },
       plot: { select: { label: true, sizeSqm: true } },
+      package: {
+        select: { label: true, amountKobo: true, returnAmountKobo: true, tenureMonths: true },
+      },
     },
   });
-  return rows.map(({ property, plan, plot, ...r }) => ({
+  return rows.map(({ property, plan, plot, package: pkg, ...r }) => ({
     ...r,
     propertyTitle: property
       ? plot
         ? `${property.title} — ${plotName(plot)}`
         : property.title
       : null,
-    planName: plan?.name ?? null,
+    planName: plan ? (pkg ? `${plan.name} — ${packageName(pkg)}` : plan.name) : null,
   }));
 }

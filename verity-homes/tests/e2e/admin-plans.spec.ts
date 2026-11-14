@@ -7,6 +7,7 @@ import {
   restorePlans,
   snapshotPlans,
 } from "./helpers/db";
+import { planPackagesFlow } from "./helpers/plan-packages-flow";
 import { storageStateFor } from "./setup/clerk-users";
 
 // Unit 17: admin plans + FAQs against the TEST database. Plans and FAQs are site-wide (one gold
@@ -37,11 +38,22 @@ test.describe("signed-in admin", () => {
     test.skip(page.viewportSize()!.width < 800, "site-wide changes: desktop project only");
     test.setTimeout(240_000);
     const snapshot = await snapshotPlans();
+    const name = `[SAMPLE] E2E Plan ${randomUUID().slice(0, 8)}`;
     try {
-      await planFlow(page);
+      await planFlow(page, name);
     } finally {
-      await restorePlans(snapshot); // the original gold card + order; E2E plans removed
+      await restorePlans(snapshot, [name]); // the original gold card + order; this plan removed
     }
+  });
+
+  // Unit 17c: admin → publish → home summary card → plan page rows → Select ₦20M → enquiry with
+  // packageId + message → inbox → “guaranteed” refused → unpublish → 404.
+  test("packages: 3 packages → summary card → plan page → select ₦20M → enquiry → inbox → 404", async ({
+    page,
+  }) => {
+    test.skip(page.viewportSize()!.width < 800, "site-wide changes: desktop project only");
+    test.setTimeout(240_000);
+    await planPackagesFlow(page);
   });
 
   test("FAQ: add → publish → on /invest → edit → reorder → delete", async ({ page }) => {
@@ -61,9 +73,7 @@ test.describe("signed-in admin", () => {
   });
 });
 
-async function planFlow(page: Page) {
-  const token = randomUUID().slice(0, 8);
-  const name = `[SAMPLE] E2E Plan ${token}`;
+async function planFlow(page: Page, name: string) {
   const editor = page.getByRole("form", { name: "Plan editor" });
 
   // ---- Draft ----
@@ -76,7 +86,7 @@ async function planFlow(page: Page) {
   await editor.getByLabel("Minimum investment").pressSequentially("2500000");
   await expect(editor.getByLabel("Minimum investment")).toHaveValue("2,500,000");
   await editor.getByLabel("Tenure (months)").fill("6");
-  await editor.getByLabel("Payout").selectOption("MONTHLY");
+  await editor.getByLabel("Payout", { exact: true }).selectOption("MONTHLY");
   await editor.getByRole("button", { name: "Save draft" }).click();
   await toast(page, /Draft saved/);
   await expect(page).toHaveURL(/\/admin\/plans\/(?!new$)[a-z0-9]+$/);
@@ -86,17 +96,29 @@ async function planFlow(page: Page) {
   await pub.goto("/invest");
   await expect(plansRegion(pub).locator("article", { hasText: name })).toHaveCount(0);
 
-  // ---- Publish → /invest and the home page, with the right minimum ----
-  await page
-    .getByRole("form", { name: "Plan editor" })
-    .getByRole("button", { name: "Publish", exact: true })
-    .click();
+  // ---- Publish needs a package, the agreement and payout terms (Unit 17c) ----
+  const ed0 = page.getByRole("form", { name: "Plan editor" });
+  await ed0.getByRole("button", { name: "Publish", exact: true }).click();
+  await expect(ed0.locator('[id$="f-packages-err"]')).toContainText("Add at least one package");
+  expect(await planByName(name)).toMatchObject({ status: "DRAFT" });
+  await ed0.getByRole("button", { name: "Add a package" }).click();
+  await ed0.locator('[id$="f-packages-0-amount"]').pressSequentially("2500000");
+  await ed0.locator('[id$="f-packages-0-receive"]').pressSequentially("2600000");
+  await ed0.locator('[id$="f-packages-0-tenureMonths"]').fill("6");
+  await ed0.getByLabel("Agreement with").fill("[SAMPLE] E2E Company Ltd");
+  await ed0.getByLabel("Payout terms").fill("Paid at maturity, per your signed agreement.");
+
+  // ---- Publish → /invest and the home page, “Invest from” the package ----
+  await ed0.getByRole("button", { name: "Publish", exact: true }).click();
   await toast(page, /Published/);
   await pub.goto("/invest");
   const card = plansRegion(pub).locator("article", { hasText: name });
   await expect(card).toHaveCount(1);
   await expect(card).toContainText("₦2,500,000");
-  await expect(card).toContainText("Rate to be confirmed");
+  await expect(card.getByRole("link", { name: /View plan/ })).toHaveAttribute(
+    "href",
+    /^\/invest\/sample-e2e-plan-/,
+  );
   await pub.goto("/");
   await expect(pub.locator("#invest article", { hasText: name })).toContainText("₦2,500,000");
 

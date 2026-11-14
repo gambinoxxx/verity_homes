@@ -144,6 +144,18 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
   on save (never recreated), because `Enquiry.plotId` (SetNull) points at them. Property also
   has `developerName?`, `paymentPlan?`, `offerNote?`, `offerEndsAt?` (the offer is hidden after
   it — dropped from the cached data and re-checked in the browser) and `termsNote?`.
+- **Investment packages (Unit 17c, migration `20261114090000_investment_packages`)**:
+  `InvestmentPackage` (`planId` cascade, `label?`, `amountKobo`, `returnAmountKobo`,
+  `tenureMonths` 1–120, `sortOrder`) — "invest X, receive Y (expected) after N months".
+  InvestmentPlan gains `slug?` (unique; the migration backfilled existing plans), `description`
+  (Markdown, rendered like blog posts), `partnerName?`, `contractWith?`, `payoutTerms?`,
+  `exitTerms?` and cover fields. With packages, the save keeps `minimumKobo` = the smallest
+  package and `tenureMonths` = the shortest, so the summary cards' "Invest from" stays correct.
+  Gain = receive − invest (exact kobo); "% per year" = ((receive/invest)^(12/months) − 1) × 100,
+  1 decimal (`lib/invest.ts`). Packages are synced by id on save (`Enquiry.packageId`, SetNull).
+  Publishing needs ≥ 1 package, a slug, `contractWith` and `payoutTerms`
+  (`planPublishIssues`). `/invest/[slug]` is published-only (proxy: `RedirectEntity.PLAN`
+  308s an old slug, 404 otherwise); no FAQPage or financial JSON-LD on plan pages.
 - **Users and sessions** live in Clerk. Rows store the Clerk user id as a
   plain string in `createdBy`.
 

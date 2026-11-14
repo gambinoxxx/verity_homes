@@ -1,25 +1,36 @@
 "use client";
 
-// WhatsApp button on the property page that names the chosen plot (Unit 17b). Starts with the
-// listing's own message; after "Select" on a plot it switches to that plot's text.
+// WhatsApp button that names what the visitor picked: a plot on a property page (Unit 17b) or a
+// package on a plan page (Unit 17c). Starts with the page's own message; after "Select" it
+// switches to that choice's text.
 import { useEffect, useState } from "react";
+import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { whatsappLink } from "@/lib/whatsapp";
 
 type Props = {
   number: string | null;
   defaultText: string;
-  propertyId: string;
+  /** The property (plots) or plan (packages) this button belongs to. */
+  ownerId: string;
   className?: string;
   children: React.ReactNode;
 };
 
-export function PlotAwareWhatsApp({ number, defaultText, propertyId, className, children }: Props) {
+export function PlotAwareWhatsApp({ number, defaultText, ownerId, className, children }: Props) {
   const [text, setText] = useState(defaultText);
-  useEffect(
-    () => onPlotSelected((sel) => sel.propertyId === propertyId && setText(sel.whatsappText)),
-    [propertyId],
-  );
+  useEffect(() => {
+    const offPlot = onPlotSelected(
+      (sel) => sel.propertyId === ownerId && setText(sel.whatsappText),
+    );
+    const offPackage = onPackageSelected(
+      (sel) => sel.planId === ownerId && setText(sel.whatsappText),
+    );
+    return () => {
+      offPlot();
+      offPackage();
+    };
+  }, [ownerId]);
   const href = whatsappLink(number, text);
   // No number configured: fall back to the on-page form (as before).
   if (!href)

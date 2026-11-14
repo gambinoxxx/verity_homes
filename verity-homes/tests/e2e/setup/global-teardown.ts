@@ -10,6 +10,7 @@ async function sweepDatabase(url: string) {
   const db = neon(url);
   await db`DELETE FROM "Enquiry" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
   await db`DELETE FROM "InvestmentPlan" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
+  await db`DELETE FROM "SlugRedirect" WHERE entity = 'PLAN' AND "toSlug" LIKE ${"sample-e2e-%"}`;
   await db`DELETE FROM "Faq" WHERE question LIKE ${"[SAMPLE] E2E %"}`;
   const rows = (await db`SELECT slug FROM "Property" WHERE title LIKE ${"[SAMPLE] E2E %"}`) as {
     slug: string;

@@ -22,7 +22,7 @@ export function PlansSection({ plans }: { plans: PlanView[] }) {
             Figures shown here come from the plans the admin publishes.
           </Reveal>
         </div>
-        <PlanGrid plans={plans} ctaHref="#start" exitLine />
+        <PlanGrid plans={plans} />
         <Reveal>
           <InvestDisclaimer />
         </Reveal>
