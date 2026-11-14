@@ -1,7 +1,8 @@
 // Runs once after every Playwright run, even when tests failed or were interrupted mid-way
 // (e.g. a dropped connection skipped a file's afterAll). Removes what e2e tests create — and
 // only that: properties titled "[SAMPLE] E2E …" (with their redirects; photos and documents
-// cascade), enquiries, plans and FAQs named "[SAMPLE] E2E …", and Blob files under e2e/
+// cascade), enquiries, plans, FAQs, blog posts (+ redirects) and categories named
+// "[SAMPLE] E2E …", and Blob files under e2e/
 // (BLOB_PATH_PREFIX). (A plans test restores the gold card and order in its own afterAll.) Real or seed data is never matched.
 import { neon } from "@neondatabase/serverless";
 import { del, list } from "@vercel/blob";
@@ -12,6 +13,17 @@ async function sweepDatabase(url: string) {
   await db`DELETE FROM "InvestmentPlan" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
   await db`DELETE FROM "SlugRedirect" WHERE entity = 'PLAN' AND "toSlug" LIKE ${"sample-e2e-%"}`;
   await db`DELETE FROM "Faq" WHERE question LIKE ${"[SAMPLE] E2E %"}`;
+  // Unit 18: blog posts and categories made by admin-posts.spec.ts (their files are under e2e/).
+  const posts = (await db`SELECT slug FROM "Post" WHERE title LIKE ${"[SAMPLE] E2E %"}`) as {
+    slug: string;
+  }[];
+  if (posts.length) {
+    const postSlugs = posts.map((r) => r.slug);
+    await db`DELETE FROM "Post" WHERE title LIKE ${"[SAMPLE] E2E %"}`;
+    await db`DELETE FROM "SlugRedirect" WHERE entity = 'POST'
+             AND ("toSlug" = ANY(${postSlugs}) OR "fromSlug" = ANY(${postSlugs}))`;
+  }
+  await db`DELETE FROM "Category" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
   const rows = (await db`SELECT slug FROM "Property" WHERE title LIKE ${"[SAMPLE] E2E %"}`) as {
     slug: string;
   }[];

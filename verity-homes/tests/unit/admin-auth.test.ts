@@ -59,6 +59,7 @@ describe("admin sidebar", () => {
       "Investment plans",
       "FAQs",
       "Blog posts",
+      "Categories",
       "Testimonials",
       "Partners",
       "Enquiries",

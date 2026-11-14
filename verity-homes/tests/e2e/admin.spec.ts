@@ -79,6 +79,7 @@ test.describe("signed-in admin", () => {
       "Investment plans",
       "FAQs",
       "Blog posts",
+      "Categories",
       "Testimonials",
       "Partners",
       /^Enquiries(\d+ new)?$/, // + the NEW-count badge
@@ -236,7 +237,12 @@ test.describe("admin dashboard", () => {
       "href",
       "/admin/plans",
     );
-    for (const label of ["Write a blog post", "Update contact details"]) {
+    // Unit 18: writing a blog post is live.
+    await expect(quick.getByRole("link", { name: "Write a blog post" })).toHaveAttribute(
+      "href",
+      "/admin/posts/new",
+    );
+    for (const label of ["Update contact details"]) {
       const item = quick.getByText(label);
       await expect(item).toBeVisible();
       await expect(item).toContainText("Coming soon");
@@ -265,6 +271,9 @@ test.describe("signed-in non-admin", () => {
     "/admin/plans",
     "/admin/plans/new",
     "/admin/faqs",
+    "/admin/posts",
+    "/admin/posts/new",
+    "/admin/categories",
   ]) {
     test(`gets 403 "No admin access" at ${path}`, async ({ page }) => {
       const res = await page.goto(path);

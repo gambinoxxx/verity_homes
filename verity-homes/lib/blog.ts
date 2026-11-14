@@ -58,17 +58,31 @@ export function postJsonLd(
 
 /**
  * Hosts next/image may load in Markdown bodies. Must match `images.remotePatterns` in
- * next.config.ts — Unit 18 adds the Vercel Blob host to both (Open question 23).
+ * next.config.ts: the Vercel Blob public host (Unit 18, Open question 23), where the post
+ * editor's "Insert image" uploads go. "*." matches exactly one subdomain label, like
+ * remotePatterns' `*` hostname wildcard.
  */
-export const MARKDOWN_IMAGE_HOSTS: readonly string[] = [];
+export const MARKDOWN_IMAGE_HOSTS: readonly string[] = ["*.public.blob.vercel-storage.com"];
+
+function hostAllowed(hostname: string, hosts: readonly string[]): boolean {
+  return hosts.some((h) => {
+    if (!h.startsWith("*.")) return hostname === h;
+    const suffix = h.slice(1); // ".public.blob.vercel-storage.com"
+    const label = hostname.slice(0, -suffix.length);
+    return hostname.endsWith(suffix) && /^[a-z0-9-]+$/i.test(label);
+  });
+}
 
 /** The src to render for a Markdown image, or null to skip it (unknown host, bad URL). */
-export function markdownImageSrc(src: string | undefined | null): string | null {
+export function markdownImageSrc(
+  src: string | undefined | null,
+  hosts: readonly string[] = MARKDOWN_IMAGE_HOSTS,
+): string | null {
   if (!src) return null;
   if (src.startsWith("/") && !src.startsWith("//")) return src; // same-site file
   try {
     const u = new URL(src);
-    return u.protocol === "https:" && MARKDOWN_IMAGE_HOSTS.includes(u.hostname) ? src : null;
+    return u.protocol === "https:" && hostAllowed(u.hostname, hosts) ? src : null;
   } catch {
     return null;
   }

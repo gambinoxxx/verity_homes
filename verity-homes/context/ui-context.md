@@ -211,6 +211,13 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Plot options (Unit 17b): editor panels “Plot options” (fieldset rows, ↑↓/×) and
     “Development & offer” (`editor.module.css` `.plotRow`, `.plotOps`); the single Price panel is
     disabled with a note while plots exist.
+  - Blog posts + categories (Unit 18): `components/admin/posts/` reuses the properties list
+    (`properties.module.css`) and editor (`editor.module.css`, `editor-inputs.tsx`) styles;
+    `posts.module.css` adds only the Write/Preview tabs (the list's segmented tabs, as buttons),
+    the Markdown toolbar, the preview pane, the 16:9 cover box and the excerpt counter. The
+    Preview tab renders `components/site/blog/markdown.tsx` inside the global `.prose`. Insert
+    image asks for alt text in a native `<dialog>` (`ui.dialog`). Sidebar: Categories under Blog
+    posts (`tag` glyph). `/admin/categories` is one inline-edited table.
 - **Property page plots (Unit 17b)**: `components/site/property/plots.tsx` — “Choose your plot”
   under the facts strip (a 5-column table; stacked cards ≤ 700 px), `OfferNote`; notes box
   `.terms` (cream); head shows “From ₦…”, “Initial deposit from ₦…” and “A development by …”.

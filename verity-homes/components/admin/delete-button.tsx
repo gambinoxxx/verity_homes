@@ -2,7 +2,7 @@
 
 // Delete with a confirm dialog that names the item (native <dialog>: focus moves in, Esc
 // closes, focus returns to the button). Used for properties (Unit 14), plans and FAQs
-// (Unit 17). `action` is the item's server action (Zod → requireAdmin → delete).
+// (Unit 17), blog posts (Unit 18). `action` is the item's server action (Zod → requireAdmin → delete).
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 import { toast } from "sonner";
@@ -108,3 +108,7 @@ export function DeleteButton({
 /** The property dialog text (Unit 14). */
 export const PROPERTY_DELETE_BODY =
   "This removes the listing and all its photos and documents. Its web address will stop working. This can't be undone.";
+
+/** The blog post dialog text (Unit 18). */
+export const POST_DELETE_BODY =
+  "This removes the article, its cover and every image in it. Its web address will stop working. This can't be undone.";

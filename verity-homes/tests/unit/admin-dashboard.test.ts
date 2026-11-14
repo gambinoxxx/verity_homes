@@ -57,10 +57,14 @@ describe("built admin routes", () => {
       "/admin/plans",
       "/admin/plans/new",
       "/admin/faqs",
+      "/admin/posts",
+      "/admin/posts/new",
+      "/admin/categories",
     ]);
     expect(isAdminRouteBuilt("/admin")).toBe(true);
     expect(isAdminRouteBuilt("/admin/properties/new")).toBe(true);
-    expect(isAdminRouteBuilt("/admin/posts/new")).toBe(false);
+    expect(isAdminRouteBuilt("/admin/posts/new")).toBe(true); // Unit 18
+    expect(isAdminRouteBuilt("/admin/testimonials")).toBe(false);
     expect(isAdminRouteBuilt("/admin/settings?tab=contact")).toBe(false);
     expect(isAdminRouteBuilt("/privacy")).toBe(true);
     expect(isAdminRouteBuilt("/admin/plans", new Set(["/admin/plans"]))).toBe(true);

@@ -46,7 +46,8 @@ no public page loads Clerk (Open question 42).
 - `app/admin/sign-in/[[...sign-in]]/` — The Clerk `<SignIn />` page (in `<Suspense>`).
 - `app/admin/no-access/` — 403 page for signed-in users without the admin role.
 - `app/api/blob/upload/` — Route handler that issues Vercel Blob client
-  upload tokens, admin only.
+  upload tokens, admin only (property photos, Unit 15; blog post covers and body images,
+  Unit 18).
 - `app/sitemap.ts`, `app/robots.ts` — SEO files.
 - `proxy.ts` — From Unit 6 (and `/blog/[slug]` from Unit 11): answers `/properties/[slug]` with the real status before the
   page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
@@ -66,9 +67,9 @@ no public page loads Clerk (Open question 42).
   Zod, checks `requireAdmin()` for admin actions, writes, then calls
   `revalidatePath`.
 - `lib/validation/` — Zod schemas shared by forms and actions.
-- `lib/storage/` — Blob wrapper: `remove`, `handlePhotoUpload` (token route), `blobPathPrefix`
-  (server, `index.ts`) and `uploadPhotoFile` (browser, `client.ts`). The only importer of
-  `@vercel/blob`.
+- `lib/storage/` — Blob wrapper: `remove`, `listFolder`, `handleImageUpload` (token route;
+  `uploadTargetFromPathname` → a property's or a post's folder), `blobPathPrefix` (server,
+  `index.ts`) and `uploadPhotoFile` (browser, `client.ts`). The only importer of `@vercel/blob`.
 - `lib/email/` — Resend client and templates. The only importer of `resend`.
   `client.ts` (lazy client), `enquiry-template.ts` (pure: subject/HTML/text),
   `enquiry.ts` (`sendEnquiryEmail`, never throws).
@@ -92,6 +93,16 @@ no public page loads Clerk (Open question 42).
   `lib/db/mutations/plans.ts` — plans and FAQs admin (Unit 17); actions `updateTag("plans")` /
   `updateTag("faqs")`. Only one plan is highlighted: `clearOtherHighlights()` runs in the same
   transaction as the save.
+- `lib/actions/post.ts` (create/update/publish/unpublish/delete) + `lib/actions/category.ts`
+  (create/update/delete) + `lib/db/mutations/posts.ts` + `lib/db/queries/admin-posts.ts` — blog
+  admin (Unit 18); actions `updateTag("posts")` + `/`, `/blog`, `/blog/<slug>`. Schema
+  `lib/validation/post.ts` (shared with the editor; `postPublishIssues`). Post images live in Blob
+  under `posts/<id>/` (cover) and `posts/<id>/inline/` (body), `lib/post-images.ts`. A save
+  lists the folder and deletes files the post no longer uses (`unreferencedImages`: not the cover
+  and not mentioned in the body — old covers, images removed from the body, uploads never
+  inserted); delete removes the whole folder. `lib/post-content.ts`: word count, reading time
+  (200 wpm, min 1), unsafe-link check. `lib/markdown-format.ts`: the editor toolbar's text edits.
+  Categories are deleted only when no post (any status) uses them.
 - `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
   apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).
@@ -104,11 +115,12 @@ no public page loads Clerk (Open question 42).
   (naira) per listing type, shared by the home search and the `/properties` filters.
 - `lib/invest.ts` — Shared investment copy: the disclaimer and the 4 steps.
 - `lib/blog.ts` — Post helpers: share links, meta description, Article JSON-LD, and the Markdown
-  link/image rules (`markdownLinkKind`, `markdownImageSrc`, `MARKDOWN_IMAGE_HOSTS`).
+  link/image rules (`markdownLinkKind`, `markdownImageSrc`, `MARKDOWN_IMAGE_HOSTS` =
+  `*.public.blob.vercel-storage.com`, one label like `images.remotePatterns`; Unit 18, Q23).
   `lib/validation/blog-filters.ts` parses `/blog` params (`category`, `q`, `page`).
 - `components/site/blog/markdown.tsx` — The only Markdown renderer: react-markdown + remark-gfm,
   `skipHtml` (raw HTML is never rendered), default `urlTransform`, safe external links, images only
-  from known hosts. Unit 18's preview must use this same component.
+  from known hosts. The admin post editor's Preview tab renders this same component (Unit 18).
 - `components/site/privacy/privacy-notice.tsx` — The /privacy DRAFT notice. It describes what the
   code collects; when a unit changes what is collected, stored or shared (new form field, new
   processor, analytics, cookies), update the notice and `PRIVACY_LAST_UPDATED` in the same unit.

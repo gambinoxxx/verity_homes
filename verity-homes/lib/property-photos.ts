@@ -41,13 +41,18 @@ const EXT: Record<string, string> = {
  * Upload pathname: `<prefix>properties/<propertyId>/<name>.<ext>`. Blob adds a random suffix
  * before the extension. `prefix` is "" in production and "e2e/" in Playwright runs.
  */
+/** File extension for an uploaded image's content type (jpg by default). */
+export function photoExt(contentType: string): string {
+  return EXT[contentType] ?? "jpg";
+}
+
 export function photoPathname(
   prefix: string,
   propertyId: string,
   fileName: string,
   contentType: string,
 ): string {
-  return `${prefix}properties/${propertyId}/${photoBaseName(fileName)}.${EXT[contentType] ?? "jpg"}`;
+  return `${prefix}properties/${propertyId}/${photoBaseName(fileName)}.${photoExt(contentType)}`;
 }
 
 const ID_RE = /^[a-z0-9]{8,40}$/;

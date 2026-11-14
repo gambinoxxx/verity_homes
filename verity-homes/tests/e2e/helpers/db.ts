@@ -371,3 +371,70 @@ export async function deleteE2ePlans(names: string[]): Promise<void> {
     await db`DELETE FROM "SlugRedirect" WHERE entity = 'PLAN'
              AND ("toSlug" = ANY(${slugs}) OR "fromSlug" = ANY(${slugs}))`;
 }
+
+// ---- Admin blog posts + categories (Unit 18) ----
+
+export type PostRow = {
+  id: string;
+  slug: string;
+  status: string;
+  publishedAt: Date | null;
+  coverUrl: string | null;
+  coverAlt: string;
+  content: string;
+  readingMinutes: number;
+  categoryId: string | null;
+};
+
+export async function findPostByTitle(title: string): Promise<PostRow | null> {
+  const rows = (await sql()`
+    SELECT id, slug, status::text AS status, "publishedAt", "coverUrl", "coverAlt", content,
+           "readingMinutes", "categoryId"
+    FROM "Post" WHERE title = ${title} LIMIT 1`) as PostRow[];
+  return rows[0] ?? null;
+}
+
+export async function findPostById(id: string): Promise<PostRow | null> {
+  const rows = (await sql()`
+    SELECT id, slug, status::text AS status, "publishedAt", "coverUrl", "coverAlt", content,
+           "readingMinutes", "categoryId"
+    FROM "Post" WHERE id = ${id} LIMIT 1`) as PostRow[];
+  return rows[0] ?? null;
+}
+
+/** A draft "[SAMPLE] E2E …" post (no category) to edit; returns its id. */
+export async function insertE2ePost(title: string, slug: string): Promise<string> {
+  if (!title.startsWith("[SAMPLE] E2E ")) throw new Error("titles must start '[SAMPLE] E2E '");
+  const id = `e2e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  await sql()`
+    INSERT INTO "Post" (id, slug, title, excerpt, content, status, "createdAt", "updatedAt")
+    VALUES (${id}, ${slug}, ${title}, '', '', 'DRAFT', now(), now())`;
+  return id;
+}
+
+export async function categoryByName(name: string): Promise<{ id: string; slug: string } | null> {
+  const rows = (await sql()`SELECT id, slug FROM "Category" WHERE name = ${name}`) as {
+    id: string;
+    slug: string;
+  }[];
+  return rows[0] ?? null;
+}
+
+/** Deletes this test's own "[SAMPLE] E2E …" posts (by title) and their redirects. */
+export async function cleanUpE2ePosts(titles: string[]): Promise<void> {
+  const own = titles.filter((t) => t.startsWith("[SAMPLE] E2E "));
+  if (!own.length) return;
+  const db = sql();
+  const rows = (await db`SELECT slug FROM "Post" WHERE title = ANY(${own})`) as { slug: string }[];
+  const slugs = rows.map((r) => r.slug);
+  await db`DELETE FROM "Post" WHERE title = ANY(${own})`;
+  if (slugs.length)
+    await db`DELETE FROM "SlugRedirect" WHERE entity = 'POST'
+             AND ("toSlug" = ANY(${slugs}) OR "fromSlug" = ANY(${slugs}))`;
+}
+
+/** Deletes this test's own "[SAMPLE] E2E …" categories (posts using them keep, uncategorised). */
+export async function cleanUpE2eCategories(names: string[]): Promise<void> {
+  const own = names.filter((n) => n.startsWith("[SAMPLE] E2E "));
+  if (own.length) await sql()`DELETE FROM "Category" WHERE name = ANY(${own})`;
+}

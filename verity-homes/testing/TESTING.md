@@ -178,7 +178,9 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
 - Needs a real `BLOB_READ_WRITE_TOKEN` in `.env.test`, for a **public** Blob store.
 - `tests/e2e/setup/global-teardown.ts` runs after every Playwright run, even an interrupted one.
   It removes properties titled "[SAMPLE] E2E …" (and their redirects) and every Blob file under
-  `e2e/`, so a dropped connection can't leave test data behind.
+  `e2e/`, so a dropped connection can't leave test data behind. Since Unit 18 it also removes
+  blog posts (+ POST redirects) and categories named "[SAMPLE] E2E …"; post covers and body
+  images upload under `e2e/posts/<id>/` (`admin-posts.spec.ts`).
 
 ## 7. Before launch (Unit 21)
 

@@ -1,0 +1,212 @@
+/* Post editor additions (Unit 18). Everything else comes from properties/editor.module.css and
+   ui.module.css: Write/Preview tabs (the list's segmented tabs, as buttons), the Markdown
+   toolbar, the preview pane, the cover box and the excerpt counter. */
+
+/* ---- Write / Preview ---- */
+.bodyHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--bg-subtle);
+  padding: 4px;
+  border-radius: 12px;
+}
+.tabs button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.tabs button[aria-selected="true"] {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+.tabs button:focus-visible,
+.tool:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.tool:not(:disabled):hover {
+  border-color: var(--bg-navy);
+}
+.tool:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.tool svg {
+  width: 14px;
+  height: 14px;
+}
+.italic {
+  font-style: italic;
+  font-family: var(--font-display), serif;
+}
+/* doubled class: beats editor.module.css `.f textarea` without !important */
+textarea.body.body {
+  min-height: 420px;
+  font-size: 15px;
+}
+.preview {
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 8px 24px 24px;
+  min-height: 420px;
+  background: var(--bg-base);
+  overflow-wrap: anywhere;
+}
+.previewEmpty {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding-top: 16px;
+}
+.bodyMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.bodyMeta b {
+  color: var(--text-primary);
+}
+.status {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* ---- Excerpt counter ---- */
+.counter {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.over {
+  color: var(--alert-warn-text);
+  font-weight: 700;
+}
+
+/* ---- Cover ---- */
+.coverBox {
+  position: relative;
+  max-width: 480px;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+}
+.coverBox img {
+  object-fit: cover;
+}
+.coverActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+
+/* ---- New category (inline) ---- */
+.newCat {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.newCat input {
+  flex: 1 1 180px;
+}
+.linkBtn {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  min-height: 32px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---- Categories page ---- */
+.catForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+.catForm input {
+  flex: 1 1 240px;
+}
+.catName {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.catName input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.blocked {
+  align-self: center;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--alert-warn-text);
+  font-weight: 700;
+}
+
+/* ---- Posts list: long titles (Unit 18) ---- */
+/* The table scrolls inside its box on phones; keep titles readable instead of 2 words a line. */
+.postCell {
+  min-width: 300px;
+}
+.slug {
+  display: block;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

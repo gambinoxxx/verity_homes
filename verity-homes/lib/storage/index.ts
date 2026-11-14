@@ -1,9 +1,12 @@
 // Vercel Blob access (server). The only importers of @vercel/blob are this folder's files
 // (eslint no-restricted-imports). Unit 14: remove(). Unit 15: client-upload token route.
+// Unit 18: the token route also takes blog post images (posts/<id>/…), and listFolder() finds a
+// post's files for the clean-up on save and delete.
 import "server-only";
-import { del } from "@vercel/blob";
+import { del, list } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { blobEnv } from "@/lib/env";
+import { postIdFromPathname } from "@/lib/post-images";
 import {
   MAX_PHOTO_BYTES,
   PHOTO_CONTENT_TYPES,
@@ -46,16 +49,45 @@ export async function remove(urls: readonly string[]): Promise<{ removed: number
   return { removed: blobs.length };
 }
 
-export type UploadGate = (propertyId: string) => Promise<void>;
+/**
+ * Every file under `folder` (e.g. "posts/<id>/"), as URLs. Used to find a post's uploads; an
+ * empty or malformed folder never lists the whole store.
+ */
+export async function listFolder(folder: string): Promise<string[]> {
+  if (!/^([a-z0-9-]+\/)+$/.test(folder)) return [];
+  const { BLOB_READ_WRITE_TOKEN } = blobEnv();
+  const urls: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix: folder, cursor, token: BLOB_READ_WRITE_TOKEN });
+    urls.push(...page.blobs.map((b) => b.url));
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  return urls;
+}
+
+/** Where an upload is going: a property's photos (Unit 15) or a blog post's images (Unit 18). */
+export type UploadTarget = { kind: "property"; id: string } | { kind: "post"; id: string };
+
+export function uploadTargetFromPathname(prefix: string, pathname: string): UploadTarget | null {
+  const propertyId = propertyIdFromPathname(prefix, pathname);
+  if (propertyId) return { kind: "property", id: propertyId };
+  const postId = postIdFromPathname(prefix, pathname);
+  if (postId) return { kind: "post", id: postId };
+  return null;
+}
+
+export type UploadGate = (target: UploadTarget) => Promise<void>;
 
 /**
  * Client-upload token endpoint (app/api/blob/upload/route.ts). `authorize` runs inside
- * onBeforeGenerateToken (requireAdmin + the property exists + photo limit) and throws to refuse.
- * Uploads: JPEG/PNG/WebP, ≤ 10 MB, random suffix, only into `<prefix>properties/<id>/`.
- * No onUploadCompleted: the browser saves the row itself through a server action, because
- * Blob's completion webhook can't reach localhost.
+ * onBeforeGenerateToken (requireAdmin + the property/post exists + limits) and throws to refuse.
+ * Uploads: JPEG/PNG/WebP, ≤ 10 MB, random suffix, only into `<prefix>properties/<id>/` or
+ * `<prefix>posts/<id>/[inline/]`.
+ * No onUploadCompleted: the browser saves the result itself through a server action or the
+ * editor's save, because Blob's completion webhook can't reach localhost.
  */
-export async function handlePhotoUpload(
+export async function handleImageUpload(
   request: Request,
   body: HandleUploadBody,
   authorize: UploadGate,
@@ -67,9 +99,9 @@ export async function handlePhotoUpload(
     request,
     body,
     onBeforeGenerateToken: async (pathname) => {
-      const propertyId = propertyIdFromPathname(prefix, pathname);
-      if (!propertyId) throw new UploadRefused("Photos must go into a property's folder.");
-      await authorize(propertyId);
+      const target = uploadTargetFromPathname(prefix, pathname);
+      if (!target) throw new UploadRefused("Images must go into a property's or a post's folder.");
+      await authorize(target);
       return {
         allowedContentTypes: [...PHOTO_CONTENT_TYPES],
         maximumSizeInBytes: MAX_PHOTO_BYTES,

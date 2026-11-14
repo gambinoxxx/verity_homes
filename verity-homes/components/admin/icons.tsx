@@ -30,6 +30,12 @@ const PATHS: Record<
     </>
   ),
   pen: <path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" strokeLinejoin="round" />,
+  tag: (
+    <>
+      <path d="M3 12V4h8l10 10-8 8z" strokeLinejoin="round" />
+      <circle cx="7.5" cy="8.5" r="1.5" />
+    </>
+  ),
   quote: <path d="M5 17V12c0-3 2-5 5-5M14 17v-5c0-3 2-5 5-5M5 17h4v-5H5M14 17h4v-5h-4" />,
   hand: <path d="M3 12l4-4 5 2 3-2 6 5-5 5-4-2-3 2z" strokeLinecap="round" />,
   inbox: (
