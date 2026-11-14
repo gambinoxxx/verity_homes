@@ -38,7 +38,11 @@ export function EnquiryDetailPanel({
     e.phone,
     whatsappReply({
       name: e.name,
-      propertyTitle: e.property?.title ?? null,
+      propertyTitle: e.property
+        ? e.plot
+          ? `the ${e.plot.name} at ${e.property.title}`
+          : e.property.title
+        : null,
       planName: e.plan?.name ?? null,
     }),
   );
@@ -95,6 +99,17 @@ export function EnquiryDetailPanel({
                   {e.property.title} <span className={styles.muted}>(not published)</span>
                 </>
               )}
+            </dd>
+          </>
+        ) : null}
+        {e.plot ? (
+          <>
+            <dt>Plot</dt>
+            <dd data-testid="enquiry-plot">
+              {e.plot.name} — {formatNaira(e.plot.priceKobo)}
+              {e.plot.initialDepositKobo !== null
+                ? ` (deposit ${formatNaira(e.plot.initialDepositKobo)})`
+                : ""}
             </dd>
           </>
         ) : null}

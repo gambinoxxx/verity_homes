@@ -128,6 +128,7 @@ export async function getAdminProperty(id: string): Promise<AdminPropertyEditor 
         select: { id: true, url: true, alt: true, width: true, height: true },
       },
       documents: { orderBy: { sortOrder: "asc" } },
+      plots: { orderBy: { sortOrder: "asc" } },
     },
   });
   if (!p) return null;
@@ -168,6 +169,22 @@ export async function getAdminProperty(id: string): Promise<AdminPropertyEditor 
       projectStatus: p.projectStatus ?? "",
       seoTitle: p.seoTitle ?? "",
       seoDescription: p.seoDescription ?? "",
+      plots: p.plots.map((x) => ({
+        id: x.id,
+        label: x.label ?? "",
+        sizeSqm: String(x.sizeSqm),
+        price: nairaInputFromKobo(x.priceKobo),
+        deposit: nairaInputFromKobo(x.initialDepositKobo),
+        suitableFor: x.suitableFor ?? "",
+      })),
+      developerName: p.developerName ?? "",
+      paymentPlan: p.paymentPlan ?? "",
+      offerNote: p.offerNote ?? "",
+      // the date in Lagos (offers end at 23:59 Lagos time on that day)
+      offerEndsAt: p.offerEndsAt
+        ? new Date(p.offerEndsAt.getTime() + 3_600_000).toISOString().slice(0, 10)
+        : "",
+      termsNote: p.termsNote ?? "",
       photos: p.images.map((i) => ({ id: i.id, alt: i.alt })),
       removedPhotoIds: [],
     },

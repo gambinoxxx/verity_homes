@@ -10,7 +10,8 @@ import type {
   PropertyType,
   TitleDocument,
 } from "@/lib/generated/prisma/client";
-import { formatPrice } from "@/lib/format";
+import { formatListingPrice } from "@/lib/format";
+import { depositLabel, plotSizeRange } from "@/lib/plots";
 import {
   optionalDecimalToNumber,
   optionalKoboToNumber,
@@ -44,6 +45,8 @@ const cardSelect = {
   area: true,
   city: true,
   images: coverImage,
+  // Unit 17b: plot sizes/prices for "From ₦…" and "300–1,000 sqm"
+  plots: { orderBy: { sortOrder: "asc" }, select: { sizeSqm: true, priceKobo: true } },
 } as const satisfies Prisma.PropertySelect;
 
 // Deliberately has no `address` key.
@@ -66,6 +69,22 @@ const detailSelect = {
     select: { id: true, url: true, alt: true, width: true, height: true },
   },
   documents: { orderBy: { sortOrder: "asc" }, select: { id: true, name: true, verified: true } },
+  plots: {
+    orderBy: { sortOrder: "asc" },
+    select: {
+      id: true,
+      label: true,
+      sizeSqm: true,
+      priceKobo: true,
+      initialDepositKobo: true,
+      suitableFor: true,
+    },
+  },
+  developerName: true,
+  paymentPlan: true,
+  offerNote: true,
+  offerEndsAt: true,
+  termsNote: true,
 } as const satisfies Prisma.PropertySelect;
 
 type CardRow = Prisma.PropertyGetPayload<{ select: typeof cardSelect }>;
@@ -89,6 +108,10 @@ export type PropertyCard = {
   pricePeriod: PricePeriod;
   priceOnRequest: boolean;
   priceLabel: string;
+  /** "300–1,000 sqm" when the listing has plots; otherwise null (use sizeSqm). */
+  sizeLabel: string | null;
+  /** Number of plot options (0 for an ordinary listing). */
+  plotCount: number;
   bedrooms: number | null;
   bathrooms: number | null;
   sizeSqm: number | null;
@@ -98,7 +121,24 @@ export type PropertyCard = {
   cover: PropertyImageView | null;
 };
 
+export type PlotView = {
+  id: string;
+  label: string | null;
+  sizeSqm: number;
+  priceKobo: number;
+  initialDepositKobo: number | null;
+  suitableFor: string | null;
+};
+
 export type PropertyDetail = Omit<PropertyCard, "cover"> & {
+  plots: PlotView[];
+  /** "Initial deposit from ₦1,000,000", or null. */
+  depositLabel: string | null;
+  developerName: string | null;
+  paymentPlan: string | null;
+  offerNote: string | null;
+  offerEndsAt: Date | null;
+  termsNote: string | null;
   parkingSpaces: number | null;
   completionDate: Date | null;
   description: string;
@@ -116,21 +156,31 @@ export type PropertyDetail = Omit<PropertyCard, "cover"> & {
 };
 
 function toCard(row: CardRow): PropertyCard {
-  const { images, priceKobo, ...rest } = row;
+  const { images, priceKobo, plots, ...rest } = row;
   return {
     ...rest,
     priceKobo: optionalKoboToNumber(priceKobo),
-    priceLabel: formatPrice(row),
+    priceLabel: formatListingPrice(row),
+    sizeLabel: plotSizeRange(plots),
+    plotCount: plots.length,
     cover: images[0] ?? null,
   };
 }
 
 function toDetail(row: DetailRow): PropertyDetail {
-  const { images, priceKobo, latitude, longitude, nearby, ...rest } = row;
+  const { images, priceKobo, latitude, longitude, nearby, plots, ...rest } = row;
   return {
     ...rest,
     priceKobo: optionalKoboToNumber(priceKobo),
-    priceLabel: formatPrice(row),
+    priceLabel: formatListingPrice(row),
+    sizeLabel: plotSizeRange(plots),
+    plotCount: plots.length,
+    plots: plots.map((p) => ({
+      ...p,
+      priceKobo: Number(p.priceKobo),
+      initialDepositKobo: optionalKoboToNumber(p.initialDepositKobo),
+    })),
+    depositLabel: depositLabel(plots),
     latitude: optionalDecimalToNumber(latitude),
     longitude: optionalDecimalToNumber(longitude),
     nearby: parseNearby(nearby),
@@ -215,17 +265,24 @@ function buildWhere(f: PropertyFilters): Prisma.PropertyWhereInput {
   if (f.beds != null && f.beds > 0) and.push({ bedrooms: { gte: f.beds } });
   if (f.title && f.title.length > 0) and.push({ titleDocument: { in: f.title } });
   if (f.min != null || f.max != null) {
+    const range = {
+      ...(f.min != null ? { gte: BigInt(Math.round(f.min)) * 100n } : {}),
+      ...(f.max != null ? { lte: BigInt(Math.round(f.max)) * 100n } : {}),
+    };
+    // Unit 17b: a listing with plots matches when ANY plot's price is in range (an estate with
+    // ₦18M–₦70M plots is found by min=25M); other listings use their own price.
     and.push({
-      priceOnRequest: false,
-      priceKobo: {
-        ...(f.min != null ? { gte: BigInt(Math.round(f.min)) * 100n } : {}),
-        ...(f.max != null ? { lte: BigInt(Math.round(f.max)) * 100n } : {}),
-      },
+      OR: [
+        { plots: { none: {} }, priceOnRequest: false, priceKobo: range },
+        { plots: { some: { priceKobo: range } } },
+      ],
     });
   }
   return { AND: and };
 }
 
+// Price sorting uses Property.priceKobo, which the admin save keeps equal to the cheapest plot
+// for listings with plots (Unit 17b) — "From ₦…" sorts by its lowest price.
 function buildOrder(sort: PropertyFilters["sort"]): Prisma.PropertyOrderByWithRelationInput[] {
   if (sort === "price-asc") return [{ priceKobo: { sort: "asc", nulls: "last" } }, ...newestFirst];
   if (sort === "price-desc")
@@ -301,7 +358,12 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
   cacheTag(PROPERTIES_TAG);
   cacheLife("max");
   const row = await db.property.findFirst({ where: { ...PUBLISHED, slug }, select: detailSelect });
-  return row ? toDetail(row) : null;
+  if (!row) return null;
+  const detail = toDetail(row);
+  // Unit 17b: an offer that has already ended isn't sent at all (the page's OfferNote also
+  // re-checks the date in the browser, for an offer that ends while this entry is cached).
+  if (detail.offerEndsAt && detail.offerEndsAt.getTime() <= Date.now()) detail.offerNote = null;
+  return detail;
 }
 
 /**

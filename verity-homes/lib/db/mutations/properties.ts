@@ -43,6 +43,11 @@ function columns(d: PropertyData) {
     projectStatus: d.projectStatus,
     seoTitle: d.seoTitle,
     seoDescription: d.seoDescription,
+    developerName: d.developerName,
+    paymentPlan: d.paymentPlan,
+    offerNote: d.offerNote,
+    offerEndsAt: d.offerEndsAt,
+    termsNote: d.termsNote,
   } satisfies Prisma.PropertyUncheckedUpdateInput;
 }
 
@@ -62,6 +67,7 @@ export async function insertProperty(d: PropertyData, slug: string, createdBy: s
       status: "DRAFT",
       createdBy,
       documents: { create: documentRows(d) },
+      plots: { create: d.plots.map(plotColumns) },
     },
     select: { id: true, slug: true, status: true },
   });
@@ -96,6 +102,7 @@ export async function savePropertyEdits(
 ): Promise<{ id: string; slug: string; status: string; removedPhotoUrls: string[] }> {
   return db.$transaction(async (tx) => {
     const removedPhotoUrls = d.photos ? await syncPhotos(tx, id, d.photos) : [];
+    await syncPlots(tx, id, d.plots);
     const updated = await tx.property.update({
       where: { id },
       data: {
@@ -125,6 +132,38 @@ export async function savePropertyEdits(
 }
 
 type Tx = Parameters<Parameters<typeof db.$transaction>[0]>[0];
+
+/** A plot's columns (everything but its id). */
+function plotColumns(p: PropertyData["plots"][number]) {
+  return {
+    label: p.label,
+    sizeSqm: p.sizeSqm,
+    priceKobo: p.priceKobo,
+    initialDepositKobo: p.initialDepositKobo,
+    suitableFor: p.suitableFor,
+    sortOrder: p.sortOrder,
+  };
+}
+
+/**
+ * Plot options as the editor left them (Unit 17b). Rows keep their ids — enquiries point at a
+ * plot (plotId) — so existing plots are updated in place, new ones created, and plots no longer
+ * in the list deleted (their enquiries keep the property link; plotId becomes null).
+ */
+async function syncPlots(tx: Tx, propertyId: string, plots: PropertyData["plots"]) {
+  const existing = await tx.propertyPlot.findMany({ where: { propertyId }, select: { id: true } });
+  const keep = new Set(plots.flatMap((p) => (p.id ? [p.id] : [])));
+  const gone = existing.filter((e) => !keep.has(e.id)).map((e) => e.id);
+  if (gone.length) await tx.propertyPlot.deleteMany({ where: { propertyId, id: { in: gone } } });
+  const known = new Set(existing.map((e) => e.id));
+  for (const p of plots) {
+    if (p.id && known.has(p.id)) {
+      await tx.propertyPlot.update({ where: { id: p.id }, data: plotColumns(p) });
+    } else {
+      await tx.propertyPlot.create({ data: { ...plotColumns(p), propertyId } });
+    }
+  }
+}
 
 /**
  * Photos as the editor left them: `removedIds` are deleted (their URLs returned so the caller

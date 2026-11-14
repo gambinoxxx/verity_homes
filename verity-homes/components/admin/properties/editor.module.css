@@ -223,6 +223,26 @@
   color: var(--text-muted);
 }
 
+/* ---- Plot options (Unit 17b) ---- */
+.plotRow {
+  margin: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  min-width: 0;
+}
+.plotRow legend {
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.plotOps {
+  display: flex;
+  gap: 6px;
+  min-height: 44px;
+  align-items: center;
+}
+
 /* ---- Photos (design .drop / .photos / .photo) ---- */
 .drop {
   border: 2px dashed var(--border-input);

@@ -10,6 +10,7 @@ import { clientIp, hashIp } from "@/lib/ip-hash";
 import {
   countEnquiriesSince,
   findPublishedPlanRef,
+  findPlotRef,
   findPublishedPropertyRef,
   markEnquiryEmailSent,
   saveEnquiry,
@@ -86,9 +87,10 @@ export async function createEnquiry(
     if (recent >= RATE_LIMIT) return { ok: false, error: MESSAGES.rateLimited };
 
     // Links must point at published content; anything else is dropped, the enquiry still counts.
-    const [property, plan] = await Promise.all([
+    const [property, plan, plot] = await Promise.all([
       input.propertyId ? findPublishedPropertyRef(input.propertyId) : null,
       input.planId ? findPublishedPlanRef(input.planId) : null,
+      input.plotId && input.propertyId ? findPlotRef(input.plotId, input.propertyId) : null,
     ]);
 
     // 3. Save first.
@@ -101,6 +103,7 @@ export async function createEnquiry(
       source: input.source,
       propertyId: property?.id ?? null,
       planId: plan?.id ?? null,
+      plotId: property && plot ? plot.id : null,
       wantsInspection: input.wantsInspection,
       amountKobo,
       ipHash,

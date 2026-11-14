@@ -92,12 +92,16 @@ export function PriceInput({
   onBlur,
   name,
   inputRef,
+  disabled,
+  placeholder = "e.g. 250,000,000",
   ...aria
 }: {
   value: string;
   onChange: (v: string) => void;
   onBlur: () => void;
   name: string;
+  disabled?: boolean;
+  placeholder?: string;
   /** React Hook Form field.ref (a callback; lets the form focus this input on errors). */
   inputRef: (el: HTMLInputElement | null) => void;
   id: string;
@@ -130,7 +134,8 @@ export function PriceInput({
       name={name}
       inputMode="decimal"
       autoComplete="off"
-      placeholder="e.g. 250,000,000"
+      placeholder={placeholder}
+      disabled={disabled}
       value={value}
       onBlur={onBlur}
       onChange={(e) => {

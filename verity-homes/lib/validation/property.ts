@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { koboFromNaira } from "@/lib/format";
 import { ALT_MAX, MAX_PHOTOS } from "@/lib/property-photos";
+import { GUARANTEE_MESSAGE, mentionsGuarantee } from "./no-guarantee";
 
 export const LISTING_TYPES = ["SALE", "RENT", "LAND", "OFF_PLAN"] as const;
 export const PROPERTY_TYPES = [
@@ -56,6 +57,11 @@ export const LIMITS = {
   area: 80,
   city: 80,
   address: 200,
+  plots: 20,
+  plotLabel: 60,
+  suitableFor: 80,
+  developerName: 100,
+  note: 200,
 } as const;
 
 /** Field rules and their own types — what applies to which listing (used by the form too). */
@@ -85,6 +91,56 @@ const optionalCoord = (label: string, limit: number) =>
       (n) => n === null || Math.abs(n) <= limit,
       `${label} must be between -${limit} and ${limit}`,
     );
+
+/** Text that must not promise returns ("guarantee", "guaranteed"). Unit 17b fields. */
+const plainCopy = (max: number, tooLong: string) =>
+  text(max, tooLong).refine((v) => !mentionsGuarantee(v), GUARANTEE_MESSAGE);
+
+const nairaAmount = (label: string, required: boolean) =>
+  z
+    .string()
+    .trim()
+    .superRefine((v, ctx) => {
+      if (v === "") {
+        if (required) ctx.addIssue({ code: "custom", message: `Add the ${label}` });
+        return;
+      }
+      try {
+        if (koboFromNaira(v) <= 0n)
+          ctx.addIssue({ code: "custom", message: `Enter a ${label} above ₦0` });
+      } catch {
+        ctx.addIssue({ code: "custom", message: `Enter the ${label} in naira, e.g. 18,000,000` });
+      }
+    });
+
+/** One plot size on an estate (Unit 17b). */
+const plotSchema = z
+  .object({
+    id: z.string().max(40).optional(),
+    label: plainCopy(LIMITS.plotLabel, "Keep the plot name under 60 characters"),
+    sizeSqm: z
+      .string()
+      .trim()
+      .refine((v) => /^\d+$/.test(v) && Number(v) > 0, "Size: a whole number of sqm above 0")
+      .transform(Number)
+      .refine((n) => n <= 10_000_000, "Size looks too large"),
+    price: nairaAmount("plot price", true),
+    deposit: nairaAmount("deposit", false),
+    suitableFor: plainCopy(LIMITS.suitableFor, "Keep “suitable for” under 80 characters"),
+  })
+  .superRefine((p, ctx) => {
+    try {
+      if (p.deposit !== "" && koboFromNaira(p.deposit) > koboFromNaira(p.price)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deposit"],
+          message: "The deposit can't be more than the plot price",
+        });
+      }
+    } catch {
+      // amount errors are reported on the fields themselves
+    }
+  });
 
 const documentSchema = z.object({
   id: z.string().max(40).optional(),
@@ -150,6 +206,21 @@ export const propertySchema = z
     projectStatus: z.union([z.literal(""), z.enum(PROJECT_STATUSES)]),
     seoTitle: text(LIMITS.seoTitle, "Keep the SEO title under 70 characters"),
     seoDescription: text(LIMITS.seoDescription, "Keep the SEO description under 160 characters"),
+    /** Unit 17b: plot options (empty = an ordinary single-price listing). */
+    plots: z.array(plotSchema).max(LIMITS.plots, `Up to ${LIMITS.plots} plot options`).default([]),
+    developerName: plainCopy(
+      LIMITS.developerName,
+      "Keep the developer name under 100 characters",
+    ).default(""),
+    paymentPlan: plainCopy(LIMITS.note, "Keep the payment plan under 200 characters").default(""),
+    offerNote: plainCopy(LIMITS.note, "Keep the offer under 200 characters").default(""),
+    /** "YYYY-MM-DD": the offer shows until the end of that day (Lagos time). */
+    offerEndsAt: z
+      .string()
+      .trim()
+      .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Choose a date")
+      .default(""),
+    termsNote: plainCopy(LIMITS.note, "Keep the terms note under 200 characters").default(""),
     /** Unit 15: existing photos in their new order, with alt text (url etc. are display-only). */
     photos: z
       .array(
@@ -167,7 +238,8 @@ export const propertySchema = z
       .optional(),
   })
   .superRefine((v, ctx) => {
-    if (!v.priceOnRequest && v.price !== "") {
+    const hasPlots = v.plots.length > 0;
+    if (!hasPlots && !v.priceOnRequest && v.price !== "") {
       try {
         if (koboFromNaira(v.price) <= 0n)
           ctx.addIssue({ code: "custom", path: ["price"], message: "Enter a price above ₦0" });
@@ -179,7 +251,7 @@ export const propertySchema = z
         });
       }
     }
-    if (showsPricePeriod(v.listingType) && v.pricePeriod === "ONE_OFF") {
+    if (!hasPlots && showsPricePeriod(v.listingType) && v.pricePeriod === "ONE_OFF") {
       ctx.addIssue({
         code: "custom",
         path: ["pricePeriod"],
@@ -200,7 +272,17 @@ export const propertySchema = z
   })
   .transform((v) => {
     const land = isLandListing(v);
-    const priceKobo =
+    const plots = v.plots.map((p, i) => ({
+      id: p.id,
+      label: p.label === "" ? null : p.label,
+      sizeSqm: p.sizeSqm,
+      priceKobo: koboFromNaira(p.price),
+      initialDepositKobo: p.deposit === "" ? null : koboFromNaira(p.deposit),
+      suitableFor: p.suitableFor === "" ? null : p.suitableFor,
+      sortOrder: i,
+    }));
+    const hasPlots = plots.length > 0;
+    const single =
       v.price === ""
         ? null
         : (() => {
@@ -210,6 +292,10 @@ export const propertySchema = z
               return null;
             }
           })();
+    // With plots, the listing's price is its cheapest plot ("From ₦…"), used for sorting.
+    const priceKobo = hasPlots
+      ? plots.map((p) => p.priceKobo).reduce((a, b) => (b < a ? b : a))
+      : single;
     const seen = new Set<string>();
     const features = v.features.filter((f) => {
       const key = f.toLowerCase();
@@ -224,8 +310,15 @@ export const propertySchema = z
       listingType: v.listingType,
       propertyType: v.propertyType,
       priceKobo,
-      pricePeriod: showsPricePeriod(v.listingType) ? v.pricePeriod : ("ONE_OFF" as const),
-      priceOnRequest: v.priceOnRequest,
+      pricePeriod:
+        !hasPlots && showsPricePeriod(v.listingType) ? v.pricePeriod : ("ONE_OFF" as const),
+      priceOnRequest: hasPlots ? false : v.priceOnRequest,
+      plots,
+      developerName: v.developerName === "" ? null : v.developerName,
+      paymentPlan: v.paymentPlan === "" ? null : v.paymentPlan,
+      offerNote: v.offerNote === "" ? null : v.offerNote,
+      offerEndsAt: v.offerEndsAt === "" ? null : new Date(`${v.offerEndsAt}T23:59:59+01:00`),
+      termsNote: v.termsNote === "" ? null : v.termsNote,
       bedrooms: land ? null : v.bedrooms,
       bathrooms: land ? null : v.bathrooms,
       sizeSqm: v.sizeSqm,
@@ -287,6 +380,12 @@ export const EMPTY_PROPERTY: PropertyFormValues = {
   projectStatus: "",
   seoTitle: "",
   seoDescription: "",
+  plots: [],
+  developerName: "",
+  paymentPlan: "",
+  offerNote: "",
+  offerEndsAt: "",
+  termsNote: "",
   photos: [],
   removedPhotoIds: [],
 };
@@ -343,6 +442,12 @@ export const FIELD_LABEL: Record<string, string> = {
   projectStatus: "Project status",
   seoTitle: "SEO title",
   seoDescription: "SEO description",
+  plots: "Plot options",
+  developerName: "Developer",
+  paymentPlan: "Payment plan",
+  offerNote: "Offer",
+  offerEndsAt: "Offer ends",
+  termsNote: "Terms note",
   photos: "Photos",
 };
 

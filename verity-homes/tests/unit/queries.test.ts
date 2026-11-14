@@ -115,7 +115,7 @@ describe("drafts are never returned", () => {
       expect(list.length).toBeGreaterThan(0);
       expect(list.map((p) => p.slug)).not.toContain(SEEDED_DRAFT_SLUG);
     }
-    expect(listed.total).toBe(6); // the 6 published [SAMPLE] properties
+    expect(listed.total).toBe(7); // the 7 published [SAMPLE] properties (incl. the Unit 17b estate)
   });
 
   it("getPropertyBySlug returns null for a draft", async () => {

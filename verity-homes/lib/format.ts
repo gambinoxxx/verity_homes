@@ -66,6 +66,22 @@ export function formatPrice(p: {
   return formatNaira(p.priceKobo) + PERIOD[p.pricePeriod];
 }
 
+/**
+ * Price label for a listing that may offer several plots (Unit 17b): with two or more plots,
+ * "From ₦18,000,000" (the cheapest); with one plot, its price; otherwise formatPrice().
+ */
+export function formatListingPrice(p: {
+  priceKobo: bigint | null;
+  pricePeriod: PricePeriod;
+  priceOnRequest: boolean;
+  plots?: readonly { priceKobo: bigint | number }[];
+}): string {
+  const prices = (p.plots ?? []).map((x) => BigInt(x.priceKobo));
+  if (prices.length === 0) return formatPrice(p);
+  const lowest = prices.reduce((a, b) => (b < a ? b : a));
+  return prices.length === 1 ? formatNaira(lowest) : `From ${formatNaira(lowest)}`;
+}
+
 export const LISTING_LABEL = {
   SALE: "For sale",
   RENT: "For rent",

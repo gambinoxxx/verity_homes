@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef, startTransition } from "react";
 import { onPlanSelected } from "@/lib/invest-plan-select";
+import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { ArrowIcon } from "./icons";
 import { PillTicker } from "./pill-ticker";
@@ -93,6 +94,19 @@ export function EnquiryForm({
       if (planRef.current && plans.some((p) => p.id === id)) planRef.current.value = id;
     });
   }, [invest, plans]);
+  // Unit 17b: a plot picked on the property page fills the message and the hidden plotId.
+  const plotRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!propertyId) return;
+    return onPlotSelected((sel) => {
+      if (sel.propertyId !== propertyId) return;
+      if (plotRef.current) plotRef.current.value = sel.plotId;
+      const message = formRef.current?.ownerDocument.getElementById(f("message"));
+      if (message instanceof HTMLTextAreaElement) message.value = sel.message;
+    });
+    // f() is stable for the life of the component (useId).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propertyId]);
   const formRef = useRef<HTMLFormElement>(null);
   const startedAt = useRef(0);
   const submitting = useRef(false);
@@ -172,6 +186,9 @@ export function EnquiryForm({
       )}
       <input type="hidden" name="source" value={source} />
       {propertyId ? <input type="hidden" name="propertyId" value={propertyId} /> : null}
+      {propertyId ? (
+        <input type="hidden" name="plotId" ref={plotRef} defaultValue="" data-testid="plot-id" />
+      ) : null}
       {planId && !invest ? <input type="hidden" name="planId" value={planId} /> : null}
       {interest && !contact ? <input type="hidden" name="interest" value={interest} /> : null}
       {/* Honeypot: invisible to people, tempting to bots. Must stay empty. */}

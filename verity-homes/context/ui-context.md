@@ -208,6 +208,14 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `components/admin/faqs/`. Shared: `components/admin/delete-button.tsx` (confirm dialog for
     properties, plans, FAQs), `components/admin/reorder.tsx` (`useReorder` drag + `MoveButtons`
     ↑↓). Plan top-bar “Add plan” uses the dashboard's icon-only-on-phones button.
+  - Plot options (Unit 17b): editor panels “Plot options” (fieldset rows, ↑↓/×) and
+    “Development & offer” (`editor.module.css` `.plotRow`, `.plotOps`); the single Price panel is
+    disabled with a note while plots exist.
+- **Property page plots (Unit 17b)**: `components/site/property/plots.tsx` — “Choose your plot”
+  under the facts strip (a 5-column table; stacked cards ≤ 700 px), `OfferNote`; notes box
+  `.terms` (cream); head shows “From ₦…”, “Initial deposit from ₦…” and “A development by …”.
+  Select → `lib/plot-select.ts` event → the enquiry form (message + hidden `plotId`) and the
+  WhatsApp buttons (`whatsapp-link.tsx`) follow the chosen plot.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

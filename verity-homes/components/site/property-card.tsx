@@ -82,7 +82,11 @@ export function PropertyCard({
             <>
               <span>
                 <AreaIcon />
-                <Value n={p.sizeSqm} /> sqm
+                {p.sizeLabel ?? (
+                  <>
+                    <Value n={p.sizeSqm} /> sqm
+                  </>
+                )}
               </span>
               <span>
                 <DocIcon />
@@ -120,7 +124,11 @@ export function PropertyCard({
               </span>
               <span>
                 <AreaIcon />
-                <Value n={p.sizeSqm} /> sqm
+                {p.sizeLabel ?? (
+                  <>
+                    <Value n={p.sizeSqm} /> sqm
+                  </>
+                )}
               </span>
             </>
           )}

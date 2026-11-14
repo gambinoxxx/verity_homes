@@ -179,6 +179,73 @@ async function main() {
     });
   }
 
+  // Unit 17b: an estate with plot options (sizes, prices and deposits follow the real example the
+  // owner gave; names are [SAMPLE] — the real listing is entered in the admin, not seeded).
+  await db.property.create({
+    data: {
+      slug: "sample-palm-estate-plots",
+      title: "[SAMPLE] Palm Estate Plots",
+      listingType: "LAND",
+      propertyType: "LAND",
+      status: "PUBLISHED",
+      publishedAt: new Date(Date.now() - 6 * 86_400_000),
+      area: "Lekki",
+      city: "Lagos",
+      titleDocument: "C_OF_O",
+      priceKobo: N(18_000_000), // = the cheapest plot ("From ₦18,000,000")
+      description:
+        "[SAMPLE] An estate offering several plot sizes — choose the one that fits what you want to build.",
+      features: ["Gated estate", "Good road network"],
+      developerName: "[SAMPLE] Estate developer",
+      paymentPlan: "6 months interest-free",
+      offerNote: "Pay ₦5M for immediate physical allocation",
+      termsNote: "Possession of the land is subject to full payment.",
+      images: {
+        create: [
+          {
+            url: "/samples/aerial.jpg",
+            pathname: "samples/aerial.jpg",
+            alt: "[SAMPLE] aerial photo",
+            sortOrder: 0,
+          },
+        ],
+      },
+      documents: { create: [{ name: "Government-allocated C of O", sortOrder: 0 }] },
+      plots: {
+        create: [
+          {
+            sizeSqm: 300,
+            priceKobo: N(18_000_000),
+            initialDepositKobo: N(1_000_000),
+            suitableFor: "Duplexes",
+            sortOrder: 0,
+          },
+          {
+            sizeSqm: 500,
+            priceKobo: N(30_000_000),
+            initialDepositKobo: N(1_000_000),
+            suitableFor: "Duplexes",
+            sortOrder: 1,
+          },
+          {
+            sizeSqm: 600,
+            priceKobo: N(36_000_000),
+            initialDepositKobo: N(1_000_000),
+            suitableFor: "Duplexes",
+            sortOrder: 2,
+          },
+          {
+            sizeSqm: 1000,
+            priceKobo: N(70_000_000),
+            initialDepositKobo: N(5_000_000),
+            suitableFor: "Commercial & apartments",
+            sortOrder: 3,
+          },
+        ],
+      },
+    },
+  });
+
   // one draft that must never appear publicly
   await db.property.create({
     data: {

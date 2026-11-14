@@ -125,7 +125,7 @@ no public page loads Clerk (Open question 42).
 The source of truth is `prisma/schema.prisma`, and it already exists.
 
 - **Postgres** holds:
-  - Property, PropertyImage and PropertyDocument
+  - Property, PropertyImage, PropertyDocument and PropertyPlot (Unit 17b)
   - InvestmentPlan and Faq
   - Post and Category
   - Testimonial and Partner
@@ -135,6 +135,15 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
 - **Vercel Blob** holds image files only. Rows store `url` and `pathname`.
 - **Money** is a `BigInt` in kobo. Format it with `lib/format.ts`.
 - **Coordinates** are `Decimal(9,6)` latitude and longitude on Property.
+- **Plot options (Unit 17b, migration `20261113204020_plot_options`)**: `PropertyPlot`
+  (`propertyId` cascade, `label?`, `sizeSqm`, `priceKobo`, `initialDepositKobo?`, `suitableFor?`,
+  `sortOrder`) lets one listing (an estate) offer several plot sizes. When a property has plots,
+  the admin save keeps `Property.priceKobo` = the cheapest plot and `priceOnRequest` = false, so
+  "From ₦…" (`formatListingPrice`) and price sorting use the lowest price. The `/properties`
+  price filter matches a listing with plots when **any** plot is in range. Plots are synced by id
+  on save (never recreated), because `Enquiry.plotId` (SetNull) points at them. Property also
+  has `developerName?`, `paymentPlan?`, `offerNote?`, `offerEndsAt?` (the offer is hidden after
+  it — dropped from the cached data and re-checked in the browser) and `termsNote?`.
 - **Users and sessions** live in Clerk. Rows store the Clerk user id as a
   plain string in `createdBy`.
 

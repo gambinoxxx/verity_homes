@@ -10,7 +10,7 @@ export type Fact = { key: FactKey; label: string; value: string };
 type FactSource = Pick<
   PropertyDetail,
   "bedrooms" | "bathrooms" | "sizeSqm" | "parkingSpaces" | "titleDocument" | "completionDate"
->;
+> & { sizeLabel?: string | null };
 
 const num = (n: number) => n.toLocaleString("en-NG");
 
@@ -20,7 +20,10 @@ export function propertyFacts(p: FactSource): Fact[] {
   if (p.bedrooms != null) facts.push({ key: "beds", label: "Bedrooms", value: num(p.bedrooms) });
   if (p.bathrooms != null)
     facts.push({ key: "baths", label: "Bathrooms", value: num(p.bathrooms) });
-  if (p.sizeSqm != null) facts.push({ key: "size", label: "Size", value: `${num(p.sizeSqm)} sqm` });
+  // Unit 17b: an estate's plot range ("300–1,000 sqm") wins over a single size.
+  if (p.sizeLabel) facts.push({ key: "size", label: "Plot sizes", value: p.sizeLabel });
+  else if (p.sizeSqm != null)
+    facts.push({ key: "size", label: "Size", value: `${num(p.sizeSqm)} sqm` });
   if (p.parkingSpaces != null && p.parkingSpaces > 0)
     facts.push({
       key: "parking",

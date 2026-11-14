@@ -116,12 +116,30 @@ function flattenErrors(errors: FieldErrors<PropertyFormValues>): ErrorItem[] {
     });
 }
 
+const SUB_LABEL: Record<string, string> = {
+  minutes: "minutes",
+  name: "name",
+  place: "name",
+  sizeSqm: "size",
+  price: "price",
+  deposit: "deposit",
+  suitableFor: "suitable for",
+  label: "name",
+};
+
 function labelFor(path: string): string {
   const [top, index, sub] = path.split(".");
   const base = FIELD_LABEL[top ?? ""] ?? top ?? "Field";
   if (index !== undefined && /^\d+$/.test(index)) {
-    const what = top === "documents" ? "Document" : top === "nearby" ? "Nearby place" : base;
-    return `${what} ${Number(index) + 1}${sub ? ` (${sub === "minutes" ? "minutes" : "name"})` : ""}`;
+    const what =
+      top === "documents"
+        ? "Document"
+        : top === "nearby"
+          ? "Nearby place"
+          : top === "plots"
+            ? "Plot"
+            : base;
+    return `${what} ${Number(index) + 1}${sub ? ` (${SUB_LABEL[sub] ?? sub})` : ""}`;
   }
   return base;
 }
@@ -250,6 +268,8 @@ export function PropertyEditor({
   }, [showPeriod, getValues, setValue]);
 
   const documents = useFieldArray({ control, name: "documents", keyName: "key" });
+  const plots = useFieldArray({ control, name: "plots", keyName: "key" });
+  const hasPlots = (v.plots ?? []).length > 0;
   const nearby = useFieldArray({ control, name: "nearby", keyName: "key" });
 
   const err = (path: string): string | undefined =>
@@ -279,7 +299,7 @@ export function PropertyEditor({
             const issues = publishIssues({
               title: values.title,
               area: values.area,
-              hasPrice: values.price.trim() !== "",
+              hasPrice: values.price.trim() !== "" || (values.plots ?? []).length > 0,
               priceOnRequest: values.priceOnRequest,
             });
             if (Object.keys(issues).length) {
@@ -419,6 +439,12 @@ export function PropertyEditor({
           {/* ---- Price ---- */}
           <section className={ui.panel} aria-labelledby={sid("sec-price")}>
             <h2 id={sid("sec-price")}>Price</h2>
+            {hasPlots ? (
+              <p className={styles.hint} data-testid="price-from-plots" style={{ marginTop: -6 }}>
+                This listing has plot options, so its price comes from them: cards show “From ₦…”
+                (the cheapest plot). Remove all plot options to set a single price.
+              </p>
+            ) : null}
             <div className={`${styles.fields} ${styles.three}`}>
               <Field path="price" label="Price" error={err("price")}>
                 <div className={styles.prefix} data-invalid={err("price") ? "true" : undefined}>
@@ -429,17 +455,19 @@ export function PropertyEditor({
                     render={({ field }) => (
                       <PriceInput
                         name={field.name}
-                        value={field.value}
+                        value={hasPlots ? "" : field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         inputRef={field.ref}
+                        disabled={hasPlots}
+                        placeholder={hasPlots ? "From the plot options" : undefined}
                         {...cp("price", err("price"))}
                       />
                     )}
                   />
                 </div>
               </Field>
-              {showPeriod ? (
+              {showPeriod && !hasPlots ? (
                 <Field
                   path="pricePeriod"
                   label="Per"
@@ -457,8 +485,246 @@ export function PropertyEditor({
               ) : null}
               <div className={styles.f}>
                 <span className={styles.lbl}>Display</span>
-                <Switch label="Show “Price on request”" {...register("priceOnRequest")} />
+                <Switch
+                  label="Show “Price on request”"
+                  disabled={hasPlots}
+                  {...register("priceOnRequest")}
+                />
               </div>
+            </div>
+          </section>
+
+          {/* ---- Plot options (Unit 17b) ---- */}
+          <section
+            className={ui.panel}
+            aria-labelledby={sid("sec-plots")}
+            data-testid="plot-options"
+          >
+            <h2 id={sid("sec-plots")}>
+              Plot options
+              <span className={ui.panelNote}>For estates: several plot sizes, each priced</span>
+            </h2>
+            <div className={styles.rows}>
+              {plots.fields.length === 0 ? (
+                <p className={styles.emptyRows}>
+                  No plot options — this listing has a single price. Add plot sizes for an estate
+                  (e.g. 300 sqm, 500 sqm…).
+                </p>
+              ) : null}
+              {plots.fields.map((row, i) => (
+                <fieldset key={row.key} className={styles.plotRow} data-plot-index={i}>
+                  <legend>Plot {i + 1}</legend>
+                  <div className={`${styles.fields} ${styles.three}`}>
+                    <Field
+                      path={`plots.${i}.sizeSqm`}
+                      label="Size (sqm)"
+                      error={err(`plots.${i}.sizeSqm`)}
+                    >
+                      <input
+                        type="number"
+                        min={1}
+                        inputMode="numeric"
+                        {...register(`plots.${i}.sizeSqm`)}
+                        {...cp(`plots.${i}.sizeSqm`, err(`plots.${i}.sizeSqm`))}
+                      />
+                    </Field>
+                    <Field path={`plots.${i}.price`} label="Price" error={err(`plots.${i}.price`)}>
+                      <div
+                        className={styles.prefix}
+                        data-invalid={err(`plots.${i}.price`) ? "true" : undefined}
+                      >
+                        <span aria-hidden="true">₦</span>
+                        <Controller
+                          control={control}
+                          name={`plots.${i}.price`}
+                          render={({ field }) => (
+                            <PriceInput
+                              name={field.name}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              inputRef={field.ref}
+                              placeholder="e.g. 18,000,000"
+                              {...cp(`plots.${i}.price`, err(`plots.${i}.price`))}
+                            />
+                          )}
+                        />
+                      </div>
+                    </Field>
+                    <Field
+                      path={`plots.${i}.deposit`}
+                      label="Initial deposit"
+                      error={err(`plots.${i}.deposit`)}
+                    >
+                      <div
+                        className={styles.prefix}
+                        data-invalid={err(`plots.${i}.deposit`) ? "true" : undefined}
+                      >
+                        <span aria-hidden="true">₦</span>
+                        <Controller
+                          control={control}
+                          name={`plots.${i}.deposit`}
+                          render={({ field }) => (
+                            <PriceInput
+                              name={field.name}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              inputRef={field.ref}
+                              placeholder="Optional"
+                              {...cp(`plots.${i}.deposit`, err(`plots.${i}.deposit`))}
+                            />
+                          )}
+                        />
+                      </div>
+                    </Field>
+                    <Field
+                      path={`plots.${i}.suitableFor`}
+                      label="Suitable for"
+                      error={err(`plots.${i}.suitableFor`)}
+                    >
+                      <input
+                        placeholder="e.g. Duplexes"
+                        maxLength={LIMITS.suitableFor}
+                        {...register(`plots.${i}.suitableFor`)}
+                        {...cp(`plots.${i}.suitableFor`, err(`plots.${i}.suitableFor`))}
+                      />
+                    </Field>
+                    <Field
+                      path={`plots.${i}.label`}
+                      label="Name (optional)"
+                      error={err(`plots.${i}.label`)}
+                    >
+                      <input
+                        placeholder="e.g. Corner plot"
+                        maxLength={LIMITS.plotLabel}
+                        {...register(`plots.${i}.label`)}
+                        {...cp(`plots.${i}.label`, err(`plots.${i}.label`))}
+                      />
+                    </Field>
+                    <div className={styles.f}>
+                      <span className={styles.lbl} aria-hidden="true">
+                        &nbsp;
+                      </span>
+                      <div className={styles.plotOps}>
+                        <button
+                          type="button"
+                          className={ui.iconBtn}
+                          aria-label={`Move plot ${i + 1} up`}
+                          disabled={i === 0}
+                          onClick={() => plots.move(i, i - 1)}
+                        >
+                          <AdminIcon name="up" />
+                        </button>
+                        <button
+                          type="button"
+                          className={ui.iconBtn}
+                          aria-label={`Move plot ${i + 1} down`}
+                          disabled={i === plots.fields.length - 1}
+                          onClick={() => plots.move(i, i + 1)}
+                        >
+                          <AdminIcon name="down" />
+                        </button>
+                        <button
+                          type="button"
+                          className={ui.iconBtn}
+                          aria-label={`Remove plot ${i + 1}`}
+                          onClick={() => plots.remove(i)}
+                        >
+                          <AdminIcon name="x" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              ))}
+              {plots.fields.length < LIMITS.plots ? (
+                <button
+                  type="button"
+                  className={`${ui.btn} ${ui.ghost} ${styles.addRow}`}
+                  onClick={() =>
+                    plots.append({
+                      label: "",
+                      sizeSqm: "",
+                      price: "",
+                      deposit: "",
+                      suitableFor: "",
+                    })
+                  }
+                >
+                  <AdminIcon name="plus" />
+                  Add a plot size
+                </button>
+              ) : null}
+              {err("plots") ? <span className={styles.err}>{err("plots")}</span> : null}
+            </div>
+          </section>
+
+          {/* ---- Development & offer (Unit 17b) ---- */}
+          <section className={ui.panel} aria-labelledby={sid("sec-estate")}>
+            <h2 id={sid("sec-estate")}>Development &amp; offer</h2>
+            <div className={styles.fields}>
+              <Field
+                path="developerName"
+                label="Developer"
+                hint="Shown as “A development by …” under the location. Optional."
+                error={err("developerName")}
+              >
+                <input
+                  maxLength={LIMITS.developerName}
+                  {...register("developerName")}
+                  {...cp("developerName", err("developerName"), true)}
+                />
+              </Field>
+              <Field
+                path="paymentPlan"
+                label="Payment plan"
+                hint="e.g. “6 months interest-free”."
+                error={err("paymentPlan")}
+              >
+                <input
+                  maxLength={LIMITS.note}
+                  {...register("paymentPlan")}
+                  {...cp("paymentPlan", err("paymentPlan"), true)}
+                />
+              </Field>
+              <Field
+                path="offerNote"
+                label="Offer"
+                hint="e.g. “Pay ₦5M for immediate physical allocation”."
+                error={err("offerNote")}
+              >
+                <input
+                  maxLength={LIMITS.note}
+                  {...register("offerNote")}
+                  {...cp("offerNote", err("offerNote"), true)}
+                />
+              </Field>
+              <Field
+                path="offerEndsAt"
+                label="Offer ends"
+                hint="The offer is hidden after this day (Lagos time). Leave empty to keep it."
+                error={err("offerEndsAt")}
+              >
+                <input
+                  type="date"
+                  {...register("offerEndsAt")}
+                  {...cp("offerEndsAt", err("offerEndsAt"), true)}
+                />
+              </Field>
+              <Field
+                path="termsNote"
+                label="Terms note"
+                hint="e.g. “Possession of the land is subject to full payment”."
+                error={err("termsNote")}
+                full
+              >
+                <input
+                  maxLength={LIMITS.note}
+                  {...register("termsNote")}
+                  {...cp("termsNote", err("termsNote"), true)}
+                />
+              </Field>
             </div>
           </section>
 

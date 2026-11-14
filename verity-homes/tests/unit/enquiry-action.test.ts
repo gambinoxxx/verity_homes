@@ -136,6 +136,37 @@ describe("createEnquiry", () => {
     });
   });
 
+  it("keeps a plot only if it belongs to the property (Unit 17b)", async () => {
+    sendEnquiryEmail.mockResolvedValue(true);
+    const estate = await db.property.findFirstOrThrow({
+      where: { status: "PUBLISHED", plots: { some: {} } },
+      include: { plots: { orderBy: { sortOrder: "asc" } } },
+    });
+    const other = await db.property.findFirstOrThrow({
+      where: { status: "PUBLISHED", plots: { none: {} } },
+    });
+    const plot = estate.plots[1]!;
+    const a = uniqueName();
+    const b = uniqueName();
+    await createEnquiry(
+      null,
+      form({ name: a, source: "PROPERTY_PAGE", propertyId: estate.id, plotId: plot.id }),
+    );
+    // a plot id from another listing is dropped; the enquiry still counts
+    await createEnquiry(
+      null,
+      form({ name: b, source: "PROPERTY_PAGE", propertyId: other.id, plotId: plot.id }),
+    );
+    expect(await db.enquiry.findFirstOrThrow({ where: { name: a } })).toMatchObject({
+      propertyId: estate.id,
+      plotId: plot.id,
+    });
+    expect(await db.enquiry.findFirstOrThrow({ where: { name: b } })).toMatchObject({
+      propertyId: other.id,
+      plotId: null,
+    });
+  });
+
   it("stores an investment amount in kobo, and rejects an invalid one", async () => {
     sendEnquiryEmail.mockResolvedValue(true);
     const name = uniqueName();

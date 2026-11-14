@@ -77,6 +77,14 @@ beforeEach(() => {
 describe("every action rejects a non-admin without writing", () => {
   const cases: [string, () => Promise<{ ok: boolean }>][] = [
     ["createProperty", () => actions.createProperty(valid)],
+    [
+      "createProperty (with plots)",
+      () =>
+        actions.createProperty({
+          ...valid,
+          plots: [{ label: "", sizeSqm: "300", price: "18,000,000", deposit: "", suitableFor: "" }],
+        }),
+    ],
     ["updateProperty", () => actions.updateProperty("p1", valid)],
     ["publishProperty", () => actions.publishProperty("p1")],
     ["unpublishProperty", () => actions.unpublishProperty("p1")],

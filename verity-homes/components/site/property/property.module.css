@@ -473,6 +473,128 @@
   gap: 26px;
 }
 
+/* ---- Unit 17b: estate plots, terms, developer, deposit ---- */
+.dev {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.dev b {
+  color: var(--text-primary);
+}
+.deposit {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+.plots {
+  margin-top: -16px;
+}
+.plotTable {
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.plotHead,
+.plotRow {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1.3fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 22px;
+}
+.plotHead {
+  background: var(--bg-subtle);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.plotRow {
+  border-top: 1px solid var(--border-default);
+  font-size: 15px;
+}
+.plotRow small {
+  display: none;
+}
+.plotRow b {
+  font-weight: 700;
+}
+.plotPrice {
+  font-family: var(--font-display);
+  font-size: 19px;
+}
+.plotChosen {
+  background: var(--bg-cream);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+.plotAction .btn,
+.plotAction button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.terms {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 48px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: var(--bg-cream);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.terms p {
+  margin: 0;
+}
+.offer b {
+  color: var(--accent-text-on-cream);
+}
+.offer small {
+  color: var(--text-muted);
+}
+.termsNote {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .plotTable {
+    border: 0;
+    border-radius: 0;
+    display: grid;
+    gap: 12px;
+    overflow: visible;
+  }
+  .plotHead {
+    display: none;
+  }
+  .plotRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .plotRow small {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .plotSize,
+  .plotAction {
+    grid-column: 1 / -1;
+  }
+  .plotAction button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 1020px) {
   .layout {
     grid-template-columns: 1fr;

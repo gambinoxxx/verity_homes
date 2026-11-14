@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { PlotOptions } from "@/components/site/property/plots";
 import { Gallery } from "@/components/site/property/gallery";
 import {
   AboutBlock,
   DocumentsBlock,
   EnquiryCard,
+  EstateTerms,
   FactsStrip,
   FeaturesBlock,
   LocationBlock,
@@ -29,7 +31,6 @@ import {
   propertyJsonLd,
   propertyWhatsappMessage,
 } from "@/lib/property-detail";
-import { whatsappLink } from "@/lib/whatsapp";
 
 const SITE = env.NEXT_PUBLIC_SITE_URL;
 const pageUrl = (slug: string) => absoluteUrl(`/properties/${slug}`, SITE);
@@ -96,8 +97,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
     getSimilarProperties({ id: property.id, listingType: property.listingType }),
   ]);
   const url = pageUrl(property.slug);
-  const wa = whatsappLink(settings.whatsapp, propertyWhatsappMessage(property.title, url));
-  const whatsappHref = wa ?? "#enquire";
+  const whatsappText = propertyWhatsappMessage(property.title, url);
 
   return (
     <>
@@ -111,6 +111,15 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
           <PropertyHead property={property} url={url} />
           <Gallery images={property.images} title={property.title} />
           <FactsStrip property={property} />
+          {property.plots.length ? (
+            <PlotOptions
+              propertyId={property.id}
+              title={property.title}
+              url={url}
+              plots={property.plots}
+            />
+          ) : null}
+          <EstateTerms property={property} />
           <div className={styles.layout}>
             <div>
               <AboutBlock property={property} />
@@ -118,12 +127,20 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
               <DocumentsBlock property={property} />
               <LocationBlock property={property} />
             </div>
-            <EnquiryCard property={property} whatsappHref={whatsappHref} />
+            <EnquiryCard
+              property={property}
+              whatsappNumber={settings.whatsapp}
+              whatsappText={whatsappText}
+            />
           </div>
         </div>
       </section>
       <SimilarProperties items={similar} />
-      <MobileBar whatsappHref={whatsappHref} />
+      <MobileBar
+        propertyId={property.id}
+        whatsappNumber={settings.whatsapp}
+        whatsappText={whatsappText}
+      />
     </>
   );
 }

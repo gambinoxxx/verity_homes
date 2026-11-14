@@ -16,6 +16,14 @@ export function findPublishedPropertyRef(id: string) {
   });
 }
 
+/** The plot, only if it belongs to this (published) property. Unit 17b. */
+export function findPlotRef(plotId: string, propertyId: string) {
+  return db.propertyPlot.findFirst({
+    where: { id: plotId, propertyId, property: { status: "PUBLISHED" } },
+    select: { id: true, sizeSqm: true, label: true },
+  });
+}
+
 /** The investment plan, if it exists and is published. */
 export function findPublishedPlanRef(id: string) {
   return db.investmentPlan.findFirst({
@@ -33,6 +41,8 @@ export type NewEnquiry = {
   source: EnquirySource;
   propertyId: string | null;
   planId: string | null;
+  /** Unit 17b: the chosen plot (must belong to propertyId). */
+  plotId?: string | null;
   wantsInspection: boolean;
   amountKobo: bigint | null;
   ipHash: string;

@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import type { CsvEnquiry } from "@/lib/enquiry-inbox";
+import { plotName } from "@/lib/plots";
 import {
   type EnquiryFilters,
   INTEREST_PARAM,
@@ -50,6 +51,7 @@ const rowSelect = {
   createdAt: true,
   property: { select: { id: true, title: true } },
   plan: { select: { id: true, name: true } },
+  plot: { select: { label: true, sizeSqm: true } }, // Unit 17b
 } satisfies Prisma.EnquirySelect;
 
 export type EnquiryRow = Prisma.EnquiryGetPayload<{ select: typeof rowSelect }>;
@@ -112,6 +114,8 @@ export type EnquiryDetail = {
   createdAt: Date;
   property: { id: string; title: string; slug: string; published: boolean } | null;
   plan: { id: string; name: string; published: boolean } | null;
+  /** Unit 17b: the plot chosen on an estate page. */
+  plot: { name: string; priceKobo: bigint; initialDepositKobo: bigint | null } | null;
 };
 
 export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null> {
@@ -121,6 +125,7 @@ export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null>
     include: {
       property: { select: { id: true, title: true, slug: true, status: true } },
       plan: { select: { id: true, name: true, status: true } },
+      plot: { select: { label: true, sizeSqm: true, priceKobo: true, initialDepositKobo: true } },
     },
   });
   if (!e) return null;
@@ -148,6 +153,13 @@ export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null>
     plan: e.plan
       ? { id: e.plan.id, name: e.plan.name, published: e.plan.status === "PUBLISHED" }
       : null,
+    plot: e.plot
+      ? {
+          name: plotName(e.plot),
+          priceKobo: e.plot.priceKobo,
+          initialDepositKobo: e.plot.initialDepositKobo,
+        }
+      : null,
   };
 }
 
@@ -169,11 +181,16 @@ export async function exportAdminEnquiries(f: EnquiryFilters): Promise<CsvEnquir
       note: true,
       property: { select: { title: true } },
       plan: { select: { name: true } },
+      plot: { select: { label: true, sizeSqm: true } },
     },
   });
-  return rows.map(({ property, plan, ...r }) => ({
+  return rows.map(({ property, plan, plot, ...r }) => ({
     ...r,
-    propertyTitle: property?.title ?? null,
+    propertyTitle: property
+      ? plot
+        ? `${property.title} — ${plotName(plot)}`
+        : property.title
+      : null,
     planName: plan?.name ?? null,
   }));
 }

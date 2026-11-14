@@ -13,6 +13,8 @@ import {
   type FactKey,
 } from "@/lib/property-detail";
 import { EnquiryForm } from "../enquiry-form";
+import { OfferNote } from "./plots";
+import { PlotAwareWhatsApp } from "./whatsapp-link";
 import {
   AreaIcon,
   ArrowIcon,
@@ -86,10 +88,18 @@ export function PropertyHead({ property: p, url }: P & { url: string }) {
           <PinIcon />
           {p.area}, {p.city}
         </p>
+        {p.developerName ? (
+          <p className={styles.dev} data-testid="developer">
+            A development by <b>{p.developerName}</b>
+          </p>
+        ) : null}
       </div>
       <div className={styles.price}>
-        <small>{p.listingType === "RENT" ? "Rent" : "Asking price"}</small>
+        <small>
+          {p.plotCount > 1 ? "Plots" : p.listingType === "RENT" ? "Rent" : "Asking price"}
+        </small>
         <Price label={p.priceLabel} />
+        {p.depositLabel ? <span className={styles.deposit}>{p.depositLabel}</span> : null}
         <div className={styles.actions}>
           <SaveButton slug={p.slug} title={p.title} className={styles.iconBtn} />
           <ShareButton
@@ -237,11 +247,27 @@ export function LocationBlock({ property: p }: P) {
   );
 }
 
-/** WhatsApp link props: wa.me in a new tab, or the on-page form when no number is set. */
-const waProps = (href: string) =>
-  href.startsWith("https://") ? { href, target: "_blank", rel: "noopener noreferrer" } : { href };
+/** Payment plan, offer (until offerEndsAt) and terms for an estate (Unit 17b). */
+export function EstateTerms({ property: p }: P) {
+  if (!p.paymentPlan && !p.offerNote && !p.termsNote) return null;
+  return (
+    <div className={styles.terms} data-testid="estate-terms">
+      {p.paymentPlan ? (
+        <p>
+          <b>Payment plan:</b> {p.paymentPlan}
+        </p>
+      ) : null}
+      {p.offerNote ? (
+        <OfferNote note={p.offerNote} endsAt={p.offerEndsAt ? p.offerEndsAt.toISOString() : null} />
+      ) : null}
+      {p.termsNote ? <p className={styles.termsNote}>{p.termsNote}</p> : null}
+    </div>
+  );
+}
 
-export function EnquiryCard({ property: p, whatsappHref }: P & { whatsappHref: string }) {
+type WaProps = { whatsappNumber: string | null; whatsappText: string };
+
+export function EnquiryCard({ property: p, whatsappNumber, whatsappText }: P & WaProps) {
   return (
     <aside className={styles.side} id="enquire" aria-label="Enquire">
       <div className={styles.card}>
@@ -265,26 +291,40 @@ export function EnquiryCard({ property: p, whatsappHref }: P & { whatsappHref: s
           defaultMessage={`I'm interested in the ${p.title}. Please contact me.`}
         />
         <div className={styles.or}>or</div>
-        <a className={`btn ${styles.wa}`} {...waProps(whatsappHref)}>
+        <PlotAwareWhatsApp
+          className={`btn ${styles.wa}`}
+          number={whatsappNumber}
+          defaultText={whatsappText}
+          propertyId={p.id}
+        >
           <WhatsAppIcon />
           Chat on WhatsApp
-        </a>
+        </PlotAwareWhatsApp>
       </div>
     </aside>
   );
 }
 
 /** Fixed bottom bar on phones and tablets (design `.m-bar`). */
-export function MobileBar({ whatsappHref }: { whatsappHref: string }) {
+export function MobileBar({
+  propertyId,
+  whatsappNumber,
+  whatsappText,
+}: WaProps & { propertyId: string }) {
   return (
     <div className={styles.mbar} data-mbar>
       <a className="btn btn-navy" href="#enquire">
         Enquire
       </a>
-      <a className={`btn ${styles.wa}`} {...waProps(whatsappHref)}>
+      <PlotAwareWhatsApp
+        className={`btn ${styles.wa}`}
+        number={whatsappNumber}
+        defaultText={whatsappText}
+        propertyId={propertyId}
+      >
         <WhatsAppIcon />
         WhatsApp
-      </a>
+      </PlotAwareWhatsApp>
     </div>
   );
 }

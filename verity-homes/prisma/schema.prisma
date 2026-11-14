@@ -138,7 +138,15 @@ model Property {
 
   images    PropertyImage[]
   documents PropertyDocument[]
+  plots     PropertyPlot[]   // Unit 17b: plot sizes on an estate, each with its own price
   enquiries Enquiry[]
+
+  // Unit 17b: estate / development details
+  developerName String?   // "A development by …"
+  paymentPlan   String?   // e.g. "6 months interest-free"
+  offerNote     String?   // e.g. "Pay ₦5M for immediate physical allocation"
+  offerEndsAt   DateTime? // the offer note is hidden after this
+  termsNote     String?   // e.g. "Possession of the land is subject to full payment"
 
   createdBy   String? // Clerk user id
   publishedAt DateTime?
@@ -164,6 +172,24 @@ model PropertyImage {
   createdAt  DateTime @default(now())
 
   @@index([propertyId, sortOrder])
+}
+
+/// Unit 17b: one plot size on a listing (e.g. an estate). When a property has plots, its
+/// priceKobo is kept equal to the cheapest plot ("From ₦…") so sorting keeps working.
+model PropertyPlot {
+  id                 String   @id @default(cuid())
+  propertyId         String
+  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  label              String?  // optional name, e.g. "Duplex plot"
+  sizeSqm            Int
+  priceKobo          BigInt
+  initialDepositKobo BigInt?
+  suitableFor        String?  // e.g. "Duplexes", "Commercial & apartments"
+  sortOrder          Int      @default(0)
+  enquiries          Enquiry[]
+
+  @@index([propertyId, sortOrder])
+  @@index([priceKobo])
 }
 
 model PropertyDocument {
@@ -279,6 +305,8 @@ model Enquiry {
   property        Property?       @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   planId          String?
   plan            InvestmentPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  plotId          String?         // Unit 17b: the plot the visitor chose
+  plot            PropertyPlot?   @relation(fields: [plotId], references: [id], onDelete: SetNull)
   wantsInspection Boolean         @default(false)
   amountKobo      BigInt?         // investment enquiries
   status          EnquiryStatus   @default(NEW)
