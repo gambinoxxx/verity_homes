@@ -477,3 +477,60 @@ export async function restoreSettings(s: SettingsSnapshot): Promise<void> {
 export async function settingsRow(): Promise<SettingsSnapshot> {
   return snapshotSettings();
 }
+
+// ---- Testimonials, partners, subscribers (Unit 19b) ----
+
+export async function testimonialByName(
+  name: string,
+): Promise<{
+  id: string;
+  status: string;
+  consentConfirmed: boolean;
+  avatarUrl: string | null;
+} | null> {
+  const rows = (await sql()`
+    SELECT id, status::text AS status, "consentConfirmed", "avatarUrl"
+    FROM "Testimonial" WHERE name = ${name} LIMIT 1`) as {
+    id: string;
+    status: string;
+    consentConfirmed: boolean;
+    avatarUrl: string | null;
+  }[];
+  return rows[0] ?? null;
+}
+
+export async function partnerByName(
+  name: string,
+): Promise<{
+  id: string;
+  status: string;
+  consentConfirmed: boolean;
+  logoUrl: string | null;
+} | null> {
+  const rows = (await sql()`
+    SELECT id, status::text AS status, "consentConfirmed", "logoUrl"
+    FROM "Partner" WHERE name = ${name} LIMIT 1`) as {
+    id: string;
+    status: string;
+    consentConfirmed: boolean;
+    logoUrl: string | null;
+  }[];
+  return rows[0] ?? null;
+}
+
+/** Deletes this test's own "[SAMPLE] E2E …" testimonials and partners (by name). */
+export async function cleanUpE2eTrust(names: string[]): Promise<void> {
+  const own = names.filter((n) => n.startsWith("[SAMPLE] E2E "));
+  if (!own.length) return;
+  const db = sql();
+  await db`DELETE FROM "Testimonial" WHERE name = ANY(${own})`;
+  await db`DELETE FROM "Partner" WHERE name = ANY(${own})`;
+}
+
+/** Published + consented partners right now (what the marquees may show). */
+export async function visiblePartnerNames(): Promise<string[]> {
+  const rows = (await sql()`
+    SELECT name FROM "Partner" WHERE status = 'PUBLISHED' AND "consentConfirmed"
+    ORDER BY name`) as { name: string }[];
+  return rows.map((r) => r.name);
+}

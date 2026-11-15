@@ -228,6 +228,14 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   - Public: footer social icons render only for filled networks (the row is hidden when none);
     CEO bio / promise (home + /about), company story (/about) and the blog author box's bio line
     come from settings, placeholders while empty (`ceo.module.css .md` for Markdown in a `.lead`).
+  - Testimonials, partners, subscribers (Unit 19b): `components/admin/trust/` — reorderable
+    tables (plans pattern) with a consent marker, editors in the post/plan pattern (not keyed on
+    save, so they never remount) with a consent checkbox panel, avatar/logo field (post cover
+    pattern; logos on a checkerboard so transparency shows), subscribers table + search + CSV.
+    `trust.module.css` adds only these bits. Sidebar: Subscribers under Enquiries (`mail` glyph).
+  - Public partner marquee: logos in greyscale, colour on hover/focus; a tile with a website is a
+    link (new tab, `rel="noopener noreferrer"`, named “<partner> (opens in a new tab)”); the
+    looping copies are `aria-hidden` and out of the tab order.
 - **Property page plots (Unit 17b)**: `components/site/property/plots.tsx` — “Choose your plot”
   under the facts strip (a 5-column table; stacked cards ≤ 700 px), `OfferNote`; notes box
   `.terms` (cream); head shows “From ₦…”, “Initial deposit from ₦…” and “A development by …”.

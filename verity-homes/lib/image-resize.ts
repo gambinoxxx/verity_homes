@@ -1,6 +1,7 @@
 // Browser-only: shrink a photo before upload (Unit 15) — Lagos mobile data matters.
 // Decodes the file, scales it to ≤ 2400 px on the long side (EXIF orientation applied) and
 // re-encodes as WebP, or JPEG where the browser can't encode WebP (Safari), at ~0.82 quality.
+// Logos pass keepAlpha (PNG fallback). fitWithin never upscales, so small logos stay small.
 import { MAX_PHOTO_SIDE, PHOTO_QUALITY, fitWithin } from "@/lib/property-photos";
 
 export const UNSUPPORTED_PHOTO =
@@ -23,6 +24,8 @@ export async function resizeForUpload(
   file: File,
   maxSide = MAX_PHOTO_SIDE,
   quality = PHOTO_QUALITY,
+  /** Logos (Unit 19b): keep transparency — WebP, else PNG (never JPEG, which has no alpha). */
+  opts: { keepAlpha?: boolean } = {},
 ): Promise<ResizedPhoto> {
   let bitmap: ImageBitmap;
   try {
@@ -41,7 +44,10 @@ export async function resizeForUpload(
     ctx.drawImage(bitmap, 0, 0, width, height);
     // WebP first; browsers that can't encode it hand back PNG, so fall back to JPEG.
     let blob = await toBlob(canvas, "image/webp", quality);
-    if (!blob || blob.type !== "image/webp") blob = await toBlob(canvas, "image/jpeg", quality);
+    if (!blob || blob.type !== "image/webp")
+      blob = opts.keepAlpha
+        ? await toBlob(canvas, "image/png", 1)
+        : await toBlob(canvas, "image/jpeg", quality);
     if (!blob) throw new UnsupportedPhotoError();
     return { blob, width, height, contentType: blob.type };
   } finally {

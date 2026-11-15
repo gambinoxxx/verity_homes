@@ -63,6 +63,7 @@ describe("admin sidebar", () => {
       "Testimonials",
       "Partners",
       "Enquiries",
+      "Subscribers",
       "Site settings",
     ]);
   });

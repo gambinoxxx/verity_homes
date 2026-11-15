@@ -3,7 +3,13 @@
 // one published without consent, one consented draft). They must be in place before the app is
 // built: settings and partners are cached and the pages prerendered.
 import { test, expect } from "@playwright/test";
-import { getPartnerRows, getSettingsRow, type PartnerRow, type SettingsRow } from "./helpers/db";
+import {
+  getPartnerRows,
+  getSettingsRow,
+  type PartnerRow,
+  type SettingsRow,
+  visiblePartnerNames,
+} from "./helpers/db";
 
 let settings: SettingsRow;
 let partners: PartnerRow[];
@@ -51,19 +57,24 @@ test.describe("about page", () => {
       hidden.length === 0,
       "No non-public [E2E] partners on the test branch — run npm run db:test:reset.",
     );
-    const visible = partners.filter((p) => p.status === "PUBLISHED" && p.consentConfirmed);
-    const res = await page.goto("/about");
-    const html = (await res?.text()) ?? "";
-    for (const p of hidden) expect(html, `${p.name} must not be public`).not.toContain(p.name);
-
-    const label = page.getByText("Our development partners");
-    if (visible.length === 0) {
-      await expect(label).toHaveCount(0);
-      await expect(page.locator("[data-partners]")).toHaveCount(0);
-    } else {
-      await expect(label).toBeVisible();
-      for (const p of visible) expect(html).toContain(p.name);
-    }
+    // admin-trust.spec.ts may publish an E2E partner at the same time (Unit 19b): compare the
+    // page with the partners visible just before AND after loading it, and only when those agree.
+    await expect(async () => {
+      const before = await visiblePartnerNames();
+      const res = await page.goto("/about");
+      const html = (await res?.text()) ?? "";
+      const visible = await visiblePartnerNames();
+      expect(visible, "partners changed while the page loaded").toEqual(before);
+      for (const p of hidden) expect(html, `${p.name} must not be public`).not.toContain(p.name);
+      const label = page.getByText("Our development partners");
+      if (visible.length === 0) {
+        await expect(label).toHaveCount(0);
+        await expect(page.locator("[data-partners]")).toHaveCount(0);
+      } else {
+        await expect(label).toBeVisible();
+        for (const name of visible) expect(html).toContain(name);
+      }
+    }).toPass({ timeout: 30_000 });
   });
 
   test("CTA: Contact us goes to the contact form", async ({ page }) => {

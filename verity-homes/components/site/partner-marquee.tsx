@@ -2,13 +2,38 @@ import Image from "next/image";
 import type { PartnerView } from "@/lib/db/queries/trust";
 import styles from "./partner-marquee.module.css";
 
-function PartnerTile({ partner }: { partner: PartnerView }) {
-  return partner.logoUrl ? (
+/**
+ * One partner: the logo (greyscale, colour on hover/focus) or the name, linking to the partner's
+ * website in a new tab when there is one. Copies in the looping half are hidden from assistive
+ * tech and taken out of the tab order.
+ */
+function PartnerTile({ partner, copy = false }: { partner: PartnerView; copy?: boolean }) {
+  const inner = partner.logoUrl ? (
     <span className={styles.logo}>
-      <Image src={partner.logoUrl} alt={partner.name} width={140} height={40} />
+      <Image
+        src={partner.logoUrl}
+        alt={partner.name}
+        width={160}
+        height={56}
+        sizes="160px"
+        style={{ objectFit: "contain" }}
+      />
     </span>
   ) : (
     <span>{partner.name}</span>
+  );
+  if (!partner.website) return inner;
+  return (
+    <a
+      className={styles.link}
+      href={partner.website}
+      target="_blank"
+      rel="noopener noreferrer"
+      tabIndex={copy ? -1 : undefined}
+      aria-label={copy ? undefined : `${partner.name} (opens in a new tab)`}
+    >
+      {inner}
+    </a>
   );
 }
 
@@ -43,7 +68,7 @@ export function PartnerMarquee({ partners, labelId, light = false }: PartnerMarq
           {/* Second copy for a seamless loop; hidden from screen readers. */}
           {partners.map((p) => (
             <li key={`dup-${p.id}`} aria-hidden="true">
-              <PartnerTile partner={p} />
+              <PartnerTile partner={p} copy />
             </li>
           ))}
         </ul>

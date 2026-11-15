@@ -117,6 +117,19 @@ no public page loads Clerk (Open question 42).
   network's own host, RC digits only, full address needs an address; `looksLikeStreetAddress`
   is a warning only (Q37). Admin read `lib/db/queries/admin-settings.ts`. Logs never include
   setting values (only the error code/name).
+- Testimonials, partners, subscribers (Unit 19b): `lib/actions/testimonial.ts`,
+  `lib/actions/partner.ts` (create/update/publish/unpublish/delete/reorder) →
+  `lib/db/mutations/trust.ts` → `updateTag("testimonials")` / `updateTag("partners")` (+ `/`,
+  `/about`). **Consent is enforced three times:** the publish schemas
+  (`testimonialPublishSchema` / `partnerPublishSchema`, `lib/validation/trust.ts`) on the saved
+  row, the save (unticking consent sets status DRAFT in the same write) and the public queries
+  (`PUBLISHED` + `consentConfirmed`, `lib/db/queries/trust.ts`). Avatars/logos in Blob under
+  `testimonials/<id>/` and `partners/<id>/` (`lib/trust-images.ts`; logos PNG/JPEG/WebP, resized
+  with `keepAlpha` — WebP else PNG, never JPEG — and never upscaled); a save deletes the folder's
+  other files, a delete removes the folder (`lib/actions/trust-images.ts`). Subscribers:
+  `lib/actions/subscriber-admin.ts` (delete one), `app/api/admin/subscribers/export/route.ts`
+  (CSV, 401/403; `lib/subscribers.ts` reuses the enquiry CSV cell + formula guard). Admin reads in
+  `lib/db/queries/admin-trust.ts`.
 - `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
   apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).

@@ -7,6 +7,7 @@ import { del, list } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { blobEnv } from "@/lib/env";
 import { postIdFromPathname } from "@/lib/post-images";
+import { trustTargetFromPathname } from "@/lib/trust-images";
 import {
   MAX_PHOTO_BYTES,
   PHOTO_CONTENT_TYPES,
@@ -66,14 +67,24 @@ export async function listFolder(folder: string): Promise<string[]> {
   return urls;
 }
 
-/** Where an upload is going: a property's photos (Unit 15) or a blog post's images (Unit 18). */
-export type UploadTarget = { kind: "property"; id: string } | { kind: "post"; id: string };
+/**
+ * Where an upload is going: a property's photos (Unit 15), a blog post's images (Unit 18), a
+ * testimonial's avatar or a partner's logo (Unit 19b).
+ */
+export type UploadTarget =
+  | { kind: "property"; id: string }
+  | { kind: "post"; id: string }
+  | { kind: "testimonial"; id: string }
+  | { kind: "partner"; id: string };
 
 export function uploadTargetFromPathname(prefix: string, pathname: string): UploadTarget | null {
   const propertyId = propertyIdFromPathname(prefix, pathname);
   if (propertyId) return { kind: "property", id: propertyId };
   const postId = postIdFromPathname(prefix, pathname);
   if (postId) return { kind: "post", id: postId };
+  const trust = trustTargetFromPathname(prefix, pathname);
+  if (trust)
+    return { kind: trust.kind === "testimonials" ? "testimonial" : "partner", id: trust.id };
   return null;
 }
 
@@ -100,7 +111,7 @@ export async function handleImageUpload(
     body,
     onBeforeGenerateToken: async (pathname) => {
       const target = uploadTargetFromPathname(prefix, pathname);
-      if (!target) throw new UploadRefused("Images must go into a property's or a post's folder.");
+      if (!target) throw new UploadRefused("Images must go into their record's folder.");
       await authorize(target);
       return {
         allowedContentTypes: [...PHOTO_CONTENT_TYPES],

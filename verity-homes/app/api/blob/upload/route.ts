@@ -1,5 +1,5 @@
 // Client-upload token route for images (@vercel/blob/client upload()): property photos (Unit 15)
-// and blog post covers + body images (Unit 18).
+// blog post covers + body images (Unit 18), testimonial avatars and partner logos (Unit 19b).
 // 401 signed out, 403 not an admin; then requireAdmin() again inside onBeforeGenerateToken with
 // the target checks (lib/storage handleImageUpload): the property exists and has room, or the
 // post exists. The browser saves the result itself afterwards (addPropertyPhoto, or the post
@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { adminAccess, requireAdmin } from "@/lib/auth";
 import { getPhotoUploadState } from "@/lib/db/queries/admin-properties";
 import { postExists } from "@/lib/db/queries/admin-posts";
+import { partnerExists, testimonialExists } from "@/lib/db/queries/admin-trust";
 import { MAX_PHOTOS } from "@/lib/property-photos";
 import { UploadRefused, handleImageUpload } from "@/lib/storage";
 
@@ -33,6 +34,16 @@ export async function POST(request: Request): Promise<NextResponse> {
       if (target.kind === "post") {
         if (!(await postExists(target.id)))
           throw new UploadRefused("That post no longer exists.", 404);
+        return;
+      }
+      if (target.kind === "testimonial") {
+        if (!(await testimonialExists(target.id)))
+          throw new UploadRefused("That testimonial no longer exists.", 404);
+        return;
+      }
+      if (target.kind === "partner") {
+        if (!(await partnerExists(target.id)))
+          throw new UploadRefused("That partner no longer exists.", 404);
         return;
       }
       const state = await getPhotoUploadState(target.id);

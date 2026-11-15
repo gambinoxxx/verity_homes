@@ -82,6 +82,7 @@ test.describe("signed-in admin", () => {
       "Testimonials",
       "Partners",
       /^Enquiries(\d+ new)?$/, // + the NEW-count badge
+      "Subscribers",
       "Site settings",
     ]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
@@ -279,6 +280,11 @@ test.describe("signed-in non-admin", () => {
     "/admin/posts/new",
     "/admin/categories",
     "/admin/settings",
+    "/admin/testimonials",
+    "/admin/testimonials/new",
+    "/admin/partners",
+    "/admin/partners/new",
+    "/admin/subscribers",
   ]) {
     test(`gets 403 "No admin access" at ${path}`, async ({ page }) => {
       const res = await page.goto(path);

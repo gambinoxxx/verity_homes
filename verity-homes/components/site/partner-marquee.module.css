@@ -23,7 +23,8 @@
 .marquee:hover .track {
   animation-play-state: paused;
 }
-.track li > span {
+.track li > span,
+.track li > .link > span {
   display: flex;
   align-items: center;
   min-height: 54px;
@@ -34,20 +35,51 @@
   color: var(--text-on-navy-muted);
   white-space: nowrap;
 }
-.track li > .logo {
+.track li > .logo,
+.track li > .link > .logo {
   padding: 7px 24px;
 }
 .logo img {
   height: 40px;
   width: auto;
   object-fit: contain;
+  /* Unit 19b: greyscale in the strip, full colour on hover / keyboard focus */
+  filter: grayscale(1);
+  opacity: 0.85;
+  transition:
+    filter 0.3s,
+    opacity 0.3s;
+}
+.logo:hover img,
+.link:hover .logo img,
+.link:focus-visible .logo img {
+  filter: none;
+  opacity: 1;
+}
+.link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 12px;
+}
+.link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
 }
 
 /* /about (design/about.html inline styles): muted label, grey dashed tiles on white. */
 .light .label,
-.light .track li > span {
+.light .track li > span,
+.light .track li > .link > span {
   color: var(--text-muted);
 }
-.light .track li > span {
+.light .track li > span,
+.light .track li > .link > span {
   border-color: var(--border-input);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo img {
+    transition: none;
+  }
 }

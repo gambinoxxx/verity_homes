@@ -2,7 +2,7 @@
 // pages that don't exist yet are not prefetched (admin-only, like lib/nav.ts UNBUILT_ROUTES).
 
 export type AdminIcon =
-  "dash" | "home" | "chart" | "faq" | "pen" | "tag" | "quote" | "hand" | "inbox" | "gear";
+  "dash" | "home" | "chart" | "faq" | "pen" | "tag" | "quote" | "hand" | "inbox" | "mail" | "gear";
 export type AdminNavItem = { label: string; href: string; icon: AdminIcon; unit: number };
 export type AdminNavGroup = { label: string | null; items: readonly AdminNavItem[] };
 
@@ -24,6 +24,7 @@ export const ADMIN_NAV: readonly AdminNavGroup[] = [
     label: "Business",
     items: [
       { label: "Enquiries", href: "/admin/enquiries", icon: "inbox", unit: 16 },
+      { label: "Subscribers", href: "/admin/subscribers", icon: "mail", unit: 19 },
       { label: "Site settings", href: "/admin/settings", icon: "gear", unit: 19 },
     ],
   },
