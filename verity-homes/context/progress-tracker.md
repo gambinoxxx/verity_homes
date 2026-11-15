@@ -306,14 +306,27 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
       test read the public page before the save finished. `clickAndWaitForAction()`
       (`tests/e2e/helpers/editor.ts`) waits for that click's own server-action response
       (`Next-Action` request header) — as the settings spec does since Unit 19a.
-    - **Still open (owner decision pending):** under parallel load, two other specs still fail ~1–2
-      in 10 — admin-photos “map … show exact location” (the 2nd save's request carried
-      `showExactLocation:false`, yet the public page's next load still had the coordinates) and
-      admin-plots (inbox detail panel empty on first load). In isolation a probe was fresh 10/10
-      on the first load. Likely the same thing as the unreproduced /invest case: a background
-      regeneration of a page visited right after one save, finishing after the next save.
+    - **Load measurement (owner chose option b, 2026-11-15).** Probe: save (exact location on) →
+      browser visit → save (off), while 6 clients loaded /, /properties, /blog, /invest, /about and
+      the property page continuously; then the page was polled every 250 ms for 30 s. Results:
+      API-only check 0/20 stale; browser check 1/20 stale for > 30 s; with the database read after
+      each save 0/20, then 1 stale round in a 40-round run — and in that round the **database
+      still said “exact”**: the page was right. The “stale” page was a test race, not the server
+      cache: the editor is keyed on `updatedAt`, so after a save the page mounts a new editor and
+      the switch flipped on the outgoing one was lost (the next save sent the old value). Same
+      family: right after the first save on /new, `router.replace` changes the URL before the new
+      editor renders, so a click can land on the /new editor (admin-plots “Published” toast).
+      Fix (no polling): the keyed editors expose `data-version` (their `updatedAt`);
+      `saveAndWaitForRemount()` waits for it to change after a save, `expectSavedEditor()` waits
+      for an editor that has one after creating. No app cache bug was found; the /invest check's
+      bounded reload stays only where the cause was never reproduced.
     - Proven: admin-properties ×10 on both projects 102/102; admin-plans ×10 (`--workers=1`)
       112/112; admin-posts ×10 all passed.
+    - **Proof after the fix:** admin-photos + admin-plots + admin-properties ×10 on both projects:
+      240 passed, 2 failed — both in the same second, when the server logged the Neon driver's
+      `Error: [object ErrorEvent]` (a dropped database connection; the public page answered 500).
+      Not staleness. Note for production: one dropped Neon connection turns that request into an
+      error page; a retry in `lib/db/client.ts` could be considered (owner decision, not done).
     - Note: `--repeat-each` with several workers runs copies of the site-wide plans/FAQ flows at the
       same time (they then fight over the highlight, order and FAQ clean-up); repeat that spec with
       `--workers=1`.

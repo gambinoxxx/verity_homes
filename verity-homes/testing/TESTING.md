@@ -174,7 +174,9 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
   text typed before hydration is reset. After Publish/Unpublish, wait for the editor's new status
   text before using it again (the editor remounts). When the same toast can show twice in a row
   (“Changes saved”), click with `clickAndWaitForAction()` so the test waits for that save's own
-  response. Repeat `admin-plans.spec.ts` with
+  response. Property, plan and post editors remount on every save (keyed on `updatedAt`, exposed
+  as `data-version`): use `saveAndWaitForRemount()` when the test keeps editing after a save, and
+  `expectSavedEditor()` after the first save on `/new`. Repeat `admin-plans.spec.ts` with
   `--workers=1` (its flows change site-wide state).
 - **Signing out:** a test that signs out must sign in on its own, in a fresh context. Signing
   out ends the session, and the saved state shares that session.

@@ -3,9 +3,15 @@
 // goto()/reload() can save stale values (flaky under load). The editors set data-ready="true"
 // once hydrated (useHydrated); this locator only matches then, and Playwright re-resolves it on
 // every action — so each fill/click through it waits for hydration, never for a fixed time.
-import type { Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
-export type EditorName = "Property editor" | "Plan editor" | "Post editor" | "Site settings";
+export type EditorName =
+  | "Property editor"
+  | "Plan editor"
+  | "Post editor"
+  | "Site settings"
+  | "Testimonial editor"
+  | "Partner editor";
 
 export function readyForm(page: Page, name: EditorName) {
   return page.getByRole("form", { name }).and(page.locator('[data-ready="true"]'));
@@ -24,4 +30,29 @@ export async function clickAndWaitForAction(page: Page, target: Locator): Promis
   await target.click();
   const res = await done;
   if (!res.ok()) throw new Error(`server action answered ${res.status()}`);
+}
+
+/**
+ * Saves an editor whose page remounts it on every save (property, plan and post editors are
+ * keyed on updatedAt) and waits until the refreshed editor is on screen (its data-version
+ * changed). Acting before that can hit the editor being replaced: a switch flipped there is
+ * lost, and the next save sends the old value (Q57 — measured, not a server cache issue).
+ */
+export async function saveAndWaitForRemount(
+  page: Page,
+  form: Locator,
+  button: Locator,
+): Promise<void> {
+  const before = await form.getAttribute("data-version");
+  await clickAndWaitForAction(page, button);
+  if (before) await expect(form).not.toHaveAttribute("data-version", before);
+}
+
+/**
+ * After the first save on /new the app router.replace()s to /<id>: the URL changes before the
+ * new editor renders, so the /new editor can still be on screen. Wait for the editor of the
+ * saved record (only it has a data-version) before acting.
+ */
+export async function expectSavedEditor(form: Locator): Promise<void> {
+  await expect(form).toHaveAttribute("data-version", /\S/);
 }

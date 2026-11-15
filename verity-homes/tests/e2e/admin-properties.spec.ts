@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
 import { cleanUpE2eProperties, findPropertyByTitle } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
-import { readyForm } from "./helpers/editor";
+import { expectSavedEditor, readyForm } from "./helpers/editor";
 
 // Unit 14: admin properties list + editor, against the TEST database. Each test creates its own
 // "[SAMPLE] E2E …" rows (unique per run and per project) and removes them afterwards.
@@ -54,6 +54,7 @@ test("create → publish → rename (308) → unpublish → delete", async ({ pa
   await page.getByRole("button", { name: "Save draft" }).click();
   await expectToast(page, /Draft saved/);
   await expect(page).toHaveURL(/\/admin\/properties\/(?!new$)[a-z0-9]+$/);
+  await expectSavedEditor(editor(page));
   await expect(page.getByRole("heading", { level: 1, name: "Edit property" })).toBeVisible();
 
   const row = await findPropertyByTitle(title);
@@ -205,6 +206,7 @@ test("delete from the list asks first and names the property", async ({ page }) 
   await page.getByRole("button", { name: "Save draft" }).click();
   await expectToast(page, /Draft saved/);
   await expect(page).toHaveURL(/\/admin\/properties\/(?!new$)[a-z0-9]+$/);
+  await expectSavedEditor(editor(page));
 
   await page.goto(`/admin/properties?q=${encodeURIComponent(title)}`);
   await page.getByRole("button", { name: `Delete ${title}` }).click();

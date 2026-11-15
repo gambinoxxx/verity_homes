@@ -373,6 +373,9 @@ export function PropertyEditor({
         className={styles.editor}
         aria-label="Property editor"
         data-ready={hydrated ? "true" : undefined}
+        // Changes with every save (the page remounts the editor on its updatedAt): tests wait for
+        // it so they never act on the editor being replaced.
+        data-version={property?.updatedAt}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

@@ -9,7 +9,7 @@ import {
 } from "./helpers/db";
 import { planPackagesFlow } from "./helpers/plan-packages-flow";
 import { storageStateFor } from "./setup/clerk-users";
-import { readyForm } from "./helpers/editor";
+import { expectSavedEditor, readyForm } from "./helpers/editor";
 
 // Unit 17: admin plans + FAQs against the TEST database. Plans and FAQs are site-wide (one gold
 // card, one order), so the flows that change them run in the admin-desktop project only, and
@@ -91,6 +91,7 @@ async function planFlow(page: Page, name: string) {
   await editor.getByRole("button", { name: "Save draft" }).click();
   await toast(page, /Draft saved/);
   await expect(page).toHaveURL(/\/admin\/plans\/(?!new$)[a-z0-9]+$/);
+  await expectSavedEditor(editor);
   expect(await planByName(name)).toMatchObject({ status: "DRAFT", minimumKobo: "250000000" });
 
   const pub = await page.context().newPage();

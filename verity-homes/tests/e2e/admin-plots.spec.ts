@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { cleanUpE2eProperties, findPropertyByTitle } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
 import { neon } from "@neondatabase/serverless";
-import { readyForm } from "./helpers/editor";
+import { expectSavedEditor, readyForm } from "./helpers/editor";
 
 // Unit 17b: an estate with plot options, end to end on the TEST database. The listing is
 // "[SAMPLE] E2E Estate …" and is removed in a finally (the global teardown also sweeps it and
@@ -64,6 +64,7 @@ test("estate with 4 plots: admin → card “From” → page → select 500 sqm
     await editor(page).getByRole("button", { name: "Save draft" }).click();
     await toast(page, /Draft saved/);
     await expect(page).toHaveURL(/\/admin\/properties\/(?!new$)[a-z0-9]+$/);
+    await expectSavedEditor(editor(page));
     await editor(page).getByRole("button", { name: "Publish", exact: true }).click();
     await toast(page, /Published/);
     const row = await findPropertyByTitle(title);

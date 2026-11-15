@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
 import { neon } from "@neondatabase/serverless";
 import { deleteE2ePlans, planByName } from "./db";
-import { readyForm } from "./editor";
+import { expectSavedEditor, readyForm } from "./editor";
 
 // Unit 17c: a plan with 3 packages, end to end on the TEST database: admin → publish → summary
 // card on the home page → plan page rows (gain, % per year) → Select ₦20M → enquiry with
@@ -70,6 +70,7 @@ export async function planPackagesFlow(page: Page) {
     await editor(page).getByRole("button", { name: "Save draft" }).click();
     await toast(page, /Draft saved/);
     await expect(page).toHaveURL(/\/admin\/plans\/(?!new$)[a-z0-9]+$/);
+    await expectSavedEditor(editor(page));
     await editor(page).getByRole("button", { name: "Publish", exact: true }).click();
     await toast(page, /Published/);
     expect(await planByName(name)).toMatchObject({

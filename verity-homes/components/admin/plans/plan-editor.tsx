@@ -235,6 +235,9 @@ export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps
         className={styles.editor}
         aria-label="Plan editor"
         data-ready={hydrated ? "true" : undefined}
+        // Changes with every save (the page remounts the editor on its updatedAt): tests wait for
+        // it so they never act on the editor being replaced.
+        data-version={plan?.updatedAt}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

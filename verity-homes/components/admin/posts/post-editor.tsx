@@ -260,6 +260,9 @@ export function PostEditor({
         className={editorStyles.editor}
         aria-label="Post editor"
         data-ready={hydrated ? "true" : undefined}
+        // Changes with every save (the page remounts the editor on its updatedAt): tests wait for
+        // it so they never act on the editor being replaced.
+        data-version={post?.updatedAt}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

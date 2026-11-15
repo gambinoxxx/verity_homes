@@ -12,7 +12,7 @@ import {
   insertE2ePost,
 } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
-import { clickAndWaitForAction, readyForm } from "./helpers/editor";
+import { clickAndWaitForAction, expectSavedEditor, readyForm } from "./helpers/editor";
 
 // Unit 18: admin blog posts + categories, against the TEST database. Rows are "[SAMPLE] E2E …"
 // (unique per run and project) and removed afterwards; uploads go under e2e/posts/<id>/ in Blob
@@ -98,6 +98,7 @@ test.describe("signed-in admin", () => {
     await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save draft" }));
     await expectToast(page, /Draft saved/);
     await expect(page).toHaveURL(/\/admin\/posts\/(?!new$)[a-z0-9]+$/);
+    await expectSavedEditor(editor(page));
     const created = await findPostByTitle(title);
     expect(created).toMatchObject({ status: "DRAFT", publishedAt: null });
     const id = created!.id;
