@@ -1,5 +1,5 @@
 import type { PlanView } from "@/lib/db/queries/invest";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./invest-page.module.css";
 import { InvestDisclaimer, PlanGrid } from "./plans";
@@ -12,7 +12,7 @@ export function PlansSection({ plans }: { plans: PlanView[] }) {
         <div className="sec-head">
           <div>
             <Reveal as="span">
-              <PillTicker label="Our plans" />
+              <MarqueeEyebrow label="Our plans" />
             </Reveal>
             <Reveal as="h2" className={`h2 ${styles.h2}`} id="plans-h" delay={1}>
               Choose your <em>plan.</em>

@@ -146,6 +146,8 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     `<em>`, breadcrumb, optional subtitle) followed by `<section className="sheet">` (or
     `sheet subtle`). Global `.pills`, `.card`, `.ctl` (labelled control; use a `fieldset.ctl`
     + `legend.lbl` for groups), `.cta-card`.
+  - `PageHero variant="split"` (plan pages): two columns — crumbs, kicker, title, `details`
+    and `sub` on the left, an `aside` (the navy price card) on the right; stacked ≤ 900px.
   - `PageHero variant="post"` is the design/post.html hero (min-height 520px, smaller title up
     to 900px wide, optional `kicker` above the title) for /privacy and blog posts (Unit 11).
     Follow it with `<section className="sheet"><article className="container article">` and a
@@ -157,15 +159,18 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     takes a `label`. Global `.prose` also styles `ol`, tables, `hr`, `code` and `.prose-img`.
   - Shared sections: `CeoSection` (`components/site/ceo.tsx`; home and /about pass their own
     text column) and `PartnerMarquee` (`components/site/partner-marquee.tsx`; `light` on /about;
-    renders nothing without partners). A `.on-cream` section darkens `PillTicker` text to
+    renders nothing without partners). A `.on-cream` section darkens `MarqueeEyebrow` text to
     `--accent-text-on-cream`. About sections live in `components/site/about/`.
   - Investment: `PlanCard` / `PlanGrid` / `InvestSteps` / `InvestDisclaimer`
     (`components/site/invest/plans.tsx`) are shared by the home invest section and /invest;
     the copy lives in `lib/invest.ts`. `EnquiryForm` variants: `full`, `card`, `contact`,
     `invest`.
   - Reusable: `PropertyCard` (`cta="details"` on /properties, `"enquire"` elsewhere; the tag
-    carries `data-tag`), `MarqueeBand` (`light`, `reverse`), `SaveButton`, `PillTicker`
-    (the `.pill` ticker; label read once by screen readers), `EnquiryForm` (field names match
+    carries `data-tag`), `MarqueeBand` (`light`, `reverse`), `SaveButton`, `MarqueeEyebrow`
+    (`components/site/marquee-eyebrow.tsx`: `<MarqueeEyebrow label="…" />`, the one scrolling
+    gold-pill eyebrow used site-wide; pure CSS, the track is duplicated and scrolls 0 → -50%,
+    the copy is `aria-hidden` so screen readers read the label once; reduced motion shows one
+    static centred label), `EnquiryForm` (field names match
     `enquirySchema`; Unit 7 wires it), `icons.tsx` (the design's own glyphs, copied from its
     `<symbol>` set).
   - Property page sections live in `components/site/property/` (`sections.tsx` server parts,
@@ -177,6 +182,10 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     under `prefers-reduced-motion`.
   - CSS modules (`*.module.css`) are plain CSS using the variables. They
     skip the Tailwind loader, so don't use `@apply` in them.
+  - CSS modules rename `@keyframes` (and the names used in `animation:`) per file, so an
+    animation in a module can't use a keyframes defined in `globals.css` — it silently never
+    runs. Define the `@keyframes` in the same module (see `marquee-band.module.css`,
+    `partner-marquee.module.css`, `marquee-eyebrow.module.css`).
   - Shell: `<SiteChrome>` (`components/site/site-chrome.tsx`) = skip link,
     scroll progress, preloader, header + drawer, `<main id="main">`, footer,
     WhatsApp float (only when a number is set), back-to-top.
@@ -251,6 +260,16 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   (plan, amount, message, hidden `packageId`) and the WhatsApp text. Admin plan editor:
   “Plan page” and “Packages” panels (rows with a live “Gain ₦… · x.x% per year” preview);
   the old minimum/rate/tenure fields are disabled with a note while packages exist.
+  Plan page styles: `components/site/invest/plan-page.module.css`. Hero = `PageHero
+  variant="split"` with a badge, partner/agreement lines and a navy “Invest from” price card
+  (duration + payout rows). Packages table ≥ 768px: columns 24/30/18/14/14%, right-aligned
+  tabular figures, green “+₦…” gain, “x.x% / yr” pill, compact outline navy “Select →”; < 768px
+  one card per package. Under it an info-icon note (only when there are packages) and a cream
+  “Not sure which package suits you?” card (48px above and below) with two equal buttons —
+  WhatsApp (green) and “Request a call back” (outline navy) — side by side, stacked full width
+  on phones. No packages: a dashed card (icon, “Packages for this plan are being finalised”,
+  “Speak to us for details”, the same two buttons). Disclosure: `<InvestDisclaimer boxed />`,
+  a muted grey box headed “Important information”.
     Clerk's card uses the tokens through `appearance.variables` (CSS variables work).
 
 ## Icons

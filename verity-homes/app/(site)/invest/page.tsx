@@ -5,7 +5,7 @@ import { InvestSteps } from "@/components/site/invest/plans";
 import { PlansSection } from "@/components/site/invest/plans-section";
 import { StartSection } from "@/components/site/invest/start-section";
 import { PageHero } from "@/components/site/page-hero";
-import { PillTicker } from "@/components/site/pill-ticker";
+import { MarqueeEyebrow } from "@/components/site/marquee-eyebrow";
 import { Reveal } from "@/components/site/reveal";
 import { getFaqs, getPublishedPlans } from "@/lib/db/queries/invest";
 import { INVEST_LEAD } from "@/lib/invest";
@@ -44,7 +44,7 @@ export default async function InvestPage() {
           <div className={styles.split}>
             <div>
               <Reveal as="span">
-                <PillTicker label="How it works" />
+                <MarqueeEyebrow label="How it works" />
               </Reveal>
               <Reveal as="h2" className={`h2 ${styles.h2}`} id="how-h">
                 Real estate returns, <em>without building it yourself.</em>

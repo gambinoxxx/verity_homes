@@ -1,0 +1,419 @@
+/* /invest/[slug]: hero badge + partner lines, the navy price card, the packages table/cards,
+   the note and the CTA card. Tokens only (navy / white / gold, Playfair + Manrope). */
+
+/* ---- Hero (left column) ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--accent-primary);
+  color: var(--bg-navy-deep);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 18px;
+}
+.lines p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-on-navy-muted);
+}
+.lines b {
+  color: var(--text-on-navy);
+  font-weight: 700;
+}
+
+/* ---- Price card (right column) ---- */
+.priceCard {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-navy);
+  border: 1px solid var(--border-navy);
+  border-radius: 24px;
+  padding: 30px 30px 26px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.28);
+}
+/* Gold accent line along the top edge. */
+.priceCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--accent-primary);
+}
+.priceCard small {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+}
+.priceCard strong {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 3.4vw, 46px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text-on-navy);
+  font-variant-numeric: tabular-nums;
+}
+.priceRows {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--border-navy);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.priceRows li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: var(--text-on-navy-muted);
+}
+.priceRows svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--accent-primary);
+}
+
+/* ---- Packages ---- */
+.section h2 {
+  margin: 18px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.card {
+  margin-top: 28px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.table {
+  font-variant-numeric: tabular-nums;
+}
+.head,
+.row {
+  display: grid;
+  /* table-layout: fixed equivalent: You invest 24% · You receive 30% · Gain 18% · Per year 14% · action 14% */
+  grid-template-columns: 24% 30% 18% 14% 14%;
+  align-items: center;
+}
+.head {
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-default);
+}
+.head > span {
+  padding: 14px 20px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: right;
+}
+.row {
+  min-height: 72px;
+  border-bottom: 1px solid var(--border-default);
+  transition: background 0.2s;
+}
+.row:last-child {
+  border-bottom: 0;
+}
+.row:hover {
+  background: rgb(10 26 51 / 0.025);
+}
+.chosen {
+  background: rgb(200 162 78 / 0.08);
+}
+.row > span {
+  padding: 14px 20px;
+  text-align: right;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+}
+/* Mobile-only labels inside cells. */
+.cellLabel {
+  display: none;
+}
+.amount {
+  display: block;
+  font-weight: 600;
+}
+.receive b {
+  display: block;
+  font-weight: 800;
+}
+.receive small,
+.label {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.gain {
+  color: var(--state-success);
+}
+.pct {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.action {
+  text-align: center;
+}
+.row > .action {
+  text-align: center;
+}
+.select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--bg-navy);
+  background: transparent;
+  color: var(--bg-navy);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.select:hover,
+.select[aria-pressed="true"] {
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+.select:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---- Note + CTA ---- */
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.note svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 2px;
+}
+/* No packages yet: dashed card with the same two buttons. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 28px;
+  border: 1.5px dashed var(--border-input);
+  border-radius: 20px;
+  background: var(--bg-base);
+}
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.emptyIcon svg {
+  width: 24px;
+  height: 24px;
+}
+.empty h3 {
+  margin: 16px 0 4px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+.empty p {
+  margin: 0 0 22px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+.empty .ctaActions {
+  justify-content: center;
+}
+.cta {
+  margin: 48px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 28px;
+  padding: 26px 28px;
+  border-radius: 20px;
+  background: var(--bg-cream);
+}
+.cta h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+.cta p {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+/* Two equal buttons: side by side, stacked full width on phones (below). */
+.ctaActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ctaActions > :global(.btn) {
+  justify-content: center;
+  padding-inline: 22px;
+  white-space: nowrap;
+}
+.wa {
+  background: var(--whatsapp-button);
+  color: var(--text-on-navy);
+  border: 1.5px solid var(--whatsapp-button);
+}
+.wa:hover {
+  background: var(--whatsapp-button-hover);
+  border-color: var(--whatsapp-button-hover);
+}
+.callBack {
+  background: transparent;
+  color: var(--bg-navy);
+  border: 1.5px solid var(--bg-navy);
+}
+.callBack:hover {
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+}
+
+/* ---- Phones: one card per package ---- */
+@media (max-width: 767px) {
+  .card {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .head {
+    display: none;
+  }
+  .table {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    padding: 20px;
+    border: 1px solid var(--border-default);
+    border-radius: 18px;
+    background: var(--bg-base);
+  }
+  .row:last-child {
+    border-bottom: 1px solid var(--border-default);
+  }
+  .row > span {
+    padding: 0;
+    text-align: left;
+  }
+  .row > span + span {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-default);
+  }
+  .row > span:first-child {
+    padding-bottom: 12px;
+  }
+  .cellLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .row > span:first-child .cellLabel {
+    margin-bottom: 4px;
+  }
+  .row > span:first-child .amount {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .receive {
+    text-align: right;
+  }
+  .row > span.action {
+    display: block;
+    padding: 14px 0 0;
+  }
+  .select {
+    width: 100%;
+    min-height: 46px;
+  }
+  .cta {
+    padding: 22px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ctaActions {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .empty {
+    padding: 32px 20px;
+    align-items: stretch;
+  }
+  .emptyIcon {
+    align-self: center;
+  }
+}

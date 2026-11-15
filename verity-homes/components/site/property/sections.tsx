@@ -26,7 +26,7 @@ import {
   PinIcon,
   WhatsAppIcon,
 } from "../icons";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { PropertyCard } from "../property-card";
 import { SaveButton } from "../save-button";
 import { ShareButton } from "./share-button";
@@ -336,7 +336,7 @@ export function SimilarProperties({ items }: { items: PropertyCardData[] }) {
       <div className="container">
         <div className="sec-head">
           <div>
-            <PillTicker label="Similar properties" />
+            <MarqueeEyebrow label="Similar properties" />
             <h2 className="h2" id="sim-h">
               You may also like
             </h2>

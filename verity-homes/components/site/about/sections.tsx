@@ -9,7 +9,7 @@ import { CeoSection, ceoText } from "../ceo";
 import { Markdown } from "../blog/markdown";
 import { ArrowIcon, ShieldIcon } from "../icons";
 import { PartnerMarquee } from "../partner-marquee";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./about.module.css";
 
@@ -42,7 +42,7 @@ export function Story({ story }: { story: string | null }) {
           </div>
           <div>
             <Reveal as="span">
-              <PillTicker label="Our story" />
+              <MarqueeEyebrow label="Our story" />
             </Reveal>
             <Reveal as="h2" className="h2" id="story-h">
               A property company built on <em>truth.</em>
@@ -96,7 +96,7 @@ export function Values() {
       <div className="container">
         <div className="sec-head">
           <div>
-            <PillTicker label="What we stand for" />
+            <MarqueeEyebrow label="What we stand for" />
             <h2 className="h2" id="val-h">
               How we <em>work.</em>
             </h2>
@@ -120,7 +120,7 @@ export function Values() {
 export function AboutCeo({ bio, promise }: { bio: string | null; promise: string | null }) {
   return (
     <CeoSection>
-      <PillTicker label="Leadership" />
+      <MarqueeEyebrow label="Leadership" />
       <h2 className="h2" id="ceo-h">
         Meet <em>Esther.</em>
       </h2>

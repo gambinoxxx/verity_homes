@@ -15,9 +15,18 @@ type Props = {
   ownerId: string;
   className?: string;
   children: React.ReactNode;
+  /** Where the link goes when no WhatsApp number is set: the page's enquiry form. */
+  fallbackHref?: string;
 };
 
-export function PlotAwareWhatsApp({ number, defaultText, ownerId, className, children }: Props) {
+export function PlotAwareWhatsApp({
+  number,
+  defaultText,
+  ownerId,
+  className,
+  children,
+  fallbackHref = "#enquire",
+}: Props) {
   const [text, setText] = useState(defaultText);
   useEffect(() => {
     const offPlot = onPlotSelected(
@@ -35,7 +44,7 @@ export function PlotAwareWhatsApp({ number, defaultText, ownerId, className, chi
   // No number configured: fall back to the on-page form (as before).
   if (!href)
     return (
-      <a className={className} href="#enquire">
+      <a className={className} href={fallbackHref}>
         {children}
       </a>
     );

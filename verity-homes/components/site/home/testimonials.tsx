@@ -1,5 +1,5 @@
 import { getPublishedTestimonials } from "@/lib/db/queries/trust";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import { TestimonialCarousel } from "./testimonial-carousel";
 
@@ -12,7 +12,7 @@ export async function Testimonials() {
       <div className="container">
         <TestimonialCarousel testimonials={testimonials}>
           <Reveal as="span">
-            <PillTicker label="Testimonials" />
+            <MarqueeEyebrow label="Testimonials" />
           </Reveal>
           <Reveal as="h2" className="h2" delay={1} id="t-h">
             Clients who trusted Verity

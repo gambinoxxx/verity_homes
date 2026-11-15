@@ -3,13 +3,14 @@ import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/site/blog/markdown";
-import { WhatsAppIcon } from "@/components/site/icons";
+import { CalendarIcon, InfoIcon, PayoutIcon, WhatsAppIcon } from "@/components/site/icons";
 import { FaqSection } from "@/components/site/invest/faq-section";
 import { PackageOptions } from "@/components/site/invest/packages";
+import planStyles from "@/components/site/invest/plan-page.module.css";
 import { InvestDisclaimer } from "@/components/site/invest/plans";
 import { StartSection } from "@/components/site/invest/start-section";
 import { PageHero } from "@/components/site/page-hero";
-import { PillTicker } from "@/components/site/pill-ticker";
+import { MarqueeEyebrow } from "@/components/site/marquee-eyebrow";
 import styles from "@/components/site/property/property.module.css";
 import { PlotAwareWhatsApp } from "@/components/site/property/whatsapp-link";
 import { Reveal } from "@/components/site/reveal";
@@ -22,7 +23,7 @@ import {
 import { getSiteSettings } from "@/lib/db/queries/settings";
 import { env } from "@/lib/env";
 import { formatNaira, PAYOUT_LABEL } from "@/lib/format";
-import { planFromAmountKobo } from "@/lib/invest";
+import { planFromAmountKobo, tenureLabel } from "@/lib/invest";
 import { absoluteUrl } from "@/lib/property-detail";
 
 const SITE = env.NEXT_PUBLIC_SITE_URL;
@@ -76,77 +77,114 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
   const url = pageUrl(plan.slug);
   const from = planFromAmountKobo(plan.packages);
 
+  const duration =
+    tenureLabel(plan.packages.map((p) => p.tenureMonths)) ?? `${plan.tenureMonths} months`;
+
+  // The same two buttons in the "Not sure?" card and the no-packages card.
+  const ctaActions = (
+    <div className={planStyles.ctaActions}>
+      <PlotAwareWhatsApp
+        className={`btn ${planStyles.wa}`}
+        number={settings.whatsapp}
+        defaultText={`Hi Verity, I'm interested in ${plan.name} (${url})`}
+        ownerId={plan.id}
+        fallbackHref="#start"
+      >
+        <WhatsAppIcon />
+        Chat on WhatsApp
+      </PlotAwareWhatsApp>
+      <a className={`btn ${planStyles.callBack}`} href="#start">
+        Request a call back
+      </a>
+    </div>
+  );
+
   return (
     <>
       <PageHero
+        variant="split"
         title={plan.name}
         crumbs={[
           { label: "Home", href: "/" },
           { label: "Invest", href: "/invest" },
           { label: plan.name },
         ]}
-        sub={plan.summary ?? undefined}
-        image={plan.coverUrl ?? "/samples/building.jpg"}
-      />
-      <section className="sheet" aria-labelledby="packages-h">
-        <div className="container">
-          <div className={styles.head}>
-            <div>
-              {plan.badge ? (
-                <span className={`${styles.tag} ${styles.tagGold}`}>{plan.badge}</span>
-              ) : null}
+        kicker={plan.badge ? <span className={planStyles.badge}>{plan.badge}</span> : undefined}
+        details={
+          plan.partnerName || plan.contractWith ? (
+            <div className={planStyles.lines}>
               {plan.partnerName ? (
-                <p className={styles.dev} data-testid="plan-partner">
+                <p data-testid="plan-partner">
                   In partnership with <b>{plan.partnerName}</b>
                 </p>
               ) : null}
               {plan.contractWith ? (
-                <p className={styles.dev} data-testid="plan-contract">
+                <p data-testid="plan-contract">
                   Your agreement is with <b>{plan.contractWith}</b>
                 </p>
               ) : null}
             </div>
-            <div className={styles.price}>
-              <small>Invest from</small>
-              <b>{formatNaira(from ?? BigInt(plan.minimumKobo))}</b>
-              <span className={styles.deposit}>Payout: {PAYOUT_LABEL[plan.payoutFrequency]}</span>
-            </div>
+          ) : undefined
+        }
+        sub={plan.summary ?? undefined}
+        image={plan.coverUrl ?? "/samples/building.jpg"}
+        aside={
+          <div className={planStyles.priceCard} data-testid="plan-price-card">
+            <small>Invest from</small>
+            <strong>{formatNaira(from ?? BigInt(plan.minimumKobo))}</strong>
+            <ul className={planStyles.priceRows}>
+              <li>
+                <CalendarIcon />
+                {duration}
+              </li>
+              <li>
+                <PayoutIcon />
+                Payout: {PAYOUT_LABEL[plan.payoutFrequency].toLowerCase()}
+              </li>
+            </ul>
           </div>
-
-          <section
-            className={`${styles.block} ${styles.plots}`}
-            aria-labelledby="packages-h"
-            id="packages"
-          >
+        }
+      />
+      <section className="sheet" aria-labelledby="packages-h">
+        <div className="container">
+          <section className={planStyles.section} aria-labelledby="packages-h" id="packages">
             <Reveal as="span">
-              <PillTicker label="Packages" />
+              <MarqueeEyebrow label="Packages" />
             </Reveal>
             <h2 id="packages-h">Choose your package</h2>
             {plan.packages.length ? (
-              <PackageOptions
-                planId={plan.id}
-                planName={plan.name}
-                url={url}
-                packages={plan.packages}
-              />
+              <>
+                <PackageOptions
+                  planId={plan.id}
+                  planName={plan.name}
+                  url={url}
+                  packages={plan.packages}
+                />
+                <p className={planStyles.note}>
+                  <InfoIcon />
+                  <span>
+                    Amounts you receive are expected, per your signed agreement. “Per year” is the
+                    equivalent yearly rate for comparison.
+                  </span>
+                </p>
+                <div className={planStyles.cta}>
+                  <div>
+                    <h3>Not sure which package suits you?</h3>
+                    <p>Chat with us on WhatsApp, or ask for a call back below.</p>
+                  </div>
+                  {ctaActions}
+                </div>
+              </>
             ) : (
-              <p className={styles.note}>
-                Packages for this plan are being finalised — speak to us below.
-              </p>
+              <div className={planStyles.empty} data-testid="plan-no-packages">
+                <span className={planStyles.emptyIcon} aria-hidden="true">
+                  <CalendarIcon />
+                </span>
+                <h3>Packages for this plan are being finalised</h3>
+                <p>Speak to us for details.</p>
+                {ctaActions}
+              </div>
             )}
-            <p className={styles.note}>
-              Amounts you receive are expected, per your signed agreement. “Per year” is the
-              equivalent yearly rate for comparison.
-            </p>
-            <PlotAwareWhatsApp
-              className={`btn ${styles.wa}`}
-              number={settings.whatsapp}
-              defaultText={`Hi Verity, I'm interested in ${plan.name} (${url})`}
-              ownerId={plan.id}
-            >
-              <WhatsAppIcon />
-              Chat on WhatsApp
-            </PlotAwareWhatsApp>
           </section>
 
           {plan.description.trim() ? (
@@ -173,7 +211,7 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
               </div>
             </section>
           ) : null}
-          <InvestDisclaimer light />
+          <InvestDisclaimer boxed />
         </div>
       </section>
       <FaqSection faqs={faqs} />

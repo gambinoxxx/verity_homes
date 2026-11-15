@@ -3,7 +3,7 @@ import type { PostSummary } from "@/lib/db/queries/posts";
 import { formatDate } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
 import { ArrowIcon } from "./icons";
-import { PillTicker } from "./pill-ticker";
+import { MarqueeEyebrow } from "./marquee-eyebrow";
 import { Reveal, RevealLink } from "./reveal";
 import styles from "./post-cards.module.css";
 
@@ -69,7 +69,7 @@ export function PostsSection({ posts, id, pill, title, layout }: PostsSectionPro
         <div className="sec-head">
           <div>
             <Reveal as="span">
-              <PillTicker label={pill} />
+              <MarqueeEyebrow label={pill} />
             </Reveal>
             <Reveal as="h2" className="h2" delay={1} id={headingId}>
               {title}

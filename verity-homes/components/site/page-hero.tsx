@@ -14,46 +14,91 @@ type PageHeroProps = {
   /** Decorative background photo. */
   image: string;
   /**
-   * "post": the design/post.html hero (taller, smaller title up to 900px wide) for prose
-   * pages and blog posts. Default is the giant inner-page title.
+   * Default: the giant inner-page title. "post": the design/post.html hero (taller, smaller
+   * title up to 900px wide) for prose pages and blog posts. "split": two columns on desktop
+   * (stacked on phones) — kicker, title, `details` and `sub` on the left, `aside` (e.g. a price
+   * card) on the right; used by /invest/[slug].
    */
-  variant?: "page" | "post";
-  /** Shown above the title in the "post" variant (e.g. the category tag). */
+  variant?: "page" | "post" | "split";
+  /** Shown above the title in the "post" and "split" variants (e.g. a tag or badge). */
   kicker?: React.ReactNode;
+  /** "split": lines under the title, before `sub`. */
+  details?: React.ReactNode;
+  /** "split": the right-hand column. */
+  aside?: React.ReactNode;
 };
+
+function Crumbs({ crumbs }: { crumbs: readonly Crumb[] }) {
+  return (
+    <nav className={styles.crumbs} aria-label="Breadcrumb">
+      <ol>
+        {crumbs.map((c, i) => (
+          <li key={`${i}-${c.label}`}>
+            {c.href ? (
+              <Link href={c.href} prefetch={prefetchFor(c.href)}>
+                {c.label}
+              </Link>
+            ) : (
+              <span aria-current="page">{c.label}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
 
 /**
  * Inner-page hero (design `.page-hero`): full-bleed photo, dark overlay, giant title,
  * breadcrumb, optional subtitle on the right. Follow it with `<section className="sheet">`.
  */
-export function PageHero({ title, crumbs, sub, image, variant = "page", kicker }: PageHeroProps) {
+export function PageHero({
+  title,
+  crumbs,
+  sub,
+  image,
+  variant = "page",
+  kicker,
+  details,
+  aside,
+}: PageHeroProps) {
   const post = variant === "post";
+  const background = (
+    <div className={`${styles.image} media`} aria-hidden="true">
+      <Image src={image} alt="" fill priority sizes="100vw" />
+    </div>
+  );
+
+  if (variant === "split") {
+    return (
+      <section className={`${styles.hero} ${styles.split}`} aria-labelledby="page-title">
+        {background}
+        <div className={`container ${styles.splitInner}`}>
+          <div className={styles.splitText}>
+            <Crumbs crumbs={crumbs} />
+            {kicker}
+            <h1 className={styles.title} id="page-title">
+              {title}
+            </h1>
+            {details}
+            {sub ? <p className={styles.sub}>{sub}</p> : null}
+          </div>
+          {aside ? <div className={styles.splitAside}>{aside}</div> : null}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`${styles.hero} ${post ? styles.post : ""}`} aria-labelledby="page-title">
-      <div className={`${styles.image} media`} aria-hidden="true">
-        <Image src={image} alt="" fill priority sizes="100vw" />
-      </div>
+      {background}
       <div className={`container ${styles.inner}`}>
         <div className={post ? styles.postText : undefined}>
           {kicker}
           <h1 className={styles.title} id="page-title">
             {title}
           </h1>
-          <nav className={styles.crumbs} aria-label="Breadcrumb">
-            <ol>
-              {crumbs.map((c, i) => (
-                <li key={`${i}-${c.label}`}>
-                  {c.href ? (
-                    <Link href={c.href} prefetch={prefetchFor(c.href)}>
-                      {c.label}
-                    </Link>
-                  ) : (
-                    <span aria-current="page">{c.label}</span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <Crumbs crumbs={crumbs} />
         </div>
         {sub ? <p className={styles.sub}>{sub}</p> : null}
       </div>

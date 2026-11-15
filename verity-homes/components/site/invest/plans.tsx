@@ -72,11 +72,22 @@ export function PlanGrid({ plans }: { plans: PlanView[] }) {
 export function InvestDisclaimer({
   className = "",
   light = false,
+  boxed = false,
 }: {
   className?: string;
-  /** On a white background (plan pages). */
+  /** On a white background. */
   light?: boolean;
+  /** Plan pages: a muted box headed "Important information". */
+  boxed?: boolean;
 }) {
+  if (boxed) {
+    return (
+      <aside className={`${styles.disclaimerBox} ${className}`} aria-labelledby="important-info-h">
+        <h2 id="important-info-h">Important information</h2>
+        <p>{INVEST_DISCLAIMER}</p>
+      </aside>
+    );
+  }
   return (
     <p className={`${styles.disclaimer} ${light ? styles.onLight : ""} ${className}`}>
       {INVEST_DISCLAIMER}

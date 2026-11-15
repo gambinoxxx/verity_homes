@@ -1,6 +1,6 @@
 import { EnquiryForm } from "../enquiry-form";
 import boxStyles from "../home/contact-block.module.css";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./invest-page.module.css";
 
@@ -17,7 +17,7 @@ export function StartSection({ plans, planId }: StartProps) {
       <div className="container">
         <Reveal className={`${boxStyles.box} on-navy`}>
           <div className={boxStyles.text}>
-            <PillTicker label="Start investing" />
+            <MarqueeEyebrow label="Start investing" />
             <h2 className="h2" id="start-h">
               Speak to us about <em>a plan.</em>
             </h2>

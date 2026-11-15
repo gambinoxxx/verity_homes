@@ -1,6 +1,6 @@
 import { getShowcaseProperties, type PropertyCard } from "@/lib/db/queries/properties";
 import { PROJECT_STATUS_LABEL, TITLE_LABEL } from "@/lib/format";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { ShowcaseStack, type ShowcaseItem } from "./showcase-stack";
 import styles from "./showcase.module.css";
 
@@ -38,7 +38,7 @@ export async function Showcase() {
       <div className="container">
         <div className={`sec-head ${styles.head}`}>
           <div>
-            <PillTicker label="Signature projects" />
+            <MarqueeEyebrow label="Signature projects" />
             <h2 className="h2" id="sc-h">
               Developments we&apos;re <em>proud of.</em>
             </h2>

@@ -6,7 +6,7 @@ import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { ArrowIcon } from "./icons";
-import { PillTicker } from "./pill-ticker";
+import { MarqueeEyebrow } from "./marquee-eyebrow";
 import styles from "./enquiry-form.module.css";
 
 const INTERESTS = [
@@ -196,7 +196,7 @@ export function EnquiryForm({
     >
       {contact ? (
         <>
-          <PillTicker label="Quick enquiry" />
+          <MarqueeEyebrow label="Quick enquiry" />
           <h2 id={f("h")}>{heading}</h2>
         </>
       ) : (

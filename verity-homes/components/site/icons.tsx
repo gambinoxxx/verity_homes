@@ -276,3 +276,39 @@ export function PlusIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+/** Calendar (plan duration). */
+export function CalendarIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <rect x="4" y="5" width="16" height="15" rx="2" />
+        <path d="M4 10h16M9 3v4M15 3v4" />
+      </g>
+    </svg>
+  );
+}
+
+/** Coins (payout). */
+export function PayoutIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.8">
+        <ellipse cx="12" cy="7" rx="7" ry="3" />
+        <path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" />
+      </g>
+    </svg>
+  );
+}
+
+/** Info "i" in a circle (notes). */
+export function InfoIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6M12 7.5v.01" />
+      </g>
+    </svg>
+  );
+}

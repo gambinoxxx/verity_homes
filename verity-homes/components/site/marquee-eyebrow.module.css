@@ -1,0 +1,87 @@
+/* Scrolling eyebrow pill (design/assets/verity.css `.pill` / `.pill-track`), pure CSS.
+   The track holds the same group twice and moves left by exactly one group (-50%), so the
+   loop is seamless. The keyframes live in this module: a module can't reach the global
+   `marquee` keyframes (CSS Modules rename `animation: marquee` to a local name), which is
+   why the old PillTicker never moved. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  width: 190px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 999px;
+  padding: 8px 0;
+  /* Fixed line box: no layout shift between the moving and the still version. */
+  line-height: 18px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+  vertical-align: middle;
+}
+.track {
+  display: flex;
+  flex: none;
+  width: max-content;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  white-space: nowrap;
+  animation: eyebrowScroll 14s linear infinite;
+  will-change: transform;
+}
+.group {
+  display: flex;
+  flex: none;
+}
+/* Each item ends with its own gap, so the two groups join with the same spacing. */
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 14px;
+}
+.item i {
+  font-style: normal;
+  opacity: 0.6;
+}
+@keyframes eyebrowScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+/* Navy sections use the bright gold (Open question 20). */
+:global(.on-navy) .track {
+  color: var(--accent-primary);
+}
+/* Cream sections: --accent-text is 4.4:1 on cream, so one shade darker (Open question 22). */
+:global(.on-cream) .track {
+  color: var(--accent-text-on-cream);
+}
+
+/* Reduced motion: no scrolling — one label, centred and fully visible. */
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    width: auto;
+    padding: 8px 16px;
+    justify-content: center;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .track {
+    animation: none;
+    transform: none;
+  }
+  .group + .group,
+  .item + .item,
+  .item i {
+    display: none;
+  }
+  .item {
+    padding-right: 0;
+  }
+}

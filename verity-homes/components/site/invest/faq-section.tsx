@@ -1,6 +1,6 @@
 import type { FaqView } from "@/lib/db/queries/invest";
 import { PlusIcon } from "../icons";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./invest-page.module.css";
 
@@ -12,7 +12,7 @@ export function FaqSection({ faqs }: { faqs: FaqView[] }) {
       <div className={`container ${styles.split} ${styles.faqSplit}`}>
         <div className={styles.faqHead}>
           <Reveal as="span">
-            <PillTicker label="Questions" />
+            <MarqueeEyebrow label="Questions" />
           </Reveal>
           <Reveal as="h2" className={`h2 ${styles.h2}`} id="faq-h">
             Before you <em>invest.</em>

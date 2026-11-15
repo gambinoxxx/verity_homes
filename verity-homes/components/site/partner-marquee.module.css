@@ -83,3 +83,11 @@
     transition: none;
   }
 }
+
+/* Local keyframes: CSS Modules rename `animation: marquee` to this module's own name, so the
+   global @keyframes marquee (globals.css) is never matched from here. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

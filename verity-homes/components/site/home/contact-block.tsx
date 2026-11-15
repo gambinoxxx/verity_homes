@@ -2,7 +2,7 @@ import { getSiteSettings } from "@/lib/db/queries/settings";
 import { whatsappLink } from "@/lib/whatsapp";
 import { EnquiryForm } from "../enquiry-form";
 import { MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "../icons";
-import { PillTicker } from "../pill-ticker";
+import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./contact-block.module.css";
 
@@ -23,7 +23,7 @@ export async function ContactBlock() {
       <div className="container">
         <Reveal className={`${styles.box} on-navy`}>
           <div className={styles.text}>
-            <PillTicker label="Quick enquiry" />
+            <MarqueeEyebrow label="Quick enquiry" />
             <h2 className="h2" id="c-h">
               Ready to buy, rent <em>or invest?</em>
             </h2>
