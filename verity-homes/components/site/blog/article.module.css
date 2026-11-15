@@ -1,0 +1,211 @@
+/* Blog post page: hero meta line, overlapping cover, the Markdown body, end CTA.
+   Unlayered (CSS module), so these beat the global `.prose` in the components layer. */
+
+/* ---- Hero meta: "8 Nov 2026 · 3 min read · by …" ---- */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 20px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-on-navy-muted);
+}
+.meta span + span::before {
+  content: "·";
+  margin-right: 10px;
+  color: var(--accent-primary);
+}
+.meta b {
+  color: var(--text-on-navy);
+  font-weight: 700;
+}
+
+/* ---- Cover: large and rounded, overlapping the top of the white sheet ---- */
+.cover {
+  position: relative;
+  max-width: 1080px;
+  margin: -278px auto 64px; /* sheet padding 88 + 190 into the hero */
+  aspect-ratio: 16 / 8;
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--bg-navy-surface);
+  box-shadow: 0 30px 60px -20px rgb(7 18 38 / 0.45);
+}
+.cover img {
+  object-fit: cover;
+}
+
+/* ---- Article column ---- */
+.article {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ---- Markdown body ---- */
+.body {
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--text-prose);
+}
+.body p {
+  margin: 0 0 20px;
+}
+/* Lead: the first paragraph, a touch larger. */
+.body > p:first-child {
+  font-size: 20px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+.body h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 48px 0 16px;
+}
+/* Short gold rule above each section heading. */
+.body h2::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent-primary);
+  margin-bottom: 18px;
+}
+.body > h2:first-child {
+  margin-top: 0;
+}
+.body h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin: 36px 0 12px;
+}
+.body strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.body em {
+  font-style: italic;
+}
+
+/* Lists: gold round bullets / gold numbers, 24px indent, 8px between items. */
+.body ul,
+.body ol {
+  margin: 0 0 20px;
+  padding-left: 24px;
+}
+.body ul {
+  list-style: none;
+}
+.body ul > li {
+  position: relative;
+}
+.body ul > li::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 0.68em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+}
+.body ol {
+  list-style: decimal;
+}
+.body ol > li::marker {
+  color: var(--accent-text);
+  font-weight: 700;
+}
+.body li {
+  margin: 0 0 8px;
+  padding-left: 4px;
+}
+.body li > ul,
+.body li > ol {
+  margin: 8px 0 0;
+}
+
+.body blockquote {
+  margin: 32px 0;
+  padding: 20px;
+  border-left: 4px solid var(--accent-primary);
+  border-radius: 0 16px 16px 0;
+  background: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--text-primary);
+}
+.body blockquote p {
+  margin: 0;
+}
+.body blockquote p + p {
+  margin-top: 12px;
+}
+
+.body a {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.body a:hover {
+  color: var(--accent-text);
+}
+
+/* Images: rounded, full column width; caption from the alt text (markdown.tsx). */
+.body :global(.prose-figure) {
+  display: block;
+  margin: 32px 0;
+}
+.body :global(.prose-img) {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  margin: 0;
+}
+.body :global(.prose-caption) {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .cover {
+    margin: -146px 0 40px; /* sheet padding 56 + 90 into the hero */
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+  }
+}
+@media (max-width: 767px) {
+  .meta {
+    font-size: 14px;
+  }
+  .body {
+    font-size: 17px;
+  }
+  .body > p:first-child {
+    font-size: 18.5px;
+  }
+  .body h2 {
+    font-size: 26px;
+    margin-top: 40px;
+  }
+  .body h3 {
+    font-size: 20px;
+  }
+}

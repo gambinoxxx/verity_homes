@@ -132,15 +132,24 @@ test.describe("blog post", () => {
   test("renders the hero, Markdown body, author and related posts", async ({ page }) => {
     await page.goto(`/blog/${POST}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(POST_TITLE);
-    await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("min read");
+    // Meta line under the title: date · reading time · author.
+    await expect(page.getByTestId("post-meta")).toContainText("min read");
+    await expect(page.getByTestId("post-meta")).toContainText("by Esther Ezenagu");
     const body = page.locator("article .prose");
     await expect(body.getByRole("heading", { level: 2, name: "[SAMPLE] Heading" })).toBeVisible();
     await expect(body.locator("ul > li")).toHaveText(["Point one", "Point two"]);
     await expect(body.locator("blockquote")).toContainText("A pull quote.");
     await expect(page.locator("article")).toContainText("Esther Ezenagu");
     const related = page.locator("#related");
-    await expect(related.getByRole("heading", { name: "More articles" })).toBeVisible();
-    await expect(related.locator('a[href^="/blog/"]:not([href="/blog"])')).toHaveCount(2);
+    await expect(related.getByRole("heading", { name: "Related posts" })).toBeVisible();
+    await expect(related.locator('a[href^="/blog/"]:not([href="/blog"])')).toHaveCount(3);
+    // End-of-article CTA: WhatsApp + "Request a call back" (same buttons as plan pages).
+    const cta = page.getByTestId("help-cta");
+    await expect(cta).toContainText("Have questions about this? Talk to Verity");
+    await expect(cta.getByRole("link", { name: "Request a call back" })).toHaveAttribute(
+      "href",
+      "/contact#message",
+    );
   });
 
   test("Article JSON-LD and canonical", async ({ page }) => {

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { markdownImageSrc } from "@/lib/blog";
 import { applyMarkdown, insertBlock } from "@/lib/markdown-format";
 import {
+  looksLikePlainText,
   markdownImage,
   readingMinutes,
   unreferencedImages,
@@ -203,5 +204,38 @@ describe("Blob images in Markdown (Q23)", () => {
     expect(
       markdownImageSrc("https://abc.public.blob.vercel-storage.com.evil.com/x.webp"),
     ).toBeNull();
+  });
+});
+
+describe("looksLikePlainText (admin hint: pasted without Markdown)", () => {
+  const plain = "First paragraph here.\n\nSecond paragraph here.\n\nThird paragraph here.";
+
+  it("flags 3+ paragraphs with no Markdown at all", () => {
+    expect(looksLikePlainText(plain)).toBe(true);
+    // single line breaks (a common paste) count as paragraphs too
+    expect(looksLikePlainText("One.\nTwo.\nThree.")).toBe(true);
+  });
+
+  it("stays quiet for short bodies", () => {
+    expect(looksLikePlainText("")).toBe(false);
+    expect(looksLikePlainText("One.\n\nTwo.")).toBe(false);
+  });
+
+  it.each([
+    ["a heading", "## Start with the land"],
+    ["an h3", "### Details"],
+    ["a dash list", "- Title"],
+    ["a star list", "* Survey"],
+    ["a numbered list", "1. Pick a package"],
+    ["a quote", "> Approval is not paperwork."],
+    ["bold", "Make sure the **title** is valid."],
+  ])("any Markdown sign clears it: %s", (_, line) => {
+    expect(looksLikePlainText(`${plain}\n\n${line}`)).toBe(false);
+  });
+
+  it("a dash inside a sentence or a hyphenated word is not a list", () => {
+    expect(
+      looksLikePlainText(`${plain}\n\nCosts rise - plan ahead with well-known builders.`),
+    ).toBe(true);
   });
 });

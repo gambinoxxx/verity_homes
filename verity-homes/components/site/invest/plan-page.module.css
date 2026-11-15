@@ -273,61 +273,6 @@
   font-size: 15px;
   color: var(--text-muted);
 }
-.empty .ctaActions {
-  justify-content: center;
-}
-.cta {
-  margin: 48px 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px 28px;
-  padding: 26px 28px;
-  border-radius: 20px;
-  background: var(--bg-cream);
-}
-.cta h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 600;
-}
-.cta p {
-  margin: 4px 0 0;
-  font-size: 15px;
-  color: var(--text-muted);
-}
-/* Two equal buttons: side by side, stacked full width on phones (below). */
-.ctaActions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-.ctaActions > :global(.btn) {
-  justify-content: center;
-  padding-inline: 22px;
-  white-space: nowrap;
-}
-.wa {
-  background: var(--whatsapp-button);
-  color: var(--text-on-navy);
-  border: 1.5px solid var(--whatsapp-button);
-}
-.wa:hover {
-  background: var(--whatsapp-button-hover);
-  border-color: var(--whatsapp-button-hover);
-}
-.callBack {
-  background: transparent;
-  color: var(--bg-navy);
-  border: 1.5px solid var(--bg-navy);
-}
-.callBack:hover {
-  background: var(--bg-navy);
-  color: var(--text-on-navy);
-}
-
 /* ---- Phones: one card per package ---- */
 @media (max-width: 767px) {
   .card {
@@ -399,15 +344,6 @@
   .select {
     width: 100%;
     min-height: 46px;
-  }
-  .cta {
-    padding: 22px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .ctaActions {
-    grid-template-columns: 1fr;
-    width: 100%;
   }
   .empty {
     padding: 32px 20px;

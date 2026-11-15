@@ -3,7 +3,8 @@ import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/site/blog/markdown";
-import { CalendarIcon, InfoIcon, PayoutIcon, WhatsAppIcon } from "@/components/site/icons";
+import { HelpCta, HelpCtaActions } from "@/components/site/help-cta";
+import { CalendarIcon, InfoIcon, PayoutIcon } from "@/components/site/icons";
 import { FaqSection } from "@/components/site/invest/faq-section";
 import { PackageOptions } from "@/components/site/invest/packages";
 import planStyles from "@/components/site/invest/plan-page.module.css";
@@ -12,7 +13,6 @@ import { StartSection } from "@/components/site/invest/start-section";
 import { PageHero } from "@/components/site/page-hero";
 import { MarqueeEyebrow } from "@/components/site/marquee-eyebrow";
 import styles from "@/components/site/property/property.module.css";
-import { PlotAwareWhatsApp } from "@/components/site/property/whatsapp-link";
 import { Reveal } from "@/components/site/reveal";
 import {
   getFaqs,
@@ -80,24 +80,12 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
   const duration =
     tenureLabel(plan.packages.map((p) => p.tenureMonths)) ?? `${plan.tenureMonths} months`;
 
-  // The same two buttons in the "Not sure?" card and the no-packages card.
-  const ctaActions = (
-    <div className={planStyles.ctaActions}>
-      <PlotAwareWhatsApp
-        className={`btn ${planStyles.wa}`}
-        number={settings.whatsapp}
-        defaultText={`Hi Verity, I'm interested in ${plan.name} (${url})`}
-        ownerId={plan.id}
-        fallbackHref="#start"
-      >
-        <WhatsAppIcon />
-        Chat on WhatsApp
-      </PlotAwareWhatsApp>
-      <a className={`btn ${planStyles.callBack}`} href="#start">
-        Request a call back
-      </a>
-    </div>
-  );
+  const actions = {
+    whatsapp: settings.whatsapp,
+    whatsappText: `Hi Verity, I'm interested in ${plan.name} (${url})`,
+    ownerId: plan.id,
+    callBackHref: "#start",
+  };
 
   return (
     <>
@@ -167,13 +155,11 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
                     equivalent yearly rate for comparison.
                   </span>
                 </p>
-                <div className={planStyles.cta}>
-                  <div>
-                    <h3>Not sure which package suits you?</h3>
-                    <p>Chat with us on WhatsApp, or ask for a call back below.</p>
-                  </div>
-                  {ctaActions}
-                </div>
+                <HelpCta
+                  title="Not sure which package suits you?"
+                  text="Chat with us on WhatsApp, or ask for a call back below."
+                  {...actions}
+                />
               </>
             ) : (
               <div className={planStyles.empty} data-testid="plan-no-packages">
@@ -182,7 +168,7 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
                 </span>
                 <h3>Packages for this plan are being finalised</h3>
                 <p>Speak to us for details.</p>
-                {ctaActions}
+                <HelpCtaActions {...actions} />
               </div>
             )}
           </section>

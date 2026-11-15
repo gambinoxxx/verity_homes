@@ -150,13 +150,34 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     and `sub` on the left, an `aside` (the navy price card) on the right; stacked ≤ 900px.
   - `PageHero variant="post"` is the design/post.html hero (min-height 520px, smaller title up
     to 900px wide, optional `kicker` above the title) for /privacy and blog posts (Unit 11).
-    Follow it with `<section className="sheet"><article className="container article">` and a
-    `.prose` body. `.article` (780px column) is unlayered in `globals.css` so it beats the
-    `container` utility; `.prose` (with `--text-prose`) lives in the components layer.
+    With `details` (blog posts) the breadcrumb moves above the kicker and the meta line sits
+    under a smaller title; `overlap` adds bottom room for a cover image that overlaps the sheet.
+    /privacy: follow it with `<section className="sheet"><article className="container
+    article">` and a `.prose` body. `.article` (780px column) is unlayered in `globals.css` so
+    it beats the `container` utility; `.prose` (with `--text-prose`) lives in the components
+    layer.
+  - Blog post page (`app/(site)/blog/[slug]/page.tsx`, styles in
+    `components/site/blog/article.module.css`): hero = category tag, H1, “date · N min read ·
+    by Author” (`data-testid="post-meta"`); the cover (alt = coverAlt or title) is a large
+    rounded image overlapping the top of the sheet; a 720px article column; the Markdown body
+    gets `prose` + the module's `.body` (unlayered, so it wins over the global `.prose`): h2
+    Playfair 32/26px with a short gold rule above, h3 Manrope 600 22px, 18px/1.75 paragraphs
+    with a larger lead, gold dot bullets and gold numbers, cream blockquote with a 4px gold
+    border, navy links with a gold underline, rounded full-width images with the alt text as a
+    caption (`.prose-figure` / `.prose-caption` spans — Markdown wraps images in a <p>). Then
+    share, author box, `HelpCta` (“Have questions about this? Talk to Verity”; call back →
+    /contact#message) and “Related posts” (`PostsSection layout="trio"`: up to 3, same category
+    first, then the latest).
+  - `HelpCta` / `HelpCtaActions` (`components/site/help-cta.tsx`): the cream “talk to us” card
+    and its two equal buttons (WhatsApp green, “Request a call back” outline navy); side by side
+    on desktop, stacked full width < 768px. Used by plan pages and blog posts.
   - Blog: `components/site/blog/` (`blog-browser.tsx` list + sidebar, `markdown.tsx` body,
     `post-sections.tsx` tag/share/author). `PostsSection` (`components/site/post-cards.tsx`,
-    `layout="featured"` on home, `"pair"` for the post page's "More articles"). `ShareButton`
-    takes a `label`. Global `.prose` also styles `ol`, tables, `hr`, `code` and `.prose-img`.
+    `layout="featured"` on home, `"pair"` two equal cards, `"trio"` for the post page's
+    “Related posts”). `ShareButton` takes a `label`. Global `.prose` also styles `ol`, tables,
+    `hr`, `code` and `.prose-img`.
+  - Admin post editor: a non-blocking warning in the Publish panel when the body has 3+
+    paragraphs and no Markdown at all (`looksLikePlainText` in `lib/post-content.ts`).
   - Shared sections: `CeoSection` (`components/site/ceo.tsx`; home and /about pass their own
     text column) and `PartnerMarquee` (`components/site/partner-marquee.tsx`; `light` on /about;
     renders nothing without partners). A `.on-cream` section darkens `MarqueeEyebrow` text to
@@ -265,7 +286,7 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
   (duration + payout rows). Packages table ≥ 768px: columns 24/30/18/14/14%, right-aligned
   tabular figures, green “+₦…” gain, “x.x% / yr” pill, compact outline navy “Select →”; < 768px
   one card per package. Under it an info-icon note (only when there are packages) and a cream
-  “Not sure which package suits you?” card (48px above and below) with two equal buttons —
+  “Not sure which package suits you?” `HelpCta` card (48px above and below) with two equal buttons —
   WhatsApp (green) and “Request a call back” (outline navy) — side by side, stacked full width
   on phones. No packages: a dashed card (icon, “Packages for this plan are being finalised”,
   “Speak to us for details”, the same two buttons). Disclosure: `<InvestDisclaimer boxed />`,

@@ -22,8 +22,13 @@ type PageHeroProps = {
   variant?: "page" | "post" | "split";
   /** Shown above the title in the "post" and "split" variants (e.g. a tag or badge). */
   kicker?: React.ReactNode;
-  /** "split": lines under the title, before `sub`. */
+  /** "split" and "post": lines under the title (e.g. date · reading time · author). */
   details?: React.ReactNode;
+  /**
+   * "post": extra room at the bottom for a cover image that overlaps the top of the white
+   * sheet (the page renders the image, e.g. blog posts).
+   */
+  overlap?: boolean;
   /** "split": the right-hand column. */
   aside?: React.ReactNode;
 };
@@ -61,6 +66,7 @@ export function PageHero({
   kicker,
   details,
   aside,
+  overlap = false,
 }: PageHeroProps) {
   const post = variant === "post";
   const background = (
@@ -89,16 +95,24 @@ export function PageHero({
     );
   }
 
+  // A post with `details` (blog): breadcrumb on top, then kicker, title and the meta line.
+  const metaFirst = post && details != null;
   return (
-    <section className={`${styles.hero} ${post ? styles.post : ""}`} aria-labelledby="page-title">
+    <section
+      className={`${styles.hero} ${post ? styles.post : ""} ${metaFirst ? styles.withDetails : ""} ${
+        post && overlap ? styles.overlap : ""
+      }`}
+      aria-labelledby="page-title"
+    >
       {background}
       <div className={`container ${styles.inner}`}>
         <div className={post ? styles.postText : undefined}>
+          {metaFirst ? <Crumbs crumbs={crumbs} /> : null}
           {kicker}
           <h1 className={styles.title} id="page-title">
             {title}
           </h1>
-          <Crumbs crumbs={crumbs} />
+          {metaFirst ? details : <Crumbs crumbs={crumbs} />}
         </div>
         {sub ? <p className={styles.sub}>{sub}</p> : null}
       </div>

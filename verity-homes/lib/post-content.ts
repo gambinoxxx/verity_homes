@@ -25,6 +25,24 @@ export function readingMinutes(markdown: string): number {
   return Math.max(1, Math.ceil(wordCount(markdown) / WORDS_PER_MINUTE));
 }
 
+/** Paragraph-ish blocks before the "no Markdown" hint shows. */
+export const PLAIN_TEXT_MIN_PARAGRAPHS = 3;
+
+// Any one of these means the author used Markdown: a heading (#), a list item (- * + or 1.),
+// a quote (>), or bold (** / __).
+const MARKDOWN_SIGN = /^\s{0,3}(#{1,6}\s|[-*+]\s|\d{1,3}[.)]\s|>)|\*\*\S|__\S/m;
+
+/**
+ * True when the body has 3+ paragraphs but no Markdown at all (no ##, -, 1., **, >): it was
+ * probably pasted as plain text, so the post page would show no headings or lists. Lines count
+ * as paragraphs too (pasted text often has single line breaks). A hint only, never blocks a save.
+ */
+export function looksLikePlainText(markdown: string): boolean {
+  const paragraphs = markdown.split(/\n/).filter((line) => line.trim() !== "").length;
+  if (paragraphs < PLAIN_TEXT_MIN_PARAGRAPHS) return false;
+  return !MARKDOWN_SIGN.test(markdown);
+}
+
 const BAD_SCHEME = /^(javascript|vbscript|data):/;
 
 /** Decodes the entity tricks browsers accept in a scheme (&#106; &#x6a; &colon; &Tab;). */

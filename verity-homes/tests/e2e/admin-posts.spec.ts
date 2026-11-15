@@ -167,7 +167,7 @@ test.describe("signed-in admin", () => {
     const res = await pub.goto(`/blog/${slug}`);
     expect(res?.status()).toBe(200);
     await expect(pub.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(pub.getByRole("navigation", { name: "Breadcrumb" })).toContainText(
+    await expect(pub.getByTestId("post-meta")).toContainText(
       `${readingMinutes(withImage)} min read`,
     );
     const inlineImg = pub.locator(`article .prose img[alt="E2E inline ${token}"]`);

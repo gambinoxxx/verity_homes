@@ -28,7 +28,7 @@ function components(siteUrl: string): Components {
     img: ({ src, alt }) => {
       const safe = markdownImageSrc(typeof src === "string" ? src : null);
       if (!safe) return null;
-      return (
+      const img = (
         <Image
           src={safe}
           alt={alt ?? ""}
@@ -37,6 +37,17 @@ function components(siteUrl: string): Components {
           sizes="(max-width: 860px) 100vw, 780px"
           className="prose-img"
         />
+      );
+      // Caption from the alt text. Spans, not <figure>: Markdown puts images inside a <p>.
+      // The caption repeats the alt, so screen readers hear it once (from the alt).
+      if (!alt?.trim()) return img;
+      return (
+        <span className="prose-figure">
+          {img}
+          <span className="prose-caption" aria-hidden="true">
+            {alt}
+          </span>
+        </span>
       );
     },
   };

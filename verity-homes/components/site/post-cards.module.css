@@ -16,6 +16,10 @@
 .pair {
   grid-template-columns: 1fr 1fr;
 }
+/* Post page "Related posts": up to three equal cards; fewer cards share the row. */
+.trio {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
 .post {
   background: var(--bg-base);
   border-radius: 20px;

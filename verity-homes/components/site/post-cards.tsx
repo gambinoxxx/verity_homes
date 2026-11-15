@@ -52,13 +52,14 @@ type PostsSectionProps = {
   id: string;
   pill: string;
   title: React.ReactNode;
-  /** "featured": 1 big + 2 small (home). "pair": two equal cards (post page). */
-  layout: "featured" | "pair";
+  /** "featured": 1 big + 2 small (home). "pair": two equal cards. "trio": up to three
+   * equal cards (post page "Related posts"). */
+  layout: "featured" | "pair" | "trio";
 };
 
 /**
  * Grey `.sec.blog` section with a pill, heading, "All articles" link and post cards. Home
- * "Insights for buyers & investors" and the post page's "More articles". Hidden if no posts.
+ * "Insights for buyers & investors" and the post page's "Related posts". Hidden if no posts.
  */
 export function PostsSection({ posts, id, pill, title, layout }: PostsSectionProps) {
   if (posts.length === 0) return null;
@@ -79,7 +80,11 @@ export function PostsSection({ posts, id, pill, title, layout }: PostsSectionPro
             All articles <ArrowIcon className={styles.arrow} />
           </RevealLink>
         </div>
-        <div className={`${styles.posts} ${layout === "pair" ? styles.pair : ""}`}>
+        <div
+          className={`${styles.posts} ${layout === "pair" ? styles.pair : ""} ${
+            layout === "trio" ? styles.trio : ""
+          }`}
+        >
           {posts.map((p, i) => (
             <PostCard key={p.id} post={p} big={layout === "featured" && i === 0} index={i} />
           ))}

@@ -13,6 +13,7 @@ import { createCategory } from "@/lib/actions/category";
 import { createPost, deletePost, publishPost, unpublishPost, updatePost } from "@/lib/actions/post";
 import { postMetaDescription } from "@/lib/blog";
 import { formatDate } from "@/lib/format";
+import { looksLikePlainText } from "@/lib/post-content";
 import { slugify } from "@/lib/slug";
 import { fieldId } from "@/lib/validation/property";
 import {
@@ -569,6 +570,16 @@ export function PostEditor({
                 </>
               )}
             </div>
+            {looksLikePlainText(content) ? (
+              <div
+                className={`${ui.alert} ${ui.warn} ${editorStyles.summary}`}
+                role="status"
+                data-testid="plain-text-warning"
+              >
+                This article has no headings or lists — did you paste plain text? Paste the version
+                with ## and - symbols.
+              </div>
+            ) : null}
             {list.length ? (
               <div className={`${ui.alert} ${ui.error} ${editorStyles.summary}`} role="alert">
                 <div>
