@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/site/blog/markdown";
@@ -11,6 +13,7 @@ import {
   getPublishedPostSlugs,
   getRelatedPosts,
 } from "@/lib/db/queries/posts";
+import { getSiteSettings } from "@/lib/db/queries/settings";
 import { env } from "@/lib/env";
 import { formatDate } from "@/lib/format";
 import { absoluteUrl, jsonLdScript } from "@/lib/property-detail";
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
 
 // design/post.html: hero over the cover photo (category, title, date · reading time), Markdown
 // body, share, author, then two related posts. The design shows the cover only as the hero.
-export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
+async function PostContent({ params }: { params: PageProps<"/blog/[slug]">["params"] }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) {
@@ -66,7 +69,10 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
     if (to && to !== slug) permanentRedirect(`/blog/${encodeURIComponent(to)}`);
     notFound();
   }
-  const related = await getRelatedPosts({ id: post.id, categoryId: post.category?.id ?? null });
+  const [related, settings] = await Promise.all([
+    getRelatedPosts({ id: post.id, categoryId: post.category?.id ?? null }),
+    getSiteSettings(), // the author box's CEO bio (Unit 19a)
+  ]);
   const url = postUrl(post.slug);
   const minutes = `${post.readingMinutes} min read`;
 
@@ -93,7 +99,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         <article className="article container">
           <Markdown source={post.content} siteUrl={SITE} />
           <PostShare title={post.title} url={url} />
-          <AuthorBox name={post.authorName} />
+          <AuthorBox name={post.authorName} ceoBio={settings.ceoBio} siteUrl={SITE} />
         </article>
       </section>
       <PostsSection
@@ -104,5 +110,19 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         layout="pair"
       />
     </>
+  );
+}
+
+/**
+ * `params` is read inside <Suspense> (Next 16 + Partial Prefetching): the route's generic App
+ * Shell is tagged by the site layout's settings read, so a settings save regenerates it — and
+ * awaiting params outside a boundary made that regeneration fail (500) until Unit 19a.
+ * Slugs from generateStaticParams are still fully prerendered; proxy.ts still answers 308/404.
+ */
+export default function PostPage({ params }: PageProps<"/blog/[slug]">) {
+  return (
+    <Suspense fallback={<SlugPageFallback />}>
+      <PostContent params={params} />
+    </Suspense>
   );
 }

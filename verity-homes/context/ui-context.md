@@ -218,6 +218,16 @@ is `--accent-text` (contrast); on navy it is `--accent-primary`.
     Preview tab renders `components/site/blog/markdown.tsx` inside the global `.prose`. Insert
     image asks for alt text in a native `<dialog>` (`ui.dialog`). Sidebar: Categories under Blog
     posts (`tag` glyph). `/admin/categories` is one inline-edited table.
+  - Site settings (Unit 19a): `components/admin/settings/` — one form in the editor grid
+    (panels Contact, Office, Company, Social media, Website text with anchors `#contact`,
+    `#office`, `#company`, `#social`, `#content`; aside: Save + `#privacy` panel). Each field says
+    where it shows (“Shown on: …”). WhatsApp shows the saved `234…` digits and a Test link; the
+    map search has a live Google embed preview (`editor.module.css .map`) and the Q37 warning; the
+    full-address switch shows the “every page footer and the contact page” warning.
+    `settings.module.css` adds only these bits.
+  - Public: footer social icons render only for filled networks (the row is hidden when none);
+    CEO bio / promise (home + /about), company story (/about) and the blog author box's bio line
+    come from settings, placeholders while empty (`ceo.module.css .md` for Markdown in a `.lead`).
 - **Property page plots (Unit 17b)**: `components/site/property/plots.tsx` — “Choose your plot”
   under the facts strip (a 5-column table; stacked cards ≤ 700 px), `OfferNote`; notes box
   `.terms` (cream); head shows “From ₦…”, “Initial deposit from ₦…” and “A development by …”.

@@ -105,3 +105,27 @@
     font-size: 19px;
   }
 }
+
+/* Owner-written Markdown (CEO bio, company story — Unit 19a) inside a `.lead` block: the lead's
+   type, with paragraph spacing, lists and links. */
+.md > * + * {
+  margin-top: 14px;
+}
+.md ul,
+.md ol {
+  padding-left: 22px;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md a {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.md strong {
+  color: var(--text-primary);
+}

@@ -42,9 +42,21 @@ function components(siteUrl: string): Components {
   };
 }
 
-export function Markdown({ source, siteUrl }: { source: string; siteUrl: string }) {
+/**
+ * `className` defaults to the article's `.prose`; owner-written site text (CEO bio, company
+ * story — Unit 19a) passes its own so it keeps the section's type styles. Same safety rules.
+ */
+export function Markdown({
+  source,
+  siteUrl,
+  className = "prose",
+}: {
+  source: string;
+  siteUrl: string;
+  className?: string;
+}) {
   return (
-    <div className="prose">
+    <div className={className}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml components={components(siteUrl)}>
         {source}
       </ReactMarkdown>

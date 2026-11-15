@@ -60,12 +60,14 @@ describe("built admin routes", () => {
       "/admin/posts",
       "/admin/posts/new",
       "/admin/categories",
+      "/admin/settings",
     ]);
     expect(isAdminRouteBuilt("/admin")).toBe(true);
     expect(isAdminRouteBuilt("/admin/properties/new")).toBe(true);
     expect(isAdminRouteBuilt("/admin/posts/new")).toBe(true); // Unit 18
     expect(isAdminRouteBuilt("/admin/testimonials")).toBe(false);
-    expect(isAdminRouteBuilt("/admin/settings?tab=contact")).toBe(false);
+    expect(isAdminRouteBuilt("/admin/settings#contact")).toBe(true); // Unit 19a
+    expect(isAdminRouteBuilt("/admin/partners?x=1")).toBe(false);
     expect(isAdminRouteBuilt("/privacy")).toBe(true);
     expect(isAdminRouteBuilt("/admin/plans", new Set(["/admin/plans"]))).toBe(true);
   });
@@ -75,7 +77,7 @@ describe("built admin routes", () => {
       ["Add a property", "/admin/properties/new"],
       ["Write a blog post", "/admin/posts/new"],
       ["Edit investment plans", "/admin/plans"],
-      ["Update contact details", "/admin/settings"],
+      ["Update contact details", "/admin/settings#contact"],
     ]);
   });
 });
@@ -115,10 +117,10 @@ describe("setupChecklist", () => {
       privacyReviewed: false,
     });
     expect(items.map((i) => i.href)).toEqual([
-      "/admin/settings",
-      "/admin/settings",
+      "/admin/settings#contact",
+      "/admin/settings#contact",
       "/admin/properties/new",
-      "/privacy",
+      "/admin/settings#privacy",
     ]);
     expect(items.find((i) => i.key === "privacy")?.hint).toMatch(/Q39/);
   });
@@ -173,8 +175,10 @@ describe("dashboard sections (fixture renders)", async () => {
     expect(html).toContain('data-item="email"');
     expect(html).toContain('data-item="privacy"');
     expect(html).not.toContain('data-item="whatsapp"');
-    expect(html).toContain('href="/privacy"'); // built (public) → a link
-    expect(html).toContain("Coming soon"); // /admin/settings not built yet
+    // Unit 19a: both go to the settings page's panels — links, nothing "Coming soon".
+    expect(html).toContain('href="/admin/settings#contact"');
+    expect(html).toContain('href="/admin/settings#privacy"');
+    expect(html).not.toContain("Coming soon");
   });
 });
 

@@ -35,10 +35,10 @@ export default async function AboutPage() {
         sub="Verity means truth. It is the standard behind every home we list and every plan we offer."
         image="/samples/tower.jpg"
       />
-      <Story />
+      <Story story={s.companyStory} />
       <MarqueeBand words={VALUES_BAND} />
       <Values />
-      <AboutCeo />
+      <AboutCeo bio={s.ceoBio} promise={s.ceoPromise} />
       <Trust
         companyName={s.companyName}
         rcNumber={s.rcNumber}

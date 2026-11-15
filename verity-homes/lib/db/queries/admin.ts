@@ -6,7 +6,6 @@ import { type EnquiryStatus, SAMPLE_PREFIX, type SetupStatus } from "@/lib/admin
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import type { INTEREST_LABEL } from "@/lib/format";
-import { PRIVACY_REVIEWED } from "@/lib/privacy";
 
 export type DashboardStats = {
   newEnquiries: number;
@@ -76,7 +75,10 @@ export async function getLatestEnquiries(limit = 5): Promise<LatestEnquiry[]> {
 export async function getSetupStatus(): Promise<SetupStatus> {
   await requireAdmin();
   const [settings, realPublishedProperties] = await Promise.all([
-    db.siteSettings.findUnique({ where: { id: 1 }, select: { whatsapp: true, email: true } }),
+    db.siteSettings.findUnique({
+      where: { id: 1 },
+      select: { whatsapp: true, email: true, privacyReviewedAt: true },
+    }),
     db.property.count({
       where: { status: "PUBLISHED", NOT: { title: { startsWith: SAMPLE_PREFIX } } },
     }),
@@ -85,6 +87,6 @@ export async function getSetupStatus(): Promise<SetupStatus> {
     whatsappSet: Boolean(settings?.whatsapp?.trim()),
     emailSet: Boolean(settings?.email?.trim()),
     realPublishedProperties,
-    privacyReviewed: PRIVACY_REVIEWED,
+    privacyReviewed: Boolean(settings?.privacyReviewedAt),
   };
 }

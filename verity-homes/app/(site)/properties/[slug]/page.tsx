@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { PlotOptions } from "@/components/site/property/plots";
@@ -81,7 +83,7 @@ export async function generateMetadata({
 }
 
 // design/property.html, top to bottom.
-export default async function PropertyPage({ params }: PageProps<"/properties/[slug]">) {
+async function PropertyContent({ params }: { params: PageProps<"/properties/[slug]">["params"] }) {
   const { slug } = await params;
   const property = await getPropertyBySlug(slug);
   if (!property) {
@@ -142,5 +144,19 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
         whatsappText={whatsappText}
       />
     </>
+  );
+}
+
+/**
+ * `params` is read inside <Suspense> (Next 16 + Partial Prefetching): the route's generic App
+ * Shell is tagged by the site layout's settings read, so a settings save regenerates it — and
+ * awaiting params outside a boundary made that regeneration fail (500) until Unit 19a.
+ * Slugs from generateStaticParams are still fully prerendered; proxy.ts still answers 308/404.
+ */
+export default function PropertyPage({ params }: PageProps<"/properties/[slug]">) {
+  return (
+    <Suspense fallback={<SlugPageFallback />}>
+      <PropertyContent params={params} />
+    </Suspense>
   );
 }

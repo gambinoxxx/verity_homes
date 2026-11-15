@@ -33,6 +33,7 @@ export default async function PrivacyPage() {
             rcNumber={s.rcNumber}
             officeDisplay={s.officeDisplay}
             email={s.email}
+            reviewed={s.privacyReviewed}
           />
         </article>
       </section>

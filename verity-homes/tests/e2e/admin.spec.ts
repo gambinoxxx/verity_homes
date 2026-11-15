@@ -1,5 +1,4 @@
 import { test, expect, type Page } from "@playwright/test";
-import { PRIVACY_REVIEWED } from "../../lib/privacy";
 import { dashboardCounts, latestEnquiryIds, setupFacts } from "./helpers/db";
 import { signInAs, storageStateFor } from "./setup/clerk-users";
 
@@ -204,7 +203,7 @@ test.describe("admin dashboard", () => {
       !facts.whatsappSet && "whatsapp",
       !facts.emailSet && "email",
       facts.realPublished < 1 && "property",
-      !PRIVACY_REVIEWED && "privacy",
+      !facts.privacyReviewed && "privacy",
     ].filter(Boolean);
     const card = page.getByTestId("setup-checklist");
     if (!expected.length) {
@@ -218,7 +217,11 @@ test.describe("admin dashboard", () => {
         .evaluateAll((els) => els.map((e) => e.getAttribute("data-item"))),
     ).toEqual(expected);
     if (expected.includes("privacy")) {
-      await expect(card.locator('[data-item="privacy"] a')).toHaveAttribute("href", "/privacy");
+      // Unit 19a: reviewed from the settings page's Privacy panel.
+      await expect(card.locator('[data-item="privacy"] a')).toHaveAttribute(
+        "href",
+        "/admin/settings#privacy",
+      );
     }
   });
 
@@ -242,11 +245,12 @@ test.describe("admin dashboard", () => {
       "href",
       "/admin/posts/new",
     );
-    for (const label of ["Update contact details"]) {
-      const item = quick.getByText(label);
-      await expect(item).toBeVisible();
-      await expect(item).toContainText("Coming soon");
-    }
+    // Unit 19a: settings are live too, so nothing says "Coming soon" any more.
+    await expect(quick.getByRole("link", { name: "Update contact details" })).toHaveAttribute(
+      "href",
+      "/admin/settings#contact",
+    );
+    await expect(quick.getByText("Coming soon")).toHaveCount(0);
   });
 
   test("the top bar greeting stays on one line", async ({ page }) => {
@@ -274,6 +278,7 @@ test.describe("signed-in non-admin", () => {
     "/admin/posts",
     "/admin/posts/new",
     "/admin/categories",
+    "/admin/settings",
   ]) {
     test(`gets 403 "No admin access" at ${path}`, async ({ page }) => {
       const res = await page.goto(path);

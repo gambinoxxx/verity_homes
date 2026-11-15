@@ -75,3 +75,11 @@
   font-size: 14.5px;
   line-height: 1.6;
 }
+/* Unit 19a: first paragraph of the CEO bio under her title */
+.authorBio p {
+  margin-top: 10px;
+}
+.authorBio a {
+  color: var(--accent-text);
+  text-decoration: underline;
+}

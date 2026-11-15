@@ -144,13 +144,20 @@ export async function latestEnquiryIds(limit = 5): Promise<string[]> {
   return rows.map((r) => r.id);
 }
 
-export type SetupFacts = { whatsappSet: boolean; emailSet: boolean; realPublished: number };
+export type SetupFacts = {
+  whatsappSet: boolean;
+  emailSet: boolean;
+  realPublished: number;
+  privacyReviewed: boolean;
+};
 
 export async function setupFacts(): Promise<SetupFacts> {
   const rows = (await sql()`
     SELECT
       coalesce((SELECT btrim(whatsapp) <> '' FROM "SiteSettings" WHERE id = 1), false) AS "whatsappSet",
       coalesce((SELECT btrim(email) <> '' FROM "SiteSettings" WHERE id = 1), false) AS "emailSet",
+      coalesce((SELECT "privacyReviewedAt" IS NOT NULL FROM "SiteSettings" WHERE id = 1), false)
+        AS "privacyReviewed",
       (SELECT count(*)::int FROM "Property"
         WHERE status = 'PUBLISHED' AND title NOT LIKE '[SAMPLE]%') AS "realPublished"`) as SetupFacts[];
   return rows[0]!;
@@ -437,4 +444,36 @@ export async function cleanUpE2ePosts(titles: string[]): Promise<void> {
 export async function cleanUpE2eCategories(names: string[]): Promise<void> {
   const own = names.filter((n) => n.startsWith("[SAMPLE] E2E "));
   if (own.length) await sql()`DELETE FROM "Category" WHERE name = ANY(${own})`;
+}
+
+// ---- Site settings (Unit 19a) ----
+
+/** The whole settings row, to put back after admin-settings.spec.ts (values never printed). */
+export type SettingsSnapshot = Record<string, unknown>;
+
+export async function snapshotSettings(): Promise<SettingsSnapshot> {
+  const rows = (await sql()`SELECT * FROM "SiteSettings" WHERE id = 1`) as SettingsSnapshot[];
+  if (!rows[0]) throw new Error("SiteSettings row missing — run npm run db:test:reset");
+  return rows[0];
+}
+
+/** Writes every column back exactly as snapshotted. */
+export async function restoreSettings(s: SettingsSnapshot): Promise<void> {
+  const v = (k: string) => (s[k] ?? null) as never;
+  await sql()`
+    UPDATE "SiteSettings" SET
+      phone = ${v("phone")}, whatsapp = ${v("whatsapp")}, email = ${v("email")},
+      "officeArea" = ${v("officeArea")}, "officeAddress" = ${v("officeAddress")},
+      "showFullAddress" = ${v("showFullAddress")}, "mapQuery" = ${v("mapQuery")},
+      "rcNumber" = ${v("rcNumber")}, "companyName" = ${v("companyName")},
+      "openingHours" = ${v("openingHours")}, instagram = ${v("instagram")},
+      facebook = ${v("facebook")}, x = ${v("x")}, linkedin = ${v("linkedin")},
+      "ceoBio" = ${v("ceoBio")}, "ceoPromise" = ${v("ceoPromise")},
+      "companyStory" = ${v("companyStory")}, "privacyReviewedAt" = ${v("privacyReviewedAt")},
+      "updatedAt" = now()
+    WHERE id = 1`;
+}
+
+export async function settingsRow(): Promise<SettingsSnapshot> {
+  return snapshotSettings();
 }

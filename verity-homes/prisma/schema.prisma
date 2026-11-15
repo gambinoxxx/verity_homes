@@ -101,15 +101,15 @@ enum RedirectEntity {
 // ---------------------------------------------------------------- properties
 
 model Property {
-  id           String        @id @default(cuid())
-  slug         String        @unique
-  title        String
-  listingType  ListingType
-  propertyType PropertyType
-  status       PublishStatus @default(DRAFT)
-  featured     Boolean       @default(false) // home page "Featured properties"
-  showcase     Boolean       @default(false) // home page "Developments we're proud of"
-  projectStatus ProjectStatus?               // status pill in the showcase
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  listingType   ListingType
+  propertyType  PropertyType
+  status        PublishStatus  @default(DRAFT)
+  featured      Boolean        @default(false) // home page "Featured properties"
+  showcase      Boolean        @default(false) // home page "Developments we're proud of"
+  projectStatus ProjectStatus? // status pill in the showcase
 
   priceKobo      BigInt?
   pricePeriod    PricePeriod @default(ONE_OFF)
@@ -120,34 +120,34 @@ model Property {
   sizeSqm        Int?
   parkingSpaces  Int?
   titleDocument  TitleDocument?
-  completionDate DateTime?     @db.Date // off-plan only
-  description    String        @default("") @db.Text
-  features       String[]      @default([])
+  completionDate DateTime?      @db.Date // off-plan only
+  description    String         @default("") @db.Text
+  features       String[]       @default([])
 
   // location — the public map uses lat/lng; if showExactLocation is false
   // the public map is centred on "area, city" instead of the exact pin.
   address           String? // private unless showExactLocation
-  area              String  // e.g. "Lekki"
-  city              String  @default("Lagos")
+  area              String // e.g. "Lekki"
+  city              String   @default("Lagos")
   latitude          Decimal? @db.Decimal(9, 6)
   longitude         Decimal? @db.Decimal(9, 6)
   showExactLocation Boolean  @default(false)
-  nearby            Json?    // [{ "place": "Lekki Toll Gate", "minutes": 5 }]
+  nearby            Json? // [{ "place": "Lekki Toll Gate", "minutes": 5 }]
 
   seoTitle       String?
   seoDescription String?
 
   images    PropertyImage[]
   documents PropertyDocument[]
-  plots     PropertyPlot[]   // Unit 17b: plot sizes on an estate, each with its own price
+  plots     PropertyPlot[] // Unit 17b: plot sizes on an estate, each with its own price
   enquiries Enquiry[]
 
   // Unit 17b: estate / development details
-  developerName String?   // "A development by …"
-  paymentPlan   String?   // e.g. "6 months interest-free"
-  offerNote     String?   // e.g. "Pay ₦5M for immediate physical allocation"
+  developerName String? // "A development by …"
+  paymentPlan   String? // e.g. "6 months interest-free"
+  offerNote     String? // e.g. "Pay ₦5M for immediate physical allocation"
   offerEndsAt   DateTime? // the offer note is hidden after this
-  termsNote     String?   // e.g. "Possession of the land is subject to full payment"
+  termsNote     String? // e.g. "Possession of the land is subject to full payment"
 
   createdBy   String? // Clerk user id
   publishedAt DateTime?
@@ -164,8 +164,8 @@ model PropertyImage {
   id         String   @id @default(cuid())
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  url        String   // public Blob URL
-  pathname   String   // Blob pathname, needed to delete the file
+  url        String // public Blob URL
+  pathname   String // Blob pathname, needed to delete the file
   alt        String   @default("")
   width      Int?
   height     Int?
@@ -178,15 +178,15 @@ model PropertyImage {
 /// Unit 17b: one plot size on a listing (e.g. an estate). When a property has plots, its
 /// priceKobo is kept equal to the cheapest plot ("From ₦…") so sorting keeps working.
 model PropertyPlot {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   propertyId         String
-  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  label              String?  // optional name, e.g. "Duplex plot"
+  property           Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  label              String? // optional name, e.g. "Duplex plot"
   sizeSqm            Int
   priceKobo          BigInt
   initialDepositKobo BigInt?
-  suitableFor        String?  // e.g. "Duplexes", "Commercial & apartments"
-  sortOrder          Int      @default(0)
+  suitableFor        String? // e.g. "Duplexes", "Commercial & apartments"
+  sortOrder          Int       @default(0)
   enquiries          Enquiry[]
 
   @@index([propertyId, sortOrder])
@@ -197,7 +197,7 @@ model PropertyDocument {
   id         String   @id @default(cuid())
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  name       String   // e.g. "Certificate of Occupancy (C of O)"
+  name       String // e.g. "Certificate of Occupancy (C of O)"
   verified   Boolean  @default(true)
   sortOrder  Int      @default(0)
 
@@ -209,7 +209,7 @@ model PropertyDocument {
 model InvestmentPlan {
   id                String          @id @default(cuid())
   name              String
-  badge             String?         // "Starter", "Most popular"…
+  badge             String? // "Starter", "Most popular"…
   summary           String?
   minimumKobo       BigInt
   returnRatePercent Decimal         @db.Decimal(5, 2) // per annum, as approved
@@ -227,8 +227,8 @@ model InvestmentPlan {
   // step on save); clean-up later (see progress-tracker).
   slug          String?             @unique // /invest/<slug>; required to publish
   description   String              @default("") @db.Text // Markdown
-  partnerName   String?             // "In partnership with …"
-  contractWith  String?             // who the investor signs the agreement with
+  partnerName   String? // "In partnership with …"
+  contractWith  String? // who the investor signs the agreement with
   payoutTerms   String?             @db.Text
   exitTerms     String?             @db.Text
   coverUrl      String?
@@ -244,7 +244,7 @@ model InvestmentPackage {
   plan             InvestmentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   label            String?
   amountKobo       BigInt
-  returnAmountKobo BigInt         // expected amount at maturity, per the signed agreement
+  returnAmountKobo BigInt // expected amount at maturity, per the signed agreement
   tenureMonths     Int
   sortOrder        Int            @default(0)
   enquiries        Enquiry[]
@@ -299,9 +299,9 @@ model Post {
 model Testimonial {
   id               String        @id @default(cuid())
   name             String
-  serviceUsed      String        // "Home buyer", "Investment plan client"
+  serviceUsed      String // "Home buyer", "Investment plan client"
   quote            String        @db.Text
-  rating           Int?          // 1–5
+  rating           Int? // 1–5
   avatarUrl        String?
   avatarPathname   String?
   consentConfirmed Boolean       @default(false) // must be true to publish
@@ -324,29 +324,29 @@ model Partner {
 // ---------------------------------------------------------------- leads
 
 model Enquiry {
-  id              String          @id @default(cuid())
+  id              String             @id @default(cuid())
   name            String
   phone           String
   email           String?
-  interest        EnquiryInterest @default(OTHER)
-  message         String          @default("") @db.Text
+  interest        EnquiryInterest    @default(OTHER)
+  message         String             @default("") @db.Text
   source          EnquirySource
   propertyId      String?
-  property        Property?       @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  property        Property?          @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   planId          String?
-  plan            InvestmentPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
-  plotId          String?         // Unit 17b: the plot the visitor chose
-  plot            PropertyPlot?   @relation(fields: [plotId], references: [id], onDelete: SetNull)
-  packageId       String?            // Unit 17c: the investment package the visitor chose
+  plan            InvestmentPlan?    @relation(fields: [planId], references: [id], onDelete: SetNull)
+  plotId          String? // Unit 17b: the plot the visitor chose
+  plot            PropertyPlot?      @relation(fields: [plotId], references: [id], onDelete: SetNull)
+  packageId       String? // Unit 17c: the investment package the visitor chose
   package         InvestmentPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
-  wantsInspection Boolean         @default(false)
-  amountKobo      BigInt?         // investment enquiries
-  status          EnquiryStatus   @default(NEW)
-  note            String?         @db.Text // private admin note
-  ipHash          String?         // sha256(ip + salt) for rate limiting, never the raw IP
-  emailSentAt     DateTime?       // null = notification email failed / pending
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  wantsInspection Boolean            @default(false)
+  amountKobo      BigInt? // investment enquiries
+  status          EnquiryStatus      @default(NEW)
+  note            String?            @db.Text // private admin note
+  ipHash          String? // sha256(ip + salt) for rate limiting, never the raw IP
+  emailSentAt     DateTime? // null = notification email failed / pending
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   @@index([status, createdAt])
   @@index([ipHash, createdAt])
@@ -361,22 +361,27 @@ model Subscriber {
 // ---------------------------------------------------------------- site
 
 model SiteSettings {
-  id              Int     @id @default(1) // single row
-  phone           String?
-  whatsapp        String? // international format, digits only: 234XXXXXXXXXX
-  email           String?
-  officeArea      String  @default("Onipanu, Lagos State")
-  officeAddress   String? // shown only if showFullAddress
-  showFullAddress Boolean @default(false)
-  mapQuery        String  @default("Onipanu, Lagos") // contact page map
-  rcNumber        String  @default("9971213")
-  companyName     String  @default("Verity Homes and Properties Ltd")
-  openingHours    String?
-  instagram       String?
-  facebook        String?
-  x               String?
-  linkedin        String?
-  updatedAt       DateTime @updatedAt
+  id                Int       @id @default(1) // single row
+  phone             String?
+  whatsapp          String? // international format, digits only: 234XXXXXXXXXX
+  email             String?
+  officeArea        String    @default("Onipanu, Lagos State")
+  officeAddress     String? // shown only if showFullAddress
+  showFullAddress   Boolean   @default(false)
+  mapQuery          String    @default("Onipanu, Lagos") // contact page map
+  rcNumber          String    @default("9971213")
+  companyName       String    @default("Verity Homes and Properties Ltd")
+  openingHours      String?
+  instagram         String?
+  facebook          String?
+  x                 String?
+  linkedin          String?
+  // Unit 19a: owner-editable content that was placeholder (open question 4)
+  ceoBio            String?   @db.Text // Markdown, rendered with the safe blog renderer
+  ceoPromise        String? // one line
+  companyStory      String?   @db.Text // Markdown (/about "Our story")
+  privacyReviewedAt DateTime? // set → /privacy hides the Draft banner (Q39)
+  updatedAt         DateTime  @updatedAt
 }
 
 model SlugRedirect {

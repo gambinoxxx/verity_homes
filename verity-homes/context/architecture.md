@@ -48,6 +48,12 @@ no public page loads Clerk (Open question 42).
 - `app/api/blob/upload/` — Route handler that issues Vercel Blob client
   upload tokens, admin only (property photos, Unit 15; blog post covers and body images,
   Unit 18).
+- `[slug]` pages (`/blog`, `/properties`, `/invest`): the default export is a plain component that
+  renders `<Suspense fallback={<SlugPageFallback />}>` around the async content, which awaits
+  `params` (Unit 19a fix). With Partial Prefetching each route also has a generic App Shell; the
+  site layout's settings read tags it `"settings"`, so a settings save regenerates it, and
+  awaiting `params` outside a boundary made that fail with HTTP 500. Listed slugs are still
+  fully prerendered; never await `params` at the top of a `[slug]` page.
 - `app/sitemap.ts`, `app/robots.ts` — SEO files.
 - `proxy.ts` — From Unit 6 (and `/blog/[slug]` from Unit 11): answers `/properties/[slug]` with the real status before the
   page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
@@ -103,6 +109,14 @@ no public page loads Clerk (Open question 42).
   inserted); delete removes the whole folder. `lib/post-content.ts`: word count, reading time
   (200 wpm, min 1), unsafe-link check. `lib/markdown-format.ts`: the editor toolbar's text edits.
   Categories are deleted only when no post (any status) uses them.
+- `/admin/settings` (Unit 19a): `lib/actions/settings.ts` (`updateSettings`, `setPrivacyReviewed`)
+  → `lib/db/mutations/settings.ts` (upsert row id = 1) → `updateTag("settings")` + `"posts"`
+  (the blog author box reads the CEO bio) + `revalidatePath("/", "layout")`, so every page shows
+  the change on the next request. Schema `lib/validation/settings.ts` (shared with the form):
+  WhatsApp normalised to `234…` digits (`normaliseWhatsapp`), email, https social links on the
+  network's own host, RC digits only, full address needs an address; `looksLikeStreetAddress`
+  is a warning only (Q37). Admin read `lib/db/queries/admin-settings.ts`. Logs never include
+  setting values (only the error code/name).
 - `lib/geocode.ts` — Nominatim search for the admin map picker (server only, queued, ≥ 1.1 s
   apart, descriptive User-Agent/Referer). Each function calls
   `requireAdmin()` itself and is never cached (`"use cache"` is for public data only).
@@ -168,6 +182,11 @@ The source of truth is `prisma/schema.prisma`, and it already exists.
   Publishing needs ≥ 1 package, a slug, `contractWith` and `payoutTerms`
   (`planPublishIssues`). `/invest/[slug]` is published-only (proxy: `RedirectEntity.PLAN`
   308s an old slug, 404 otherwise); no FAQPage or financial JSON-LD on plan pages.
+- **Site settings content (Unit 19a, migration `20261114150000_settings_content`, additive)**:
+  `SiteSettings.ceoBio` / `companyStory` (Markdown, rendered by `components/site/blog/markdown.tsx`
+  with its safety rules), `ceoPromise` (one line) and `privacyReviewedAt` (set → /privacy hides its
+  Draft banner and the dashboard checklist drops the item; replaces the old `lib/privacy.ts`
+  constant). Empty → the design's placeholders stay.
 - **Users and sessions** live in Clerk. Rows store the Clerk user id as a
   plain string in `createdBy`.
 
@@ -220,7 +239,8 @@ yet never breaks the build or pages that don't use it:
   | 14–15 | Properties, photos | `"properties"` |
   | 17 | Plans + FAQs | `"plans"`, `"faqs"` |
   | 18 | Posts, categories | `"posts"` |
-  | 19 | Testimonials, partners, settings | `"testimonials"`, `"partners"`, `"settings"` |
+  | 19a | Site settings | `"settings"` (+ `"posts"`, author box) |
+  | 19b | Testimonials, partners | `"testimonials"`, `"partners"` |
 - Vitest aliases `next/cache` to a no-op stub, so cached queries run directly
   in unit tests.
 

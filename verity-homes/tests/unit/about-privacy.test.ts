@@ -32,12 +32,21 @@ describe("PrivacyNotice", () => {
     companyName: "Verity Homes and Properties Ltd",
     rcNumber: "9971213",
     officeDisplay: "Onipanu, Lagos State",
+    reviewed: false,
   };
 
   it("shows the draft banner, company and RC number", () => {
     const html = renderToStaticMarkup(createElement(PrivacyNotice, { ...base, email: null }));
     expect(html).toContain("to be reviewed by Verity Homes and Properties before launch.");
     expect(html).toContain("Verity Homes and Properties Ltd (RC 9971213)");
+  });
+
+  it("hides the draft banner once the notice is marked reviewed (Unit 19a)", () => {
+    const html = renderToStaticMarkup(
+      createElement(PrivacyNotice, { ...base, email: null, reviewed: true }),
+    );
+    expect(html).not.toContain("privacy-draft-banner");
+    expect(html).not.toContain("to be reviewed by Verity Homes and Properties before launch.");
   });
 
   it("uses a visible placeholder (no mailto) when no email is set", () => {

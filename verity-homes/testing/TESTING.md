@@ -163,6 +163,11 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
   which depend on `admin-setup`. Signed-in tests use
   `test.use({ storageState: storageStateFor("admin") })`. The public `desktop` and `mobile`
   projects never sign in.
+- **Site settings (Unit 19a):** `admin-settings.spec.ts` changes what every page shows, so it never
+  runs alongside the other specs: `npm run test:e2e` skips it, and it has its own command,
+  `PW_CHANNEL=chrome npm run test:e2e:settings` (sets `PW_SETTINGS=1`: only the admin sign-in and
+  that spec). It saves the settings row in `beforeAll` and writes it back in `afterAll` (runs even
+  when a test fails), then re-saves through the admin form so the cache is refreshed too.
 - **Signing out:** a test that signs out must sign in on its own, in a fresh context. Signing
   out ends the session, and the saved state shares that session.
 - **Commands:**

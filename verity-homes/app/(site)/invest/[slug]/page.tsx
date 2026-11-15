@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/site/blog/markdown";
@@ -62,7 +64,7 @@ export async function generateMetadata({ params }: PageProps<"/invest/[slug]">):
  * No FAQPage or financial JSON-LD (owner/legal decision pending: Q54). proxy.ts answers 404 for
  * drafts/unknown slugs and 308 for old ones before this renders.
  */
-export default async function PlanPage({ params }: PageProps<"/invest/[slug]">) {
+async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["params"] }) {
   const { slug } = await params;
   const plan = await getPlanBySlug(slug);
   if (!plan) {
@@ -177,5 +179,19 @@ export default async function PlanPage({ params }: PageProps<"/invest/[slug]">) 
       <FaqSection faqs={faqs} />
       <StartSection plans={[{ id: plan.id, name: plan.name }]} planId={plan.id} />
     </>
+  );
+}
+
+/**
+ * `params` is read inside <Suspense> (Next 16 + Partial Prefetching): the route's generic App
+ * Shell is tagged by the site layout's settings read, so a settings save regenerates it — and
+ * awaiting params outside a boundary made that regeneration fail (500) until Unit 19a.
+ * Slugs from generateStaticParams are still fully prerendered; proxy.ts still answers 308/404.
+ */
+export default function PlanPage({ params }: PageProps<"/invest/[slug]">) {
+  return (
+    <Suspense fallback={<SlugPageFallback />}>
+      <PlanContent params={params} />
+    </Suspense>
   );
 }

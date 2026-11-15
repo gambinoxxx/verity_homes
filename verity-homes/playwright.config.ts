@@ -72,6 +72,23 @@ const channel = process.env.PW_CHANNEL || undefined;
 const desktop = { width: 1440, height: 900 };
 const mobile = { width: 390, height: 844 };
 
+function settingsProjects() {
+  return [
+    {
+      name: "admin-setup",
+      testMatch: /setup\/auth\.setup\.ts/,
+      retries: 1,
+      use: { channel },
+    },
+    {
+      name: "admin-settings",
+      testMatch: /admin-settings\.spec\.ts/,
+      dependencies: ["admin-setup"],
+      use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
+    },
+  ];
+}
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60_000,
@@ -89,39 +106,47 @@ export default defineConfig({
   globalSetup: "./tests/e2e/setup/global-setup.ts",
   // Sweeps leftover "[SAMPLE] E2E …" rows and e2e/ Blob files, even after an interrupted run.
   globalTeardown: "./tests/e2e/setup/global-teardown.ts",
-  projects: [
-    // Public site: no Clerk sign-in needed.
-    {
-      name: "desktop",
-      testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
-      use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
-    },
-    {
-      name: "mobile",
-      testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
-      use: { ...devices["Pixel 7"], channel, viewport: mobile },
-    },
-    // Admin: signs the Clerk test users in once (playwright/.auth/*.json), then runs admin.spec.
-    {
-      name: "admin-setup",
-      testMatch: /setup\/auth\.setup\.ts/,
-      // Signing in goes through Clerk's servers; one retry absorbs a rare page-settling race.
-      retries: 1,
-      use: { channel },
-    },
-    {
-      name: "admin-desktop",
-      testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
-      dependencies: ["admin-setup"],
-      use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
-    },
-    {
-      name: "admin-mobile",
-      testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
-      dependencies: ["admin-setup"],
-      use: { ...devices["Pixel 7"], channel, viewport: mobile },
-    },
-  ],
+  // Unit 19a: site settings change what EVERY page shows (header, footer, contact, about…), so
+  // admin-settings.spec.ts never runs alongside the other specs: it has its own command,
+  // `npm run test:e2e:settings` (PW_SETTINGS=1), which runs only the admin sign-in + that spec.
+  projects:
+    process.env.PW_SETTINGS === "1"
+      ? settingsProjects()
+      : [
+          // Public site: no Clerk sign-in needed.
+          {
+            name: "desktop",
+            testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
+            use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
+          },
+          {
+            name: "mobile",
+            testIgnore: [/admin(-[a-z-]+)?\.spec\.ts/, /setup\//],
+            use: { ...devices["Pixel 7"], channel, viewport: mobile },
+          },
+          // Admin: signs the Clerk test users in once (playwright/.auth/*.json), then runs admin.spec.
+          {
+            name: "admin-setup",
+            testMatch: /setup\/auth\.setup\.ts/,
+            // Signing in goes through Clerk's servers; one retry absorbs a rare page-settling race.
+            retries: 1,
+            use: { channel },
+          },
+          {
+            name: "admin-desktop",
+            testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
+            testIgnore: /admin-settings\.spec\.ts/,
+            dependencies: ["admin-setup"],
+            use: { ...devices["Desktop Chrome"], channel, viewport: desktop },
+          },
+          {
+            name: "admin-mobile",
+            testMatch: /admin(-[a-z-]+)?\.spec\.ts/,
+            testIgnore: /admin-settings\.spec\.ts/,
+            dependencies: ["admin-setup"],
+            use: { ...devices["Pixel 7"], channel, viewport: mobile },
+          },
+        ],
   // start the app automatically unless testing a deployed URL
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined

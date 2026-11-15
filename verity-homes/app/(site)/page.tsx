@@ -39,7 +39,7 @@ export default async function HomePage() {
       <Statement />
       <MarqueeBand words={MOTTO_BAND} light reverse />
       <Services />
-      <Ceo />
+      <Ceo bio={settings.ceoBio} promise={settings.ceoPromise} />
       <Testimonials />
       <LatestPosts />
       <ContactBlock />

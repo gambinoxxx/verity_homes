@@ -4,7 +4,6 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
-import { PRIVACY_REVIEWED } from "@/lib/privacy";
 import styles from "./privacy.module.css";
 
 /** Change this whenever the notice text changes. */
@@ -17,13 +16,21 @@ export type PrivacyNoticeProps = {
   officeDisplay: string;
   /** Contact for privacy requests (SiteSettings.email); a placeholder shows when unset. */
   email: string | null;
+  /** SiteSettings.privacyReviewedAt is set (admin “Mark privacy notice as reviewed”, Unit 19a). */
+  reviewed: boolean;
 };
 
 function Placeholder({ children }: { children: React.ReactNode }) {
   return <span className="ph">[{children}]</span>;
 }
 
-export function PrivacyNotice({ companyName, rcNumber, officeDisplay, email }: PrivacyNoticeProps) {
+export function PrivacyNotice({
+  companyName,
+  rcNumber,
+  officeDisplay,
+  email,
+  reviewed,
+}: PrivacyNoticeProps) {
   const contact = email ? (
     <a href={`mailto:${email}`}>{email}</a>
   ) : (
@@ -32,7 +39,7 @@ export function PrivacyNotice({ companyName, rcNumber, officeDisplay, email }: P
 
   return (
     <>
-      {PRIVACY_REVIEWED ? null : (
+      {reviewed ? null : (
         <p className={styles.banner} role="note" data-testid="privacy-draft-banner">
           <strong>Draft</strong> — to be reviewed by Verity Homes and Properties before launch.
         </p>

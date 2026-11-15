@@ -3,16 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PartnerView } from "@/lib/db/queries/trust";
+import { env } from "@/lib/env";
 import { prefetchFor } from "@/lib/nav";
 import { CeoSection, ceoText } from "../ceo";
+import { Markdown } from "../blog/markdown";
 import { ArrowIcon, ShieldIcon } from "../icons";
 import { PartnerMarquee } from "../partner-marquee";
 import { PillTicker } from "../pill-ticker";
 import { Reveal } from "../reveal";
 import styles from "./about.module.css";
 
-/** The sheet: two overlapping photos + "Our story". The company story is owner-supplied. */
-export function Story() {
+/**
+ * The sheet: two overlapping photos + "Our story". The company story (Markdown) comes from site
+ * settings (Unit 19a); the design's placeholder shows while it is empty.
+ */
+export function Story({ story }: { story: string | null }) {
   return (
     <section className="sheet" aria-labelledby="story-h">
       <div className="container">
@@ -47,11 +52,21 @@ export function Story() {
               develop and invest in property with confidence — through one team that walks with you
               from first enquiry to the day you get your keys.
             </Reveal>
-            <Reveal as="p" className={`lead ${styles.lead2}`}>
-              <span className="ph">
-                [Company story — why Verity was started and what makes it different.]
-              </span>
-            </Reveal>
+            {story ? (
+              <Reveal className={`lead ${styles.lead2}`} data-testid="company-story">
+                <Markdown
+                  source={story}
+                  siteUrl={env.NEXT_PUBLIC_SITE_URL}
+                  className={ceoText.md}
+                />
+              </Reveal>
+            ) : (
+              <Reveal as="p" className={`lead ${styles.lead2}`}>
+                <span className="ph">
+                  [Company story — why Verity was started and what makes it different.]
+                </span>
+              </Reveal>
+            )}
           </div>
         </div>
       </div>
@@ -101,22 +116,32 @@ export function Values() {
   );
 }
 
-/** "Meet Esther." Bio and promise stay placeholders until supplied (Open question 4). */
-export function AboutCeo() {
+/** "Meet Esther." Bio + promise from site settings (Unit 19a); placeholders while empty. */
+export function AboutCeo({ bio, promise }: { bio: string | null; promise: string | null }) {
   return (
     <CeoSection>
       <PillTicker label="Leadership" />
       <h2 className="h2" id="ceo-h">
         Meet <em>Esther.</em>
       </h2>
-      <p className={`lead ${ceoText.lead1}`}>
-        <span className="ph">
-          [Full bio — Esther&apos;s background in real estate and property investment, the partners
-          she works with, and why she founded Verity.]
-        </span>
-      </p>
-      <blockquote>
-        <span className="ph">A one-line personal promise from Esther to her clients.</span>
+      {bio ? (
+        <div className={`lead ${ceoText.lead1}`} data-testid="ceo-bio">
+          <Markdown source={bio} siteUrl={env.NEXT_PUBLIC_SITE_URL} className={ceoText.md} />
+        </div>
+      ) : (
+        <p className={`lead ${ceoText.lead1}`}>
+          <span className="ph">
+            [Full bio — Esther&apos;s background in real estate and property investment, the
+            partners she works with, and why she founded Verity.]
+          </span>
+        </p>
+      )}
+      <blockquote data-testid="ceo-promise">
+        {promise ? (
+          promise
+        ) : (
+          <span className="ph">A one-line personal promise from Esther to her clients.</span>
+        )}
       </blockquote>
       <div className={ceoText.actions}>
         <Link

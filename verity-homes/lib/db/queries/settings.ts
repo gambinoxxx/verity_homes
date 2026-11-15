@@ -17,6 +17,10 @@ const settingsSelect = {
   facebook: true,
   x: true,
   linkedin: true,
+  ceoBio: true,
+  ceoPromise: true,
+  companyStory: true,
+  privacyReviewedAt: true,
 } as const;
 
 export type SiteSettingsView = {
@@ -37,6 +41,12 @@ export type SiteSettingsView = {
     x: string | null;
     linkedin: string | null;
   };
+  /** Unit 19a: owner-written Markdown / one line; null keeps the design's placeholder. */
+  ceoBio: string | null;
+  ceoPromise: string | null;
+  companyStory: string | null;
+  /** True once the privacy notice is marked reviewed (/privacy hides its Draft banner). */
+  privacyReviewed: boolean;
 };
 
 // Same defaults as schema.prisma, used only if the single row has not been created yet.
@@ -55,9 +65,13 @@ const DEFAULTS = {
   facebook: null,
   x: null,
   linkedin: null,
+  ceoBio: null,
+  ceoPromise: null,
+  companyStory: null,
+  privacyReviewedAt: null,
 };
 
-/** Cache tag for the settings row. The admin settings action (Unit 19) calls updateTag(it). */
+/** Cache tag for the settings row. lib/actions/settings.ts (Unit 19a) calls updateTag(it). */
 export const SETTINGS_TAG = "settings";
 
 /**
@@ -81,5 +95,9 @@ export async function getSiteSettings(): Promise<SiteSettingsView> {
     companyName: row.companyName,
     openingHours: row.openingHours,
     socials: { instagram: row.instagram, facebook: row.facebook, x: row.x, linkedin: row.linkedin },
+    ceoBio: row.ceoBio,
+    ceoPromise: row.ceoPromise,
+    companyStory: row.companyStory,
+    privacyReviewed: row.privacyReviewedAt !== null,
   };
 }

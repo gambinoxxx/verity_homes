@@ -102,38 +102,34 @@ export async function Footer({ settings }: FooterProps) {
               <br />
               {settings.officeDisplay}
             </p>
-            <div className={styles.socials}>
-              {SOCIALS.map(({ key, label, icon }) => {
-                const url = settings.socials[key];
-                const svg = (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    aria-hidden="true"
-                  >
-                    {icon}
-                  </svg>
-                );
-                // No URL yet: same circle, but not a dead link.
-                return url ? (
-                  <a
-                    key={key}
-                    href={url}
-                    aria-label={label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {svg}
-                  </a>
-                ) : (
-                  <span key={key} role="img" aria-label={`${label} (link not set yet)`}>
-                    {svg}
-                  </span>
-                );
-              })}
-            </div>
+            {/* Only the networks with an address in site settings (Unit 19a). */}
+            {SOCIALS.some(({ key }) => settings.socials[key]) ? (
+              <div className={styles.socials} data-testid="footer-socials">
+                {SOCIALS.map(({ key, label, icon }) => {
+                  const url = settings.socials[key];
+                  if (!url) return null;
+                  return (
+                    <a
+                      key={key}
+                      href={url}
+                      aria-label={label}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        aria-hidden="true"
+                      >
+                        {icon}
+                      </svg>
+                    </a>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         </div>
         <div className={styles.bottom}>

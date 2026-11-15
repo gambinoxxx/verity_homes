@@ -17,6 +17,7 @@ export const BUILT_ADMIN_ROUTES: ReadonlySet<string> = new Set([
   "/admin/posts", // Unit 18
   "/admin/posts/new", // Unit 18
   "/admin/categories", // Unit 18
+  "/admin/settings", // Unit 19a
 ]);
 
 /** Public pages (e.g. /privacy) count as built; admin paths must be in the list. */
@@ -38,7 +39,7 @@ export const QUICK_ACTIONS: readonly QuickAction[] = [
   { label: "Add a property", href: ADD_PROPERTY_HREF, icon: "plus" },
   { label: "Write a blog post", href: "/admin/posts/new", icon: "pen" }, // Unit 18
   { label: "Edit investment plans", href: "/admin/plans", icon: "chart" },
-  { label: "Update contact details", href: "/admin/settings", icon: "gear" }, // Unit 19
+  { label: "Update contact details", href: "/admin/settings#contact", icon: "gear" }, // Unit 19a
 ];
 
 /** Link to one enquiry in the enquiries inbox (Unit 16 opens it from ?id=). */
@@ -83,7 +84,7 @@ export type ChecklistItem = {
   href: string;
 };
 
-const SETTINGS_HREF = "/admin/settings"; // Unit 19
+const SETTINGS_HREF = "/admin/settings"; // Unit 19a (anchors = the panels)
 
 /** What's still missing before launch, in order. Empty → the card is hidden. */
 export function setupChecklist(s: SetupStatus): ChecklistItem[] {
@@ -93,14 +94,14 @@ export function setupChecklist(s: SetupStatus): ChecklistItem[] {
       key: "whatsapp",
       label: "Add your WhatsApp number",
       hint: "The WhatsApp buttons stay hidden until it's set.",
-      href: SETTINGS_HREF,
+      href: `${SETTINGS_HREF}#contact`,
     });
   if (!s.emailSet)
     items.push({
       key: "email",
       label: "Add your contact email",
       hint: "Shown on the contact and privacy pages.",
-      href: SETTINGS_HREF,
+      href: `${SETTINGS_HREF}#contact`,
     });
   if (s.realPublishedProperties < 1)
     items.push({
@@ -113,8 +114,8 @@ export function setupChecklist(s: SetupStatus): ChecklistItem[] {
     items.push({
       key: "privacy",
       label: "Review the privacy notice",
-      hint: "It's still a draft. Have it checked before launch (open question Q39).",
-      href: "/privacy",
+      hint: "It's still a draft. Have it checked, then mark it reviewed (open question Q39).",
+      href: `${SETTINGS_HREF}#privacy`,
     });
   return items;
 }
