@@ -168,6 +168,14 @@ Set up in Unit 12 with `@clerk/testing@2.2.55` (pinned to match `@clerk/nextjs@7
   `PW_CHANNEL=chrome npm run test:e2e:settings` (sets `PW_SETTINGS=1`: only the admin sign-in and
   that spec). It saves the settings row in `beforeAll` and writes it back in `afterAll` (runs even
   when a test fails), then re-saves through the admin form so the cache is refreshed too.
+- **Admin editors (React Hook Form):** use `readyForm(page, "Property editor" | "Plan editor" |
+  "Post editor" | "Site settings")` from `tests/e2e/helpers/editor.ts`, never a bare
+  `getByRole("form")`: it only matches once the editor has hydrated (`data-ready="true"`), because
+  text typed before hydration is reset. After Publish/Unpublish, wait for the editor's new status
+  text before using it again (the editor remounts). When the same toast can show twice in a row
+  (“Changes saved”), click with `clickAndWaitForAction()` so the test waits for that save's own
+  response. Repeat `admin-plans.spec.ts` with
+  `--workers=1` (its flows change site-wide state).
 - **Signing out:** a test that signs out must sign in on its own, in a fresh context. Signing
   out ends the session, and the saved state shares that session.
 - **Commands:**

@@ -285,3 +285,35 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
     in production would have. The pages now read `params` inside `<Suspense>` (Next 16's
     "Move URL data behind Suspense"); `admin-settings.spec.ts` checks all three return 200 after a
     save. Owner: nothing to do.
+57. **Flaky admin e2e (fixed 2026-11-15, before Unit 19b).** Causes found and fixed:
+    - **Typing before hydration** (admin-properties list delete, admin-plans packages): text filled
+      right after `goto()`/`reload()` was reset when React Hook Form registered the field during
+      hydration, so the save sent stale values (proven from the trace: the save request went out,
+      without the typed text). The four admin editors now set `data-ready="true"` once hydrated
+      (`useHydrated`), and `tests/e2e/helpers/editor.ts` `readyForm()` only matches then, so every
+      fill/click waits for hydration.
+    - **Editor remount after Unpublish** (admin-properties, admin-plans): the status/updatedAt is in
+      the editor's key, so the refresh mounts a new editor; the tests now wait for its “Draft — not
+      on the website” before using it (as admin-posts since Unit 18).
+    - **Not reproduced:** once, in the full 363-test run, /invest still listed a plan on the first
+      load after “Unpublished”. It never recurred in 5× runs on both projects, and a probe that
+      toggled an FAQ 10× while 4 clients loaded /invest continuously saw the new state on every
+      first load (and the browser cache is ruled out: only `s-maxage` + ETag). That one check now
+      reloads until /invest reflects the action (bounded, like the reorder check). If it shows up
+      again, look at a regeneration of /invest that started before the action finishing after it.
+    - **Stale toast** (admin-photos map test, failed in the follow-up run; same risk in admin-posts):
+      the second “Changes saved” wait matched the previous save's toast, still on screen, so the
+      test read the public page before the save finished. `clickAndWaitForAction()`
+      (`tests/e2e/helpers/editor.ts`) waits for that click's own server-action response
+      (`Next-Action` request header) — as the settings spec does since Unit 19a.
+    - **Still open (owner decision pending):** under parallel load, two other specs still fail ~1–2
+      in 10 — admin-photos “map … show exact location” (the 2nd save's request carried
+      `showExactLocation:false`, yet the public page's next load still had the coordinates) and
+      admin-plots (inbox detail panel empty on first load). In isolation a probe was fresh 10/10
+      on the first load. Likely the same thing as the unreproduced /invest case: a background
+      regeneration of a page visited right after one save, finishing after the next save.
+    - Proven: admin-properties ×10 on both projects 102/102; admin-plans ×10 (`--workers=1`)
+      112/112; admin-posts ×10 all passed.
+    - Note: `--repeat-each` with several workers runs copies of the site-wide plans/FAQ flows at the
+      same time (they then fight over the highlight, order and FAQ clean-up); repeat that spec with
+      `--workers=1`.

@@ -4,6 +4,7 @@
 // pattern: React Hook Form + zodResolver(planSchema) (the same schema runs in the actions),
 // the same field shell, price input, switches, panels and danger zone. The investment
 // disclaimer is shown read-only at the top as a reminder.
+import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, useTransition } from "react";
@@ -108,6 +109,8 @@ export type PlanEditorProps = {
 type SaveMode = "draft" | "publish" | "save";
 
 export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps) {
+  // Tests wait for data-ready: typing before hydration is reset when the form registers.
+  const hydrated = useHydrated();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -231,6 +234,7 @@ export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps
       <form
         className={styles.editor}
         aria-label="Plan editor"
+        data-ready={hydrated ? "true" : undefined}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

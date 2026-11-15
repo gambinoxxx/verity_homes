@@ -4,6 +4,7 @@
 // Website text) with one Save button and the unsaved-changes warning, in the property/plan
 // editor pattern: React Hook Form + zodResolver(settingsSchema) — the same schema runs in
 // lib/actions/settings.ts. The Privacy panel has its own two buttons (not part of the form).
+import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, useTransition } from "react";
@@ -74,6 +75,8 @@ export function SettingsEditor({
   privacyReviewedAt,
   updatedAt,
 }: SettingsEditorProps) {
+  // Tests wait for data-ready: typing before hydration is reset when the form registers.
+  const hydrated = useHydrated();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -145,6 +148,7 @@ export function SettingsEditor({
         <form
           className={editor.mainCol}
           aria-label="Site settings"
+          data-ready={hydrated ? "true" : undefined}
           id={`${scope}form`}
           noValidate
           onSubmit={(e) => {

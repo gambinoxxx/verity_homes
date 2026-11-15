@@ -6,6 +6,7 @@ import {
   type SettingsSnapshot,
 } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
+import { readyForm } from "./helpers/editor";
 
 // Unit 19a: /admin/settings against the TEST database. Settings change what EVERY page shows, so
 // this file never runs alongside other specs: `npm run test:e2e:settings` (PW_SETTINGS=1, see
@@ -42,7 +43,7 @@ test.afterAll(async ({ browser }) => {
   }
 });
 
-const form = (page: Page) => page.getByRole("form", { name: "Site settings" });
+const form = (page: Page) => readyForm(page, "Site settings");
 const field = (page: Page, label: string) => form(page).getByLabel(label, { exact: true });
 
 async function expectToast(page: Page, text: RegExp) {

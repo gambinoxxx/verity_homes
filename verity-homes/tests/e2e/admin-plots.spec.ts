@@ -3,6 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { cleanUpE2eProperties, findPropertyByTitle } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
 import { neon } from "@neondatabase/serverless";
+import { readyForm } from "./helpers/editor";
 
 // Unit 17b: an estate with plot options, end to end on the TEST database. The listing is
 // "[SAMPLE] E2E Estate …" and is removed in a finally (the global teardown also sweeps it and
@@ -17,7 +18,7 @@ const PLOTS = [
   { size: "1000", price: "70000000", deposit: "5000000", suitable: "Commercial & apartments" },
 ];
 
-const editor = (page: Page) => page.getByRole("form", { name: "Property editor" });
+const editor = (page: Page) => readyForm(page, "Property editor");
 const byId = (page: Page, id: string) => editor(page).locator(`[id$="f-${id}"]`);
 const toast = (page: Page, text: RegExp) =>
   expect(page.locator("[data-sonner-toast]").filter({ hasText: text }).first()).toBeVisible({

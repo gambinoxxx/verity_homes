@@ -3,6 +3,7 @@
 // Blog post editor (Unit 18) for /admin/posts/new and /[id], in the property/plan editor
 // pattern: React Hook Form + zodResolver(postSchema) (the same schema runs in the actions), the
 // same field shell, panels, Google preview, publish panel, error summary and danger zone.
+import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, useTransition } from "react";
@@ -78,6 +79,8 @@ export function PostEditor({
   siteUrl,
   uploadPrefix,
 }: PostEditorProps) {
+  // Tests wait for data-ready: typing before hydration is reset when the form registers.
+  const hydrated = useHydrated();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -256,6 +259,7 @@ export function PostEditor({
       <form
         className={editorStyles.editor}
         aria-label="Post editor"
+        data-ready={hydrated ? "true" : undefined}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

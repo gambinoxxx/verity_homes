@@ -9,6 +9,7 @@ import {
   propertyPhotos,
 } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
+import { clickAndWaitForAction, readyForm } from "./helpers/editor";
 
 // Unit 15: property photos (Vercel Blob, under e2e/) and the map picker, against the TEST
 // database. Each test makes its own published "[SAMPLE] E2E …" property and removes it — and
@@ -30,10 +31,11 @@ async function newProperty(label: string, uploads = false) {
   return { ...p, title };
 }
 
-const editor = (page: Page) => page.getByRole("form", { name: "Property editor" });
+const editor = (page: Page) => readyForm(page, "Property editor");
 
 async function saveChanges(page: Page) {
-  await editor(page).getByRole("button", { name: "Save changes" }).click();
+  // Wait for THIS save (the previous save's "Changes saved" toast may still be showing).
+  await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save changes" }));
   await expect(
     page.locator("[data-sonner-toast]").filter({ hasText: "Changes saved" }).first(),
   ).toBeVisible({ timeout: 20_000 });

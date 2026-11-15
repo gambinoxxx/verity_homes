@@ -12,6 +12,7 @@ import {
   insertE2ePost,
 } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
+import { clickAndWaitForAction, readyForm } from "./helpers/editor";
 
 // Unit 18: admin blog posts + categories, against the TEST database. Rows are "[SAMPLE] E2E …"
 // (unique per run and project) and removed afterwards; uploads go under e2e/posts/<id>/ in Blob
@@ -27,7 +28,7 @@ test.afterAll(async () => {
 });
 
 /** The visible editor (Next keeps a hidden copy of the previous page mounted). */
-const editor = (page: Page) => page.getByRole("form", { name: "Post editor" });
+const editor = (page: Page) => readyForm(page, "Post editor");
 /** An editor control by field path; ids are scoped per editor instance ("…f-title"). */
 const byId = (page: Page, id: string) => editor(page).locator(`[id$="f-${id}"]`);
 
@@ -94,7 +95,7 @@ test.describe("signed-in admin", () => {
       `${readingMinutes(body)} min read`,
     );
     await expect(editor(page).getByTestId("cover-save-first")).toBeVisible();
-    await editor(page).getByRole("button", { name: "Save draft" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save draft" }));
     await expectToast(page, /Draft saved/);
     await expect(page).toHaveURL(/\/admin\/posts\/(?!new$)[a-z0-9]+$/);
     const created = await findPostByTitle(title);
@@ -130,7 +131,7 @@ test.describe("signed-in admin", () => {
     expect(inlineMatch, "inline image Markdown inserted").not.toBeNull();
     const inlineUrl = inlineMatch![1]!;
 
-    await editor(page).getByRole("button", { name: "Save draft" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save draft" }));
     await expectToast(page, /Changes saved/);
     const saved = await findPostById(id);
     expect(saved?.coverUrl).toMatch(
@@ -194,7 +195,7 @@ test.describe("signed-in admin", () => {
     const newSlug = `sample-e2e-renamed-${token}`;
     await byId(page, "title").fill(renamed);
     await byId(page, "slug").fill(newSlug);
-    await editor(page).getByRole("button", { name: "Save changes" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save changes" }));
     await expectToast(page, /Changes saved/);
     const old = await request.get(`/blog/${slug}`, { maxRedirects: 0 });
     expect(old.status()).toBe(308);
@@ -204,7 +205,7 @@ test.describe("signed-in admin", () => {
     // ---- Remove the inline image from the body → save → its Blob file is gone ----
     const without = (await byId(page, "content").inputValue()).replace(inlineMatch![0], "");
     await byId(page, "content").fill(without);
-    await editor(page).getByRole("button", { name: "Save changes" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save changes" }));
     await expectToast(page, /Changes saved/);
     await expect.poll(() => blobExists(inlineUrl), { timeout: 20_000 }).toBe(false);
     expect(await blobExists(coverUrl)).toBe(true); // the cover is still used
@@ -262,7 +263,7 @@ test.describe("signed-in admin", () => {
     // ---- Use it on a post ----
     await page.goto(`/admin/posts/${postId}`);
     await byId(page, "categoryId").selectOption({ label: catName });
-    await editor(page).getByRole("button", { name: "Save draft" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save draft" }));
     await expectToast(page, /Changes saved/);
     expect((await findPostById(postId))?.categoryId).toBe(cat!.id);
 
@@ -278,7 +279,7 @@ test.describe("signed-in admin", () => {
     // ---- Move the post to another category ----
     await page.goto(`/admin/posts/${postId}`);
     await byId(page, "categoryId").selectOption({ label: "Investing" });
-    await editor(page).getByRole("button", { name: "Save draft" }).click();
+    await clickAndWaitForAction(page, editor(page).getByRole("button", { name: "Save draft" }));
     await expectToast(page, /Changes saved/);
 
     // ---- Rename (slug follows), then delete ----

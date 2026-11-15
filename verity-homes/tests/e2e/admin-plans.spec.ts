@@ -9,6 +9,7 @@ import {
 } from "./helpers/db";
 import { planPackagesFlow } from "./helpers/plan-packages-flow";
 import { storageStateFor } from "./setup/clerk-users";
+import { readyForm } from "./helpers/editor";
 
 // Unit 17: admin plans + FAQs against the TEST database. Plans and FAQs are site-wide (one gold
 // card, one order), so the flows that change them run in the admin-desktop project only, and
@@ -74,7 +75,7 @@ test.describe("signed-in admin", () => {
 });
 
 async function planFlow(page: Page, name: string) {
-  const editor = page.getByRole("form", { name: "Plan editor" });
+  const editor = readyForm(page, "Plan editor");
 
   // ---- Draft ----
   await page.goto("/admin/plans/new");
@@ -97,7 +98,7 @@ async function planFlow(page: Page, name: string) {
   await expect(plansRegion(pub).locator("article", { hasText: name })).toHaveCount(0);
 
   // ---- Publish needs a package, the agreement and payout terms (Unit 17c) ----
-  const ed0 = page.getByRole("form", { name: "Plan editor" });
+  const ed0 = readyForm(page, "Plan editor");
   await ed0.getByRole("button", { name: "Publish", exact: true }).click();
   await expect(ed0.locator('[id$="f-packages-err"]')).toContainText("Add at least one package");
   expect(await planByName(name)).toMatchObject({ status: "DRAFT" });
@@ -124,7 +125,7 @@ async function planFlow(page: Page, name: string) {
 
   // ---- Highlight → it becomes the gold card; the previous one doesn't ----
   const before = await highlightedPlanNames();
-  const ed = page.getByRole("form", { name: "Plan editor" });
+  const ed = readyForm(page, "Plan editor");
   await ed.getByRole("switch", { name: /Highlighted/ }).check();
   if (before[0])
     await expect(ed.getByTestId("highlight-note")).toContainText(`turns it off for “${before[0]}”`);
@@ -160,7 +161,7 @@ async function planFlow(page: Page, name: string) {
 
   // ---- "guaranteed" is refused, with the message under the field ----
   await row.getByRole("link", { name: `Edit ${name}` }).click();
-  const ed2 = page.getByRole("form", { name: "Plan editor" });
+  const ed2 = readyForm(page, "Plan editor");
   await ed2.getByLabel("Summary").fill("Guaranteed returns every quarter");
   await ed2.getByRole("button", { name: "Save changes" }).click();
   const summaryErr = ed2.locator('[id$="f-summary-err"]');
@@ -172,8 +173,17 @@ async function planFlow(page: Page, name: string) {
   page.once("dialog", (d) => void d.accept()); // (no unsaved-changes prompt expected, but safe)
   await ed2.getByRole("button", { name: "Unpublish" }).click();
   await toast(page, /Unpublished/);
-  await pub.goto("/invest");
-  await expect(plansRegion(pub).locator("article", { hasText: name })).toHaveCount(0);
+  // The status is part of the editor's key: wait for the refreshed editor before using it again.
+  await expect(ed2.getByText("Draft — not on the website")).toBeVisible();
+  // Reloads until /invest reflects THIS unpublish (as the reorder check above does): once, in a
+  // full parallel run, the first load still listed the plan; it never reproduced alone or under
+  // a targeted concurrent-load probe (Q57). Same assertion, bounded wait, no fixed sleep.
+  await expect(async () => {
+    await pub.goto("/invest");
+    await expect(plansRegion(pub).locator("article", { hasText: name })).toHaveCount(0, {
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 20_000 });
 
   // ---- Delete: the dialog says how many enquiries mention it ----
   await page.getByRole("button", { name: "Delete plan" }).click();

@@ -4,6 +4,7 @@
 // React Hook Form + zodResolver(propertySchema); the same schema runs again in the server
 // actions. Fields that don't apply to the listing type are hidden (and cleared by the schema).
 // Photos and the map picker are Unit 15: their panels are here, read-only / with lat-lng inputs.
+import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -177,6 +178,8 @@ export function PropertyEditor({
   siteHost,
   uploadPrefix,
 }: PropertyEditorProps) {
+  // Tests wait for data-ready: typing before hydration is reset when the form registers.
+  const hydrated = useHydrated();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [slugTouched, setSlugTouched] = useState(Boolean(property));
@@ -369,6 +372,7 @@ export function PropertyEditor({
       <form
         className={styles.editor}
         aria-label="Property editor"
+        data-ready={hydrated ? "true" : undefined}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

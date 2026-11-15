@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
 import { cleanUpE2eProperties, findPropertyByTitle } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
+import { readyForm } from "./helpers/editor";
 
 // Unit 14: admin properties list + editor, against the TEST database. Each test creates its own
 // "[SAMPLE] E2E …" rows (unique per run and per project) and removes them afterwards.
@@ -14,14 +15,12 @@ test.afterAll(async () => {
 test.use({ storageState: storageStateFor("admin") });
 
 /** The visible editor (Next keeps a hidden copy of the previous page mounted). */
-const editor = (page: Page) => page.getByRole("form", { name: "Property editor" });
+const editor = (page: Page) => readyForm(page, "Property editor");
 /** An editor control by field path; ids are scoped per editor instance ("…f-title"). */
 const byId = (page: Page, id: string) => editor(page).locator(`[id$="f-${id}"]`);
 
 const field = (page: Page, label: string | RegExp) =>
-  page
-    .getByRole("form", { name: "Property editor" })
-    .getByLabel(label, { exact: typeof label === "string" });
+  readyForm(page, "Property editor").getByLabel(label, { exact: typeof label === "string" });
 
 async function expectToast(page: Page, text: RegExp) {
   await expect(page.locator("[data-sonner-toast]").filter({ hasText: text }).first()).toBeVisible({
@@ -104,6 +103,9 @@ test("create → publish → rename (308) → unpublish → delete", async ({ pa
   await page.getByRole("button", { name: "Unpublish" }).click();
   await expectToast(page, /Unpublished/);
   expect((await request.get(`/properties/${newSlug}`)).status()).toBe(404);
+  // Unpublishing changes updatedAt, which is part of the editor's key: the page refresh mounts a
+  // new editor. Act on that one (clicking the outgoing one loses the dialog with it).
+  await expect(editor(page).getByText("Draft — not on the website")).toBeVisible();
 
   // ---- Delete (confirm dialog names it) → gone from the admin list ----
   await page.getByRole("button", { name: "Delete property" }).click();
@@ -146,7 +148,7 @@ test("validation: errors show under the field, the first one is focused, summary
 
 test("fields that don't apply hide for land, rentals and off-plan", async ({ page }) => {
   await page.goto("/admin/properties/new");
-  const form = page.getByRole("form", { name: "Property editor" });
+  const form = readyForm(page, "Property editor");
   await expect(form.getByLabel("Bedrooms")).toBeVisible();
   await expect(form.getByLabel("Completion date")).toHaveCount(0);
   await expect(form.getByLabel("Per", { exact: true })).toHaveCount(0);

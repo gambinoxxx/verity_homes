@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, type Page } from "@playwright/test";
 import { neon } from "@neondatabase/serverless";
 import { deleteE2ePlans, planByName } from "./db";
+import { readyForm } from "./editor";
 
 // Unit 17c: a plan with 3 packages, end to end on the TEST database: admin → publish → summary
 // card on the home page → plan page rows (gain, % per year) → Select ₦20M → enquiry with
@@ -19,7 +20,7 @@ const PACKAGES = [
   { amount: "30000000", receive: "32500000", gain: "₦2,500,000", pct: "8.3%" },
 ];
 
-const editor = (page: Page) => page.getByRole("form", { name: "Plan editor" });
+const editor = (page: Page) => readyForm(page, "Plan editor");
 const byId = (page: Page, id: string) => editor(page).locator(`[id$="f-${id}"]`);
 const toast = (page: Page, text: RegExp) =>
   expect(page.locator("[data-sonner-toast]").filter({ hasText: text }).first()).toBeVisible({
