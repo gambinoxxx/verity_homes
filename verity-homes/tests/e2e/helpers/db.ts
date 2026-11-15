@@ -480,9 +480,7 @@ export async function settingsRow(): Promise<SettingsSnapshot> {
 
 // ---- Testimonials, partners, subscribers (Unit 19b) ----
 
-export async function testimonialByName(
-  name: string,
-): Promise<{
+export async function testimonialByName(name: string): Promise<{
   id: string;
   status: string;
   consentConfirmed: boolean;
@@ -499,9 +497,7 @@ export async function testimonialByName(
   return rows[0] ?? null;
 }
 
-export async function partnerByName(
-  name: string,
-): Promise<{
+export async function partnerByName(name: string): Promise<{
   id: string;
   status: string;
   consentConfirmed: boolean;

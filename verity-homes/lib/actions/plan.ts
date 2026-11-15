@@ -17,12 +17,7 @@ import {
 } from "@/lib/db/mutations/plans";
 import { PLANS_TAG } from "@/lib/db/queries/invest";
 import { uniqueSlug } from "@/lib/slug";
-import {
-  orderSchema,
-  planPublishIssues,
-  planSchema,
-  recordIdSchema,
-} from "@/lib/validation/plan";
+import { orderSchema, planPublishIssues, planSchema, recordIdSchema } from "@/lib/validation/plan";
 
 export type PlanActionResult<T = undefined> =
   | { ok: true; data: T; message: string }

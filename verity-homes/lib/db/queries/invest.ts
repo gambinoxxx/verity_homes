@@ -58,8 +58,7 @@ export async function getPublishedPlans(): Promise<PlanView[]> {
     minimumKobo: koboToNumber(r.minimumKobo),
     returnRatePercent: decimalToNumber(r.returnRatePercent),
     fromKobo: koboToNumber(planFromAmountKobo(packages) ?? r.minimumKobo),
-    tenure:
-      tenureLabel(packages.map((p) => p.tenureMonths)) ?? `${r.tenureMonths} months`,
+    tenure: tenureLabel(packages.map((p) => p.tenureMonths)) ?? `${r.tenureMonths} months`,
     packageCount: packages.length,
   }));
 }

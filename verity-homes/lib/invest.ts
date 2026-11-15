@@ -48,7 +48,9 @@ export function formatPercent(pct: number): string {
 }
 
 /** The smallest package amount (kobo) — the plan's "from" figure — or null with no packages. */
-export function planFromAmountKobo(packages: readonly Pick<PackageAmounts, "amountKobo">[]): bigint | null {
+export function planFromAmountKobo(
+  packages: readonly Pick<PackageAmounts, "amountKobo">[],
+): bigint | null {
   if (!packages.length) return null;
   return packages.map((p) => BigInt(p.amountKobo)).reduce((a, b) => (b < a ? b : a));
 }

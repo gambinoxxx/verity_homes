@@ -162,7 +162,8 @@ export async function deletePlanRow(id: string) {
       select: { name: true, _count: { select: { enquiries: true } } },
     });
     if (!plan) return null;
-    const { slug } = (await tx.investmentPlan.findUnique({ where: { id }, select: { slug: true } })) ?? {};
+    const { slug } =
+      (await tx.investmentPlan.findUnique({ where: { id }, select: { slug: true } })) ?? {};
     await tx.investmentPlan.delete({ where: { id } });
     if (slug) await tx.slugRedirect.deleteMany({ where: { entity: "PLAN", toSlug: slug } });
     return { name: plan.name, enquiries: plan._count.enquiries };
