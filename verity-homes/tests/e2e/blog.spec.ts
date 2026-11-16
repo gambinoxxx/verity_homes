@@ -154,9 +154,11 @@ test.describe("blog post", () => {
 
   test("Article JSON-LD and canonical", async ({ page }) => {
     await page.goto(`/blog/${POST}`);
-    const ld = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}",
-    ) as Record<string, unknown>;
+    // Unit 20: the root layout's Organization JSON-LD comes first; take the Article one.
+    const all = (await page.locator('script[type="application/ld+json"]').allTextContents()).map(
+      (t) => JSON.parse(t) as Record<string, unknown>,
+    );
+    const ld = all.find((l) => l["@type"] === "Article") ?? {};
     expect(ld["@type"]).toBe("Article");
     expect(ld.headline).toBe(POST_TITLE);
     expect(ld.datePublished).toBeTruthy();

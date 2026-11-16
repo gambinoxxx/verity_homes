@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { FaqSection } from "@/components/site/invest/faq-section";
 import styles from "@/components/site/invest/invest-page.module.css";
 import { InvestSteps } from "@/components/site/invest/plans";
@@ -10,18 +11,13 @@ import { Reveal } from "@/components/site/reveal";
 import { getFaqs, getPublishedPlans } from "@/lib/db/queries/invest";
 import { INVEST_LEAD } from "@/lib/invest";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Invest in real estate — Verity Homes and Properties",
   description:
     "Structured real estate investment plans in Lagos with a written agreement at every step. See the plans, read the questions investors ask, and request a call back.",
-  alternates: { canonical: "/invest" },
-  openGraph: {
-    type: "website",
-    title: "Invest in real estate — Verity Homes and Properties",
-    description: INVEST_LEAD,
-    siteName: "Verity Homes and Properties",
-  },
-};
+  path: "/invest",
+  ogDescription: INVEST_LEAD,
+});
 
 // design/invest.html: hero, how-it-works sheet, plans (navy), FAQ, investment enquiry.
 // No FAQPage JSON-LD yet: the answers are still sample text (Unit 20).

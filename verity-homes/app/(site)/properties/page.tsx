@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import { PageHero } from "@/components/site/page-hero";
 import {
@@ -17,17 +18,12 @@ export async function generateMetadata({
   const filters = parsePropertyFilters(await searchParams);
   const heading = propertiesListTitle(filters);
   const title = `${heading} — Verity Homes and Properties`;
-  return {
+  return pageMetadata({
     title,
     description: `${heading}. ${SUB}`,
-    alternates: { canonical: "/properties" },
-    openGraph: {
-      type: "website",
-      title,
-      description: SUB,
-      siteName: "Verity Homes and Properties",
-    },
-  };
+    path: "/properties",
+    ogDescription: SUB,
+  });
 }
 
 // design/properties.html: page hero, then the sheet with pills, sidebar and results.

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound, permanentRedirect } from "next/navigation";
 import { PlotOptions } from "@/components/site/property/plots";
 import { Gallery } from "@/components/site/property/gallery";
@@ -57,29 +58,18 @@ export async function generateMetadata({
   const description = metaDescription(p);
   const url = pageUrl(p.slug);
   const cover = p.images[0];
-  const images = cover
-    ? [
-        {
-          url: absoluteUrl(cover.url, SITE),
-          alt: cover.alt,
-          ...(cover.width && cover.height ? { width: cover.width, height: cover.height } : {}),
-        },
-      ]
-    : undefined;
-  return {
+  return pageMetadata({
     title,
     description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "website",
-      url,
-      title,
-      description,
-      siteName: "Verity Homes and Properties",
-      images,
-    },
-    twitter: { card: images ? "summary_large_image" : "summary", title, description, images },
-  };
+    path: url,
+    image: cover
+      ? {
+          url: absoluteUrl(cover.url, SITE),
+          alt: cover.alt || p.title,
+          ...(cover.width && cover.height ? { width: cover.width, height: cover.height } : {}),
+        }
+      : null,
+  });
 }
 
 // design/property.html, top to bottom.

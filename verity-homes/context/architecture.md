@@ -54,7 +54,14 @@ no public page loads Clerk (Open question 42).
   site layout's settings read tags it `"settings"`, so a settings save regenerates it, and
   awaiting `params` outside a boundary made that fail with HTTP 500. Listed slugs are still
   fully prerendered; never await `params` at the top of a `[slug]` page.
-- `app/sitemap.ts`, `app/robots.ts` — SEO files.
+- `app/sitemap.ts`, `app/robots.ts` — SEO files (Unit 20). Sitemap = `STATIC_SITEMAP_PATHS` +
+  `getSitemapRows()` (`lib/db/queries/sitemap.ts`: published properties, posts, plans with
+  `updatedAt`; cached with all three tags). Robots disallow `/admin` and `/api/`. Pure helpers in
+  `lib/sitemap.ts`.
+- `lib/seo.ts` — `pageMetadata()` (every public page's title, description, canonical, Open Graph
+  and Twitter; default og:image `public/og/verity-homes-1200x630.png` when there is no cover) and
+  `organizationJsonLd()` (root layout; RC number as `identifier`, office area only, phone/email/
+  socials only when set). `metadataBase` = `NEXT_PUBLIC_SITE_URL` in `app/layout.tsx`.
 - `proxy.ts` — From Unit 6 (and `/blog/[slug]` from Unit 11): answers `/properties/[slug]` with the real status before the
   page streams (published → page, `SlugRedirect` → 308, unknown/draft → 404). With Cache
   Components a page sends its shell (HTTP 200) first, so `notFound()` / `permanentRedirect()`

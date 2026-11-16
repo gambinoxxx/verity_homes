@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Manrope, Playfair_Display } from "next/font/google";
+import { getSiteSettings } from "@/lib/db/queries/settings";
+import { env } from "@/lib/env";
+import { jsonLdScript } from "@/lib/property-detail";
+import { DEFAULT_OG_IMAGE, SITE_NAME, organizationJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 // Weights match the design's Google Fonts link (design/index.html).
@@ -18,17 +22,31 @@ const manrope = Manrope({
   display: "swap",
 });
 
+// Unit 20: relative canonical / og:url / image URLs resolve against the site URL. Pages set
+// their own title, description and Open Graph through pageMetadata() (lib/seo.ts).
 export const metadata: Metadata = {
-  title: "Verity Homes and Properties",
+  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
+  title: SITE_NAME,
   description: "Verity Homes and Properties Ltd, Lagos real estate.",
+  openGraph: { siteName: SITE_NAME, locale: "en_NG", type: "website", images: [DEFAULT_OG_IMAGE] },
+  twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE.url] },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Cached ("settings" tag), so a settings save updates the JSON-LD with everything else.
+  const settings = await getSiteSettings();
+  const orgLd = organizationJsonLd(settings, env.NEXT_PUBLIC_SITE_URL);
   return (
     // Nothing is written onto <html>/<body> by hand: reveal-on-scroll and the hero headline keep
     // their state in React (components/site/reveal.tsx, lib/site-loaded.ts).
     <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(orgLd) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

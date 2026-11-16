@@ -1,21 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import { BlogBrowser, BlogLoading } from "@/components/site/blog/blog-browser";
 import { PageHero } from "@/components/site/page-hero";
 
 const SUB = "Guides and updates for buyers, tenants and investors.";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Blog — Verity Homes and Properties",
   description: `${SUB} Practical articles on buying, renting and investing in Lagos property.`,
-  alternates: { canonical: "/blog" },
-  openGraph: {
-    type: "website",
-    title: "Blog — Verity Homes and Properties",
-    description: SUB,
-    siteName: "Verity Homes and Properties",
-  },
-};
+  path: "/blog",
+  ogDescription: SUB,
+});
 
 // design/blog.html: page hero, then the sheet with category pills, post rows and sidebar.
 export default function BlogPage({ searchParams }: PageProps<"/blog">) {

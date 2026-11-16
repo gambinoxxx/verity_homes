@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { AboutCeo, AboutCta, Story, Trust, Values } from "@/components/site/about/sections";
 import { MarqueeBand } from "@/components/site/marquee-band";
 import { PageHero } from "@/components/site/page-hero";
@@ -9,12 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { companyName, rcNumber } = await getSiteSettings();
   const title = "About us — Verity Homes and Properties";
   const description = `${companyName} (RC ${rcNumber}) is a Lagos real estate company for homes, land, rentals, property management, development and investment — built on truth.`;
-  return {
-    title,
-    description,
-    alternates: { canonical: "/about" },
-    openGraph: { type: "website", title, description, siteName: "Verity Homes and Properties" },
-  };
+  return pageMetadata({ title, description, path: "/about" });
 }
 
 // Repeated so one copy of the track is wider than the screen (the design repeats it 4×).

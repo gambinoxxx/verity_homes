@@ -530,3 +530,22 @@ export async function visiblePartnerNames(): Promise<string[]> {
     ORDER BY name`) as { name: string }[];
   return rows.map((r) => r.name);
 }
+
+// ---- SEO (Unit 20): temporary SlugRedirect rows (from-slugs must start "e2e-seo-") ----
+
+export async function addE2eRedirect(
+  entity: "PROPERTY" | "POST" | "PLAN",
+  fromSlug: string,
+  toSlug: string,
+): Promise<void> {
+  if (!fromSlug.startsWith("e2e-seo-")) throw new Error("fromSlug must start 'e2e-seo-'");
+  const id = `e2e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  await sql()`
+    INSERT INTO "SlugRedirect" (id, entity, "fromSlug", "toSlug", "createdAt")
+    VALUES (${id}, ${entity}::"RedirectEntity", ${fromSlug}, ${toSlug}, now())
+    ON CONFLICT (entity, "fromSlug") DO UPDATE SET "toSlug" = EXCLUDED."toSlug"`;
+}
+
+export async function removeE2eSeoRedirects(): Promise<void> {
+  await sql()`DELETE FROM "SlugRedirect" WHERE "fromSlug" LIKE 'e2e-seo-%'`;
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHero } from "@/components/site/page-hero";
 import { PrivacyNotice } from "@/components/site/privacy/privacy-notice";
 import { getSiteSettings } from "@/lib/db/queries/settings";
@@ -7,12 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { companyName } = await getSiteSettings();
   const title = "Privacy policy — Verity Homes and Properties";
   const description = `How ${companyName} collects, uses and protects the personal information you share through this website, and your rights under the Nigeria Data Protection Act 2023.`;
-  return {
-    title,
-    description,
-    alternates: { canonical: "/privacy" },
-    openGraph: { type: "website", title, description, siteName: "Verity Homes and Properties" },
-  };
+  return pageMetadata({ title, description, path: "/privacy" });
 }
 
 // Prose page in the design/post.html layout: post hero + sheet + article column.

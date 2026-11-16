@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { notFound, permanentRedirect } from "next/navigation";
 import styles from "@/components/site/blog/article.module.css";
@@ -41,25 +42,19 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const title = `${post.seoTitle?.trim() || post.title} — Verity Homes and Properties`;
   const description = postMetaDescription(post);
   const url = postUrl(post.slug);
-  const images = post.coverUrl
-    ? [{ url: absoluteUrl(post.coverUrl, SITE), alt: post.coverAlt || post.title }]
-    : undefined;
-  return {
+  return pageMetadata({
     title,
     description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      url,
-      title,
-      description,
-      siteName: "Verity Homes and Properties",
-      images,
+    path: url,
+    type: "article",
+    image: post.coverUrl
+      ? { url: absoluteUrl(post.coverUrl, SITE), alt: post.coverAlt || post.title }
+      : null,
+    article: {
       ...(post.publishedAt ? { publishedTime: post.publishedAt.toISOString() } : {}),
       authors: [post.authorName],
     },
-    twitter: { card: images ? "summary_large_image" : "summary", title, description, images },
-  };
+  });
 }
 
 // design/post.html: hero over the cover photo (category, title, date · reading time · author),

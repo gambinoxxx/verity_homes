@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Markdown } from "@/components/site/blog/markdown";
 import { HelpCta, HelpCtaActions } from "@/components/site/help-cta";
@@ -44,19 +45,7 @@ export async function generateMetadata({ params }: PageProps<"/invest/[slug]">):
     plan.summary?.trim() ||
     `${plan.name}: investment packages, payout and exit terms, and how to start. Returns are per your signed agreement.`;
   const url = pageUrl(plan.slug);
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "website",
-      url,
-      title,
-      description,
-      siteName: "Verity Homes and Properties",
-    },
-    twitter: { card: "summary", title, description },
-  };
+  return pageMetadata({ title, description, path: url });
 }
 
 /**

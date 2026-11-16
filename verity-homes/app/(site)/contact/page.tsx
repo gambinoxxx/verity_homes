@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ContactCards } from "@/components/site/contact/contact-cards";
 import { OfficeMap } from "@/components/site/contact/office-map";
 import styles from "@/components/site/contact/contact.module.css";
@@ -11,12 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { officeDisplay } = await getSiteSettings();
   const title = "Contact us — Verity Homes and Properties";
   const description = `Email, call or WhatsApp Verity Homes and Properties, or visit our office in ${officeDisplay}. Leave a message and we'll call you back.`;
-  return {
-    title,
-    description,
-    alternates: { canonical: "/contact" },
-    openGraph: { type: "website", title, description, siteName: "Verity Homes and Properties" },
-  };
+  return pageMetadata({ title, description, path: "/contact" });
 }
 
 // design/contact.html: page hero, then the sheet with three cards, the form and the map.

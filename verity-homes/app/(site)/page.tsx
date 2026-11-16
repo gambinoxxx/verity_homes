@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Ceo } from "@/components/site/home/ceo";
 import { ContactBlock } from "@/components/site/home/contact-block";
 import { Featured } from "@/components/site/home/featured";
@@ -14,11 +15,12 @@ import { Testimonials } from "@/components/site/home/testimonials";
 import { MarqueeBand } from "@/components/site/marquee-band";
 import { getSiteSettings } from "@/lib/db/queries/settings";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Verity Homes and Properties — Invest. Own. Live.",
   description:
     "Verity Homes and Properties Ltd — homes for sale and rent, land, property management, development and real estate investment plans in Lagos.",
-};
+  path: "/",
+});
 
 const SERVICES_BAND = ["Sales", "Rentals", "Land", "Investment", "Management", "Development"];
 // Repeated so one copy of the track is wider than the screen (the design repeats it 4×).

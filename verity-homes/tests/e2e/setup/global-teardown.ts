@@ -13,6 +13,8 @@ async function sweepDatabase(url: string) {
   await db`DELETE FROM "InvestmentPlan" WHERE name LIKE ${"[SAMPLE] E2E %"}`;
   await db`DELETE FROM "SlugRedirect" WHERE entity = 'PLAN' AND "toSlug" LIKE ${"sample-e2e-%"}`;
   await db`DELETE FROM "Faq" WHERE question LIKE ${"[SAMPLE] E2E %"}`;
+  // seo.spec.ts (Unit 20): temporary redirects to seeded pages.
+  await db`DELETE FROM "SlugRedirect" WHERE "fromSlug" LIKE ${"e2e-seo-%"}`;
   // Unit 18: blog posts and categories made by admin-posts.spec.ts (their files are under e2e/).
   const posts = (await db`SELECT slug FROM "Post" WHERE title LIKE ${"[SAMPLE] E2E %"}`) as {
     slug: string;
