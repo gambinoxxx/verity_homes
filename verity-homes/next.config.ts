@@ -17,9 +17,19 @@ const CSP = [
   "base-uri 'self'",
 ].join("; ");
 
+// Dev only: GitHub Codespaces forwards the port as https://<name>-3000.app.github.dev, so the
+// browser's Origin is that host while x-forwarded-host / Host may be localhost:3000. Next then
+// rejects Server Actions ("x-forwarded-host does not match origin"). Codespaces sets
+// CODESPACES=true; Vercel never does, so production keeps the default same-origin check.
+const codespacesOrigins =
+  process.env.CODESPACES === "true" ? ["localhost:3000", "*.app.github.dev"] : undefined;
+
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  ...(codespacesOrigins
+    ? { experimental: { serverActions: { allowedOrigins: codespacesOrigins } } }
+    : {}),
   images: {
     // Property photos uploaded to Vercel Blob (Unit 15); /samples/ seed images are local.
     remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
