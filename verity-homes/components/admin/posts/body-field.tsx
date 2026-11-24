@@ -15,7 +15,8 @@ import { POST_LIMITS } from "@/lib/validation/post";
 import { AdminIcon } from "../icons";
 import editor from "../properties/editor.module.css";
 import ui from "../ui.module.css";
-import { type UploadedImage, uploadErrorMessage, uploadPostImage } from "./cover-field";
+import { uploadErrorMessage } from "@/lib/upload-errors";
+import { type UploadedImage, uploadPostImage } from "./cover-field";
 import styles from "./posts.module.css";
 
 export type BodyTab = "write" | "preview";

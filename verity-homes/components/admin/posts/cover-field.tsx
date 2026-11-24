@@ -6,10 +6,11 @@
 // uses are deleted on save (lib/actions/post.ts), so leaving without saving loses nothing.
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { UnsupportedPhotoError, resizeForUpload } from "@/lib/image-resize";
+import { resizeForUpload } from "@/lib/image-resize";
 import { postImagePathname } from "@/lib/post-images";
 import { MAX_PHOTO_BYTES } from "@/lib/property-photos";
 import { uploadPhotoFile } from "@/lib/storage/client";
+import { UploadMessage, uploadErrorMessage } from "@/lib/upload-errors";
 import { AdminIcon } from "../icons";
 import editor from "../properties/editor.module.css";
 import ui from "../ui.module.css";
@@ -27,10 +28,11 @@ export async function uploadPostImage(
     onProgress?: (percent: number) => void;
   },
 ): Promise<UploadedImage> {
-  if (file.size > MAX_PHOTO_BYTES * 4) throw new Error("This file is too large (over 40 MB).");
+  if (file.size > MAX_PHOTO_BYTES * 4)
+    throw new UploadMessage("This file is too large (over 40 MB).");
   const resized = await resizeForUpload(file);
   if (resized.blob.size > MAX_PHOTO_BYTES)
-    throw new Error("This image is still over 10 MB after resizing.");
+    throw new UploadMessage("This image is still over 10 MB after resizing.");
   const pathname = postImagePathname(
     opts.prefix,
     opts.postId,
@@ -42,11 +44,6 @@ export async function uploadPostImage(
     contentType: resized.contentType,
     onProgress: opts.onProgress,
   });
-}
-
-export function uploadErrorMessage(e: unknown): string {
-  if (e instanceof UnsupportedPhotoError) return e.message;
-  return e instanceof Error && e.message ? e.message : "The upload failed. Please try again.";
 }
 
 type Props = {

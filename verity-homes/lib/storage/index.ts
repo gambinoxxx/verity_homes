@@ -122,6 +122,11 @@ export async function handleImageUpload(
   });
 }
 
+/** Is the Blob token set? (The upload route answers 500 and logs it when not; never the value.) */
+export function blobConfigured(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+}
+
 /** Thrown by the upload gate; the route turns it into a 4xx with this message. */
 export class UploadRefused extends Error {
   constructor(

@@ -18,7 +18,7 @@ import {
   useWatch,
 } from "react-hook-form";
 import { addPropertyPhoto } from "@/lib/actions/property-photos";
-import { UnsupportedPhotoError, resizeForUpload } from "@/lib/image-resize";
+import { resizeForUpload } from "@/lib/image-resize";
 import {
   ALT_MAX,
   MAX_PHOTOS,
@@ -27,6 +27,7 @@ import {
   photosMissingAlt,
 } from "@/lib/property-photos";
 import { uploadPhotoFile } from "@/lib/storage/client";
+import { UploadMessage, uploadErrorMessage } from "@/lib/upload-errors";
 import type { PropertyData, PropertyFormValues } from "@/lib/validation/property";
 import { AdminIcon } from "../icons";
 import ui from "../ui.module.css";
@@ -92,10 +93,11 @@ export function PhotosField({
 
   async function uploadOne(file: File, key: string, id: string) {
     try {
-      if (file.size > MAX_PHOTO_BYTES * 4) throw new Error("This file is too large (over 40 MB).");
+      if (file.size > MAX_PHOTO_BYTES * 4)
+        throw new UploadMessage("This file is too large (over 40 MB).");
       const resized = await resizeForUpload(file);
       if (resized.blob.size > MAX_PHOTO_BYTES)
-        throw new Error("This photo is still over 10 MB after resizing.");
+        throw new UploadMessage("This photo is still over 10 MB after resizing.");
       patch(key, { status: "uploading", progress: 0 });
       const pathname = photoPathname(uploadPrefix, id, file.name, resized.contentType);
       const blob = await uploadPhotoFile(pathname, resized.blob, {
@@ -111,7 +113,7 @@ export function PhotosField({
         height: resized.height,
         alt: "",
       });
-      if (!saved.ok) throw new Error(saved.error);
+      if (!saved.ok) throw new UploadMessage(saved.error); // worded for the admin
       setInfo((m) => ({
         ...m,
         [saved.data.id]: {
@@ -127,12 +129,7 @@ export function PhotosField({
       if (!edited) resetField("photos", { defaultValue: getValues("photos") ?? [] });
       patch(key, { status: "done", progress: 100 });
     } catch (e) {
-      const message =
-        e instanceof UnsupportedPhotoError
-          ? e.message
-          : e instanceof Error && e.message
-            ? e.message
-            : "The upload failed. Please try again.";
+      const message = uploadErrorMessage(e);
       patch(key, { status: "error", error: message });
     }
   }

@@ -61,7 +61,7 @@ describe("transientReason / shouldRetry", () => {
 
 describe("withReadRetry", () => {
   const deps = () => ({
-    sleep: vi.fn(async (_ms: number) => {}),
+    sleep: vi.fn<(ms: number) => Promise<void>>(async () => {}),
     log: vi.fn<(m: string) => void>(),
   });
 

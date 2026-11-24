@@ -7,9 +7,10 @@
 // save (lib/actions/trust-images.ts).
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { UnsupportedPhotoError, resizeForUpload } from "@/lib/image-resize";
+import { resizeForUpload } from "@/lib/image-resize";
 import { MAX_PHOTO_BYTES } from "@/lib/property-photos";
 import { uploadPhotoFile } from "@/lib/storage/client";
+import { UploadMessage, uploadErrorMessage } from "@/lib/upload-errors";
 import {
   AVATAR_MAX_SIDE,
   LOGO_MAX_SIDE,
@@ -75,7 +76,8 @@ export function TrustImageField({
     }
     setStatus({ busy: true, progress: 0 });
     try {
-      if (file.size > MAX_PHOTO_BYTES * 4) throw new Error("This file is too large (over 40 MB).");
+      if (file.size > MAX_PHOTO_BYTES * 4)
+        throw new UploadMessage("This file is too large (over 40 MB).");
       const resized = await resizeForUpload(
         file,
         logo ? LOGO_MAX_SIDE : AVATAR_MAX_SIDE,
@@ -96,12 +98,7 @@ export function TrustImageField({
       onChange(img);
       setStatus({ busy: false, progress: 100 });
     } catch (e) {
-      const message =
-        e instanceof UnsupportedPhotoError
-          ? e.message
-          : e instanceof Error && e.message
-            ? e.message
-            : "The upload failed. Please try again.";
+      const message = uploadErrorMessage(e);
       setStatus({ busy: false, progress: 0, error: message });
     }
   }
