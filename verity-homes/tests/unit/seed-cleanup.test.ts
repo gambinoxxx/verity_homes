@@ -3,11 +3,15 @@
 // is never touched: stale prefixed rows go, kept ones stay, every non-prefixed row survives.
 import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
+import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { NO_KEYS, cleanupStaleSamples } from "../../prisma/seed-lib";
 import { assertTestDatabase } from "./helpers/test-db";
 
 assertTestDatabase();
-const { db } = await import("@/lib/db/client");
+const { db: appDb } = await import("@/lib/db/client");
+// The app client carries the read-retry extension (lib/db/client.ts); seed-lib takes the plain
+// PrismaClient type. The model API it uses is the same.
+const db = appDb as unknown as PrismaClient;
 
 const token = randomUUID().slice(0, 8);
 const P = `[SAMPLE-T${token}]`; // this test's own "sample" prefix
