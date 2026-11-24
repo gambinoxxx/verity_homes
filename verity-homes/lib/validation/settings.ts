@@ -120,7 +120,7 @@ export const settingsSchema = z
     ),
     email: text(SETTINGS_LIMITS.email, "That email is too long").refine(
       (v) => v === "" || z.email().safeParse(v).success,
-      "Enter an email address, e.g. info@verityhomes.com.ng",
+      "Enter an email address, e.g. info@verityhomes.ng",
     ),
     // ---- Office ----
     officeArea: text(SETTINGS_LIMITS.officeArea, "Keep the area under 80 characters").pipe(

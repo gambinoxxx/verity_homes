@@ -46,12 +46,12 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 - Brand kit is in `brand/`: logos, favicons and the social profile image.
 - Stack chosen: Next 16, TypeScript, Tailwind 4, shadcn (admin), Neon,
   Prisma 7, Clerk, Vercel Blob, Resend, Vercel, Vitest and Playwright.
-- Domain: `verityhomes.com.ng`.
+- Domain: `www.verityhomes.ng` (live; `verityhomes.ng` 308 → www; DNS at Whogohost). Was planned as `verityhomes.com.ng` until Unit 21.
 
 ## Open questions
 
 1. Phone and WhatsApp number.
-2. Business email (`info@verityhomes.com.ng` once email hosting is set up). **Still open:**
+2. Business email (`info@verityhomes.ng`, Hostinger mailbox). **Still open:**
    `ENQUIRY_NOTIFY_TO` is temporarily the owner's Resend sign-up address (Unit 7).
 3. Office address display: show only "Onipanu, Lagos", or the full
    address? The registered address is also the CEO's home address.
@@ -177,8 +177,8 @@ Each unit has a matching prompt in `prompts/PROMPTS.md`.
 34. **Resend is in testing mode (Unit 7, 2026-11-12).** No verified domain yet, so
     `ENQUIRY_FROM="Verity Website <onboarding@resend.dev>"` and mail can only go to the
     account's own address or Resend test inboxes; `.env.test` uses `delivered@resend.dev`.
-    **Unit 21 must verify `verityhomes.com.ng` in Resend and switch `ENQUIRY_FROM` to
-    `website@verityhomes.com.ng`** (Vercel env too). `emailEnv()` now rejects a malformed
+    **Unit 21 must verify `verityhomes.ng` in Resend and switch `ENQUIRY_FROM` to
+    `Verity Homes <website@verityhomes.ng>`** (Vercel env too; see `docs/DNS-CHECKLIST.md`). `emailEnv()` now rejects a malformed
     `ENQUIRY_FROM` (e.g. `<x@y>` with no name, which Resend refuses with 422).
 35. **Vercel env for Unit 7.** Add `RESEND_API_KEY`, `ENQUIRY_FROM` (as above, with the name)
     and `ENQUIRY_NOTIFY_TO` to the Vercel project, or enquiries are saved with

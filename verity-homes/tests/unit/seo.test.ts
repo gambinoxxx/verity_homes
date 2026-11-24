@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_OG_IMAGE, organizationJsonLd, pageMetadata } from "@/lib/seo";
 import { STATIC_SITEMAP_PATHS, robotsRules, sitemapEntries } from "@/lib/sitemap";
 
-const SITE = "https://verityhomes.com.ng";
+const SITE = "https://www.verityhomes.ng";
 
 describe("pageMetadata", () => {
   it("sets title, description, canonical, og:url and the default brand image", () => {

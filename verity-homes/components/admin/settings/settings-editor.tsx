@@ -235,7 +235,7 @@ export function SettingsEditor({
                   inputMode="email"
                   autoComplete="off"
                   maxLength={SETTINGS_LIMITS.email}
-                  placeholder="info@verityhomes.com.ng"
+                  placeholder="info@verityhomes.ng"
                 />
               </Field>
             </div>

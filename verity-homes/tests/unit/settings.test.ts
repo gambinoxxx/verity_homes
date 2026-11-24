@@ -26,7 +26,7 @@ const actions = await import("@/lib/actions/settings");
 const valid: SettingsFormValues = {
   phone: "0803 123 4567",
   whatsapp: "0803 123 4567",
-  email: "Info@VerityHomes.com.ng",
+  email: "Info@VerityHomes.ng",
   officeArea: "Onipanu, Lagos State",
   officeAddress: "",
   showFullAddress: false,
@@ -78,9 +78,9 @@ describe("WhatsApp normalisation (234… digits)", () => {
 
 describe("contact fields", () => {
   it("email: valid or empty; saved in lower case", () => {
-    expect(settingsSchema.parse(valid).email).toBe("info@verityhomes.com.ng");
+    expect(settingsSchema.parse(valid).email).toBe("info@verityhomes.ng");
     expect(settingsSchema.parse({ ...valid, email: "" }).email).toBeNull();
-    for (const bad of ["info@", "info verity.com", "@verityhomes.com.ng", "a@b"]) {
+    for (const bad of ["info@", "info verity.com", "@verityhomes.ng", "a@b"]) {
       expect(errorsOf({ email: bad }), bad).toHaveProperty("email");
     }
   });
@@ -209,7 +209,7 @@ describe("actions", () => {
   it("saving writes the parsed row and updates every page (settings + posts tags)", async () => {
     expect(await actions.updateSettings(valid)).toMatchObject({ ok: true });
     expect(saveSettings).toHaveBeenCalledWith(
-      expect.objectContaining({ whatsapp: "2348031234567", email: "info@verityhomes.com.ng" }),
+      expect.objectContaining({ whatsapp: "2348031234567", email: "info@verityhomes.ng" }),
     );
     expect(updateTag).toHaveBeenCalledWith("settings");
     expect(updateTag).toHaveBeenCalledWith("posts");
@@ -227,7 +227,7 @@ describe("actions", () => {
   it("a failed write logs no values", async () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     saveSettings.mockRejectedValueOnce(
-      Object.assign(new Error("duplicate value 0803 123 4567 info@verityhomes.com.ng"), {
+      Object.assign(new Error("duplicate value 0803 123 4567 info@verityhomes.ng"), {
         code: "P2002",
       }),
     );

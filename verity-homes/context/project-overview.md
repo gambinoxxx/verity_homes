@@ -12,8 +12,8 @@ The public website and admin panel for **Verity Homes and Properties Ltd**
   plans, blog posts, testimonials, partners, site settings and incoming
   enquiries herself, without touching code.
 
-Domain: `verityhomes.com.ng` (`verityhomes.ng` may be added later and
-redirected).
+Domain: `www.verityhomes.ng` (live; `verityhomes.ng` 308 → www). DNS is at Whogohost. The site
+URL always comes from `NEXT_PUBLIC_SITE_URL`.
 
 ## Goals
 

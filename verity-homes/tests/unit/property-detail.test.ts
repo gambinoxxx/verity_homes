@@ -10,7 +10,7 @@ import {
   propertyWhatsappMessage,
 } from "@/lib/property-detail";
 
-const SITE = "https://verityhomes.com.ng";
+const SITE = "https://www.verityhomes.ng";
 
 const noFacts = {
   bedrooms: null,
@@ -72,7 +72,7 @@ describe("enquiry helpers", () => {
 
   it("builds the WhatsApp message naming the property and its URL", () => {
     expect(propertyWhatsappMessage("Duplex", `${SITE}/properties/duplex`)).toBe(
-      "Hi Verity, I'm interested in Duplex (https://verityhomes.com.ng/properties/duplex)",
+      "Hi Verity, I'm interested in Duplex (https://www.verityhomes.ng/properties/duplex)",
     );
   });
 });

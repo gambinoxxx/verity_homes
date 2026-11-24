@@ -43,7 +43,7 @@ describe("blogHref", () => {
 });
 
 describe("share links", () => {
-  const url = "https://verityhomes.com.ng/blog/sample-tenant-checklist-lagos";
+  const url = "https://www.verityhomes.ng/blog/sample-tenant-checklist-lagos";
   const title = "A tenant's checklist & tips";
 
   it("WhatsApp shares the title + URL through wa.me", () => {
@@ -61,12 +61,12 @@ describe("share links", () => {
 });
 
 describe("Markdown link and image rules", () => {
-  const site = "https://verityhomes.com.ng";
+  const site = "https://www.verityhomes.ng";
   it("classifies links", () => {
     expect(markdownLinkKind("/invest", site)).toBe("internal");
     expect(markdownLinkKind("//evil.example", site)).toBe("external");
     expect(markdownLinkKind("https://example.com", site)).toBe("external");
-    expect(markdownLinkKind("https://verityhomes.com.ng/blog", site)).toBe("plain");
+    expect(markdownLinkKind("https://www.verityhomes.ng/blog", site)).toBe("plain");
     expect(markdownLinkKind("#section", site)).toBe("plain");
     expect(markdownLinkKind("mailto:a@b.co", site)).toBe("plain");
   });
@@ -92,14 +92,14 @@ describe("postJsonLd / postMetaDescription", () => {
   };
 
   it("Article with headline, datePublished, author name and absolute image", () => {
-    const ld = postJsonLd(post, "https://verityhomes.com.ng");
+    const ld = postJsonLd(post, "https://www.verityhomes.ng");
     expect(ld).toMatchObject({
       "@type": "Article",
       headline: "A post",
       datePublished: "2026-11-01T09:00:00.000Z",
       author: { "@type": "Person", name: "Esther Ezenagu" },
-      image: "https://verityhomes.com.ng/samples/dusk.jpg",
-      url: "https://verityhomes.com.ng/blog/a-post",
+      image: "https://www.verityhomes.ng/samples/dusk.jpg",
+      url: "https://www.verityhomes.ng/blog/a-post",
     });
   });
 

@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Markdown } from "@/components/site/blog/markdown";
 
-const SITE = "https://verityhomes.com.ng";
+const SITE = "https://www.verityhomes.ng";
 const render = (source: string) =>
   renderToStaticMarkup(createElement(Markdown, { source, siteUrl: SITE }));
 
@@ -51,9 +51,9 @@ describe("Markdown renderer — safety", () => {
   });
 
   it("same-site links stay in the tab (no target, no rel)", () => {
-    const html = render("[plans](/invest) and [home](https://verityhomes.com.ng/properties)");
+    const html = render("[plans](/invest) and [home](https://www.verityhomes.ng/properties)");
     expect(html).toContain('href="/invest"');
-    expect(html).toContain('href="https://verityhomes.com.ng/properties"');
+    expect(html).toContain('href="https://www.verityhomes.ng/properties"');
     expect(html).not.toContain("target=");
   });
 

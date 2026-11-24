@@ -42,7 +42,7 @@ export function ContactCards({ details }: { details: ContactDetails }) {
               {email}
             </a>
           ) : (
-            <span className="ph">info@verityhomes.com.ng</span>
+            <span className="ph">info@verityhomes.ng</span>
           )}
         </p>
         {email ? (
