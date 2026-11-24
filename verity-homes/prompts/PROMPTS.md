@@ -383,6 +383,9 @@ SlugRedirect. Check every page has a unique title and description.
 
 ## Unit 21: QA + launch
 
+> **Replaced** by [`prompts/unit-21.md`](unit-21.md) (Unit 21 — Lead generation + launch).
+> The text below is kept for history only.
+
 ```
 Unit 21 — QA and launch.
 1. Run the full Playwright suite on both projects; fix everything.
