@@ -61,6 +61,9 @@ export function PartnerEditor({ partner, initialValues, uploadPrefix }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  // The first save on /new navigates to /admin/partners/[id], which mounts a new editor: the form
+  // is locked (inert, aria-busy) until then so no edit lands on this one (Unit 20b).
+  const [handingOff, setHandingOff] = useState(false);
   const published = partner?.status === "PUBLISHED";
   const scope = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-`;
   const fid = (p: string) => fieldId(p, scope);
@@ -129,15 +132,19 @@ export function PartnerEditor({ partner, initialValues, uploadPrefix }: Props) {
               setServerError(pub.error);
               applyErrors(pub.fieldErrors);
               toast.error(`Saved as a draft, but not published: ${pub.error}`);
-              if (!partner) router.replace(`/admin/partners/${res.data.id}`);
-              else router.refresh();
+              if (!partner) {
+                setHandingOff(true);
+                router.replace(`/admin/partners/${res.data.id}`);
+              } else router.refresh();
               return;
             }
             message = pub.message;
           }
           toast.success(message);
-          if (!partner) router.replace(`/admin/partners/${res.data.id}`);
-          else router.refresh();
+          if (!partner) {
+            setHandingOff(true);
+            router.replace(`/admin/partners/${res.data.id}`);
+          } else router.refresh();
         }),
       (invalid) => {
         toast.error("Please check the highlighted fields.");
@@ -167,6 +174,8 @@ export function PartnerEditor({ partner, initialValues, uploadPrefix }: Props) {
         aria-label="Partner editor"
         data-ready={hydrated ? "true" : undefined}
         data-version={partner?.id}
+        aria-busy={pending || handingOff || undefined}
+        inert={handingOff}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

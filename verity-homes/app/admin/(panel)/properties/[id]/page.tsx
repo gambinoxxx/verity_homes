@@ -25,7 +25,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
       />
       <AdminContent>
         <PropertyEditor
-          key={`${property.id}-${property.updatedAt.toISOString()}`}
+          key={property.id}
           property={{
             id: property.id,
             slug: property.slug,

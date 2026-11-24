@@ -4,6 +4,7 @@
 // React Hook Form + zodResolver(propertySchema); the same schema runs again in the server
 // actions. Fields that don't apply to the listing type are hidden (and cleared by the schema).
 // Photos and the map picker are Unit 15: their panels are here, read-only / with lat-lng inputs.
+import { latestVersion, resetToSaved, type SavedEditor } from "@/lib/editor-save";
 import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
@@ -184,6 +185,11 @@ export function PropertyEditor({
   const [pending, startTransition] = useTransition();
   const [slugTouched, setSlugTouched] = useState(Boolean(property));
   const [serverError, setServerError] = useState<string | null>(null);
+  // After a save the editor resets in place (lib/editor-save.ts); data-version follows the save.
+  const [savedVersion, setSavedVersion] = useState<string>();
+  // The first save on /new navigates to /admin/properties/[id], which mounts a new editor: the form is
+  // locked (inert, aria-busy, buttons "Saving…") until then so no edit lands on this one.
+  const [handingOff, setHandingOff] = useState(false);
   const isNew = !property;
   const scope = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-`;
   const sid = (name: string) => `${scope}${name}`;
@@ -320,7 +326,13 @@ export function PropertyEditor({
             toast.error(res.error);
             return;
           }
-          reset({ ...values, slug: res.data.slug }); // clears "unsaved changes"
+          // Reset in place to what the server saved — never remount (open question 57).
+          const saved =
+            "saved" in res.data ? (res.data.saved as SavedEditor<PropertyFormValues> | null) : null;
+          if (saved) {
+            resetToSaved(form, values, saved.values);
+            setSavedVersion(saved.updatedAt);
+          } else reset({ ...values, slug: res.data.slug }); // clears "unsaved changes"
           let message = res.message;
           if (mode === "publish") {
             const pub = await publishProperty(res.data.id);
@@ -328,14 +340,19 @@ export function PropertyEditor({
               setServerError(pub.error);
               applyServerErrors(pub.fieldErrors);
               toast.error(`Saved as a draft, but not published: ${pub.error}`);
-              if (isNew) router.replace(`/admin/properties/${res.data.id}`);
+              if (isNew) {
+                setHandingOff(true);
+                router.replace(`/admin/properties/${res.data.id}`);
+              }
               return;
             }
             message = pub.message;
           }
           toast.success(message);
-          if (isNew) router.replace(`/admin/properties/${res.data.id}`);
-          else router.refresh();
+          if (isNew) {
+            setHandingOff(true);
+            router.replace(`/admin/properties/${res.data.id}`);
+          } else router.refresh();
         }),
       (invalid) => {
         toast.error("Please check the highlighted fields.");
@@ -373,9 +390,11 @@ export function PropertyEditor({
         className={styles.editor}
         aria-label="Property editor"
         data-ready={hydrated ? "true" : undefined}
-        // Changes with every save (the page remounts the editor on its updatedAt): tests wait for
-        // it so they never act on the editor being replaced.
-        data-version={property?.updatedAt}
+        // Changes with every save (from the save result, or the page props after a refresh):
+        // tests wait for it. The editor is not remounted after saving.
+        data-version={latestVersion(savedVersion, property?.updatedAt)}
+        aria-busy={pending || handingOff || undefined}
+        inert={handingOff}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

@@ -6,7 +6,10 @@
 // Only friendly messages are returned, never raw errors.
 import { revalidatePath, updateTag } from "next/cache";
 import { ForbiddenError, requireAdmin } from "@/lib/auth";
+import { getAdminProperty } from "@/lib/db/queries/admin-properties";
 import { PROPERTIES_TAG } from "@/lib/db/queries/properties";
+import type { SavedEditor } from "@/lib/editor-save";
+import type { PropertyFormValues } from "@/lib/validation/property";
 import {
   deletePropertyRow,
   findPropertyState,
@@ -27,6 +30,24 @@ import {
 export type PropertyActionResult<T = undefined> =
   | { ok: true; data: T; message: string }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
+
+/**
+ * The editor's values as saved (server-made ids included), so the editor resets in place instead
+ * of being remounted (lib/editor-save.ts). A failed read never fails the save: the editor then
+ * keeps what it sent.
+ */
+async function savedEditor(id: string): Promise<SavedEditor<PropertyFormValues> | null> {
+  try {
+    const row = await getAdminProperty(id);
+    return row ? { values: row.values, updatedAt: row.updatedAt.toISOString() } : null;
+  } catch (e) {
+    console.error(
+      "updateProperty: reading the saved editor failed:",
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
 
 const MSG = {
   check: "Please check the highlighted fields.",
@@ -99,7 +120,13 @@ export async function createProperty(
 export async function updateProperty(
   id: unknown,
   input: unknown,
-): Promise<PropertyActionResult<{ id: string; slug: string }>> {
+): Promise<
+  PropertyActionResult<{
+    id: string;
+    slug: string;
+    saved: SavedEditor<PropertyFormValues> | null;
+  }>
+> {
   const pid = propertyIdSchema.safeParse(id);
   if (!pid.success) return { ok: false, error: MSG.missing };
   const parsed = parse(input);
@@ -132,7 +159,11 @@ export async function updateProperty(
         console.error("updateProperty: photo clean-up failed:", e instanceof Error ? e.message : e);
       }
     }
-    return { ok: true, data: { id: row.id, slug: row.slug }, message: "Changes saved." };
+    return {
+      ok: true,
+      data: { id: row.id, slug: row.slug, saved: await savedEditor(row.id) },
+      message: "Changes saved.",
+    };
   } catch (e) {
     console.error("updateProperty failed:", e instanceof Error ? e.message : e);
     return { ok: false, error: MSG.failed };

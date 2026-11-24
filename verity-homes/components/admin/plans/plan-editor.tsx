@@ -4,6 +4,7 @@
 // pattern: React Hook Form + zodResolver(planSchema) (the same schema runs in the actions),
 // the same field shell, price input, switches, panels and danger zone. The investment
 // disclaimer is shown read-only at the top as a reminder.
+import { latestVersion, resetToSaved, type SavedEditor } from "@/lib/editor-save";
 import { useHydrated } from "@/lib/use-hydrated";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -114,6 +115,11 @@ export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  // After a save the editor resets in place (lib/editor-save.ts); data-version follows the save.
+  const [savedVersion, setSavedVersion] = useState<string>();
+  // The first save on /new navigates to /admin/plans/[id], which mounts a new editor: the form is
+  // locked (inert, aria-busy, buttons "Saving…") until then so no edit lands on this one.
+  const [handingOff, setHandingOff] = useState(false);
   const published = plan?.status === "PUBLISHED";
   const scope = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-`;
   const fid = (p: string) => fieldId(p, scope);
@@ -192,21 +198,32 @@ export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps
             toast.error(res.error);
             return;
           }
-          reset(values);
+          // Reset in place to what the server saved — never remount (open question 57).
+          const saved =
+            "saved" in res.data ? (res.data.saved as SavedEditor<PlanFormValues> | null) : null;
+          if (saved) {
+            resetToSaved({ getValues, reset, setValue }, values, saved.values);
+            setSavedVersion(saved.updatedAt);
+          } else reset(values);
           let message = res.message;
           if (mode === "publish") {
             const pub = await publishPlan(res.data.id);
             if (!pub.ok) {
               toast.error(`Saved as a draft, but not published: ${pub.error}`);
               applyErrors(pub.fieldErrors);
-              if (!plan) router.replace(`/admin/plans/${res.data.id}`);
+              if (!plan) {
+                setHandingOff(true);
+                router.replace(`/admin/plans/${res.data.id}`);
+              }
               return;
             }
             message = pub.message;
           }
           toast.success(message);
-          if (!plan) router.replace(`/admin/plans/${res.data.id}`);
-          else router.refresh();
+          if (!plan) {
+            setHandingOff(true);
+            router.replace(`/admin/plans/${res.data.id}`);
+          } else router.refresh();
         }),
       (invalid) => {
         toast.error("Please check the highlighted fields.");
@@ -235,9 +252,11 @@ export function PlanEditor({ plan, initialValues, highlighted }: PlanEditorProps
         className={styles.editor}
         aria-label="Plan editor"
         data-ready={hydrated ? "true" : undefined}
-        // Changes with every save (the page remounts the editor on its updatedAt): tests wait for
-        // it so they never act on the editor being replaced.
-        data-version={plan?.updatedAt}
+        // Changes with every save (from the save result, or the page props after a refresh):
+        // tests wait for it. The editor is not remounted after saving.
+        data-version={latestVersion(savedVersion, plan?.updatedAt)}
+        aria-busy={pending || handingOff || undefined}
+        inert={handingOff}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

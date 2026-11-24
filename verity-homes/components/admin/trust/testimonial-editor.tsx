@@ -64,6 +64,9 @@ export function TestimonialEditor({ testimonial, initialValues, uploadPrefix }: 
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  // The first save on /new navigates to /admin/testimonials/[id], which mounts a new editor: the form
+  // is locked (inert, aria-busy) until then so no edit lands on this one (Unit 20b).
+  const [handingOff, setHandingOff] = useState(false);
   const published = testimonial?.status === "PUBLISHED";
   const scope = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-`;
   const fid = (p: string) => fieldId(p, scope);
@@ -133,15 +136,19 @@ export function TestimonialEditor({ testimonial, initialValues, uploadPrefix }: 
               setServerError(pub.error);
               applyErrors(pub.fieldErrors);
               toast.error(`Saved as a draft, but not published: ${pub.error}`);
-              if (!testimonial) router.replace(`/admin/testimonials/${res.data.id}`);
-              else router.refresh();
+              if (!testimonial) {
+                setHandingOff(true);
+                router.replace(`/admin/testimonials/${res.data.id}`);
+              } else router.refresh();
               return;
             }
             message = pub.message;
           }
           toast.success(message);
-          if (!testimonial) router.replace(`/admin/testimonials/${res.data.id}`);
-          else router.refresh();
+          if (!testimonial) {
+            setHandingOff(true);
+            router.replace(`/admin/testimonials/${res.data.id}`);
+          } else router.refresh();
         }),
       (invalid) => {
         toast.error("Please check the highlighted fields.");
@@ -171,6 +178,8 @@ export function TestimonialEditor({ testimonial, initialValues, uploadPrefix }: 
         aria-label="Testimonial editor"
         data-ready={hydrated ? "true" : undefined}
         data-version={testimonial?.id}
+        aria-busy={pending || handingOff || undefined}
+        inert={handingOff}
         noValidate
         onSubmit={(e) => {
           e.preventDefault();

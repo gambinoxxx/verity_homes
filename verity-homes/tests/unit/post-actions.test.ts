@@ -7,6 +7,8 @@ import { EMPTY_POST } from "@/lib/validation/post";
 class ForbiddenError extends Error {}
 const requireAdmin = vi.fn(async () => ({ userId: "user_admin" }));
 vi.mock("@/lib/auth", () => ({ requireAdmin, ForbiddenError }));
+// Read back after an update (Unit 20b); the real module would load Prisma.
+vi.mock("@/lib/db/queries/admin-posts", () => ({ getAdminPost: async () => null }));
 const updateTag = vi.fn();
 const revalidatePath = vi.fn();
 vi.mock("next/cache", () => ({ updateTag, revalidatePath, cacheTag: vi.fn(), cacheLife: vi.fn() }));

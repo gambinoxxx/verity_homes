@@ -25,7 +25,7 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
       />
       <AdminContent>
         <PlanEditor
-          key={`${plan.id}-${plan.updatedAt.toISOString()}-${plan.status}`}
+          key={plan.id}
           plan={{
             id: plan.id,
             slug: plan.slug,

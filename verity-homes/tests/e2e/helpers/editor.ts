@@ -33,10 +33,9 @@ export async function clickAndWaitForAction(page: Page, target: Locator): Promis
 }
 
 /**
- * Saves an editor whose page remounts it on every save (property, plan and post editors are
- * keyed on updatedAt) and waits until the refreshed editor is on screen (its data-version
- * changed). Acting before that can hit the editor being replaced: a switch flipped there is
- * lost, and the next save sends the old value (Q57 — measured, not a server cache issue).
+ * Saves an editor and waits until its data-version changed (the save's updatedAt). Since Unit
+ * 20b the property, plan and post editors are reset in place after a save instead of remounted
+ * (Q57), so acting earlier is safe; tests still wait so their next step sees the saved state.
  */
 export async function saveAndWaitForRemount(
   page: Page,

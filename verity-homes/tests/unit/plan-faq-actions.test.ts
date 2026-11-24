@@ -6,6 +6,8 @@ import { EMPTY_PLAN } from "@/lib/validation/plan";
 class ForbiddenError extends Error {}
 const requireAdmin = vi.fn(async () => ({ userId: "user_admin" }));
 vi.mock("@/lib/auth", () => ({ requireAdmin, ForbiddenError }));
+// Read back after an update (Unit 20b); the real module would load Prisma.
+vi.mock("@/lib/db/queries/admin-plans", () => ({ getAdminPlan: async () => null }));
 const updateTag = vi.fn();
 vi.mock("next/cache", () => ({
   updateTag,

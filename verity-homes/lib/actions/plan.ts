@@ -19,6 +19,10 @@ import { PLANS_TAG } from "@/lib/db/queries/invest";
 import { uniqueSlug } from "@/lib/slug";
 import { orderSchema, planPublishIssues, planSchema, recordIdSchema } from "@/lib/validation/plan";
 
+import { getAdminPlan } from "@/lib/db/queries/admin-plans";
+import type { SavedEditor } from "@/lib/editor-save";
+import type { PlanFormValues } from "@/lib/validation/plan";
+
 export type PlanActionResult<T = undefined> =
   | { ok: true; data: T; message: string }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
@@ -79,10 +83,28 @@ export async function createPlan(input: unknown): Promise<PlanActionResult<{ id:
   }
 }
 
+/**
+ * The editor's values as saved (server-made ids included), so the editor resets in place instead
+ * of being remounted (lib/editor-save.ts). A failed read never fails the save: the editor then
+ * keeps what it sent.
+ */
+async function savedEditor(id: string): Promise<SavedEditor<PlanFormValues> | null> {
+  try {
+    const row = await getAdminPlan(id);
+    return row ? { values: row.values, updatedAt: row.updatedAt.toISOString() } : null;
+  } catch (e) {
+    console.error(
+      "updatePlan: reading the saved editor failed:",
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
 export async function updatePlan(
   id: unknown,
   input: unknown,
-): Promise<PlanActionResult<{ id: string }>> {
+): Promise<PlanActionResult<{ id: string; saved: SavedEditor<PlanFormValues> | null }>> {
   const pid = recordIdSchema.safeParse(id);
   if (!pid.success) return { ok: false, error: MSG.missing };
   const p = parse(input);
@@ -110,7 +132,7 @@ export async function updatePlan(
     refresh(row.previousSlug, slug);
     return {
       ok: true,
-      data: { id: row.id },
+      data: { id: row.id, saved: await savedEditor(row.id) },
       message: `Changes saved.${highlightNote(row.cleared)}`,
     };
   } catch (e) {

@@ -29,7 +29,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       />
       <AdminContent>
         <PostEditor
-          key={`${post.id}-${post.updatedAt.toISOString()}-${post.status}`}
+          key={post.id}
           post={{
             id: post.id,
             slug: post.slug,

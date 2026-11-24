@@ -9,7 +9,7 @@ import {
   propertyPhotos,
 } from "./helpers/db";
 import { storageStateFor } from "./setup/clerk-users";
-import { readyForm, saveAndWaitForRemount } from "./helpers/editor";
+import { clickAndWaitForAction, readyForm, saveAndWaitForRemount } from "./helpers/editor";
 
 // Unit 15: property photos (Vercel Blob, under e2e/) and the map picker, against the TEST
 // database. Each test makes its own published "[SAMPLE] E2E …" property and removes it — and
@@ -34,8 +34,7 @@ async function newProperty(label: string, uploads = false) {
 const editor = (page: Page) => readyForm(page, "Property editor");
 
 async function saveChanges(page: Page) {
-  // Wait for THIS save's response and for the refreshed editor (the page remounts it), so the
-  // next step never acts on the editor being replaced (Q57).
+  // Wait for THIS save's response and for the editor's new data-version (the refresh landed).
   await saveAndWaitForRemount(
     page,
     editor(page),
@@ -197,6 +196,43 @@ test.describe("signed-in admin", () => {
     expect(src).toContain("q=Yaba, Lagos");
     expect(src).not.toContain("6.5");
     await pub.close();
+  });
+});
+
+test.describe("signed-in admin (mobile)", () => {
+  test.use({ storageState: storageStateFor("admin") });
+
+  // Q57 / Unit 20b: the editor is reset in place after a save, never remounted, so a change made
+  // the moment a save finishes (before the page refresh lands — common on a slow phone) is kept.
+  test("save, then immediately flip Show exact location and save again → DB has the second value", async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "admin-mobile", "the slow-phone case");
+    test.setTimeout(120_000);
+    const p = await newProperty("Flip");
+    await page.goto(`/admin/properties/${p.id}`);
+    const exact = editor(page).getByRole("switch", { name: /Show exact location/ });
+    const save = editor(page).getByRole("button", { name: "Save changes" });
+
+    // First save: a pin, exact location still off. Only the action's answer is awaited.
+    await editor(page).getByLabel("Latitude").fill("6.500000");
+    await editor(page).getByLabel("Longitude").fill("3.380000");
+    await clickAndWaitForAction(page, save);
+    // Immediately — no waiting for data-version or the refresh.
+    await exact.check();
+    await clickAndWaitForAction(page, save);
+
+    await expect
+      .poll(async () => (await propertyLocation(p.id)).showExactLocation, { timeout: 10_000 })
+      .toBe(true);
+    // After both refreshes the switch is still on and nothing is left unsaved.
+    await expect(exact).toBeChecked();
+    await expect(editor(page)).not.toHaveAttribute("aria-busy", "true");
+    expect(await propertyLocation(p.id)).toMatchObject({
+      latitude: "6.500000",
+      longitude: "3.380000",
+      showExactLocation: true,
+    });
   });
 });
 

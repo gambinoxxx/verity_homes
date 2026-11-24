@@ -23,6 +23,10 @@ import { uniqueSlug } from "@/lib/slug";
 import { blobPathPrefix, isBlobUrl, listFolder, remove } from "@/lib/storage";
 import { type PostData, postIdSchema, postPublishIssues, postSchema } from "@/lib/validation/post";
 
+import { getAdminPost } from "@/lib/db/queries/admin-posts";
+import type { SavedEditor } from "@/lib/editor-save";
+import type { PostFormValues } from "@/lib/validation/post";
+
 export type PostActionResult<T = undefined> =
   | { ok: true; data: T; message: string }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
@@ -105,10 +109,30 @@ export async function createPost(
   }
 }
 
+/**
+ * The editor's values as saved (server-made ids included), so the editor resets in place instead
+ * of being remounted (lib/editor-save.ts). A failed read never fails the save: the editor then
+ * keeps what it sent.
+ */
+async function savedEditor(id: string): Promise<SavedEditor<PostFormValues> | null> {
+  try {
+    const row = await getAdminPost(id);
+    return row ? { values: row.values, updatedAt: row.updatedAt.toISOString() } : null;
+  } catch (e) {
+    console.error(
+      "updatePost: reading the saved editor failed:",
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
 export async function updatePost(
   id: unknown,
   input: unknown,
-): Promise<PostActionResult<{ id: string; slug: string }>> {
+): Promise<
+  PostActionResult<{ id: string; slug: string; saved: SavedEditor<PostFormValues> | null }>
+> {
   const pid = postIdSchema.safeParse(id);
   if (!pid.success) return { ok: false, error: MSG.missing };
   const p = parse(input);
@@ -140,7 +164,11 @@ export async function updatePost(
     if (usesBlob(current.coverUrl, current.content) || usesBlob(d.coverUrl, d.content)) {
       await sweepUnused(current.id, { coverUrl: d.coverUrl, content: d.content });
     }
-    return { ok: true, data: { id: row.id, slug: row.slug }, message: "Changes saved." };
+    return {
+      ok: true,
+      data: { id: row.id, slug: row.slug, saved: await savedEditor(row.id) },
+      message: "Changes saved.",
+    };
   } catch (e) {
     console.error("updatePost failed:", e instanceof Error ? e.message : e);
     return { ok: false, error: MSG.failed };

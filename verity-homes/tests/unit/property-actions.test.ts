@@ -58,6 +58,15 @@ vi.mock("@/lib/db/mutations/properties", () => m);
 // Stop the real cached-queries module (and its Prisma client) from loading.
 vi.mock("@/lib/db/queries/properties", () => ({ PROPERTIES_TAG: "properties" }));
 
+// The editor's values as saved (read back after updateProperty, Unit 20b).
+const getAdminProperty = vi.fn<
+  (id: string) => Promise<{ values: typeof EMPTY_PROPERTY; updatedAt: Date } | null>
+>(async () => ({
+  values: { ...EMPTY_PROPERTY, title: "[SAMPLE] Test", plots: [] },
+  updatedAt: new Date("2026-11-24T10:00:00Z"),
+}));
+vi.mock("@/lib/db/queries/admin-properties", () => ({ getAdminProperty }));
+
 const remove = vi.fn<(urls: readonly string[]) => Promise<{ removed: number }>>(async () => ({
   removed: 1,
 }));
@@ -181,6 +190,22 @@ describe("admin writes, then updates the 'properties' tag", () => {
       expect.anything(),
     );
     expect(remove).toHaveBeenCalledWith(["https://x.public.blob.vercel-storage.com/e2e/p.webp"]);
+  });
+
+  it("returns the saved editor values so the editor resets in place (no remount)", async () => {
+    const res = await actions.updateProperty("p1", valid);
+    expect(res.ok && res.data.saved).toEqual({
+      values: expect.objectContaining({ title: "[SAMPLE] Test" }),
+      updatedAt: "2026-11-24T10:00:00.000Z",
+    });
+  });
+
+  it("a failed read-back never fails the save (saved: null)", async () => {
+    getAdminProperty.mockRejectedValueOnce(new Error("connection dropped"));
+    vi.spyOn(console, "error").mockImplementationOnce(() => {});
+    const res = await actions.updateProperty("p1", valid);
+    expect(res.ok && res.data.saved).toBeNull();
+    expect(res.ok && res.message).toBe("Changes saved.");
   });
 
   it("no removed photos → no Blob call", async () => {

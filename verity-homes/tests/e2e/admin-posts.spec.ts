@@ -218,7 +218,7 @@ test.describe("signed-in admin", () => {
     await editor(page).getByRole("button", { name: "Unpublish" }).click();
     await expectToast(page, /Unpublished/);
     expect((await request.get(`/blog/${newSlug}`)).status()).toBe(404);
-    // The editor remounts with the new status (its key); act on the refreshed one.
+    // The refresh brings the new status into the same editor (no remount); wait for it.
     await expect(editor(page).getByText("Draft — not on the website")).toBeVisible();
 
     // ---- Delete (the dialog names it) → row and cover file gone ----
