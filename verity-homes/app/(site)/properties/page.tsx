@@ -6,7 +6,7 @@ import {
   PropertiesBrowser,
   PropertiesLoading,
 } from "@/components/site/properties/properties-browser";
-import { propertiesListTitle } from "@/lib/property-list";
+import { propertiesCanonical, propertiesListTitle } from "@/lib/property-list";
 import { parsePropertyFilters } from "@/lib/validation/property-filters";
 
 const SUB =
@@ -17,11 +17,14 @@ export async function generateMetadata({
 }: PageProps<"/properties">): Promise<Metadata> {
   const filters = parsePropertyFilters(await searchParams);
   const heading = propertiesListTitle(filters);
-  const title = `${heading} — Verity Homes and Properties`;
+  const path = propertiesCanonical(filters);
+  // A self-canonical page 2+ needs its own title and description.
+  const pageSuffix = path === "/properties" ? "" : ` — page ${filters.page}`;
+  const title = `${heading}${pageSuffix} — Verity Homes and Properties`;
   return pageMetadata({
     title,
-    description: `${heading}. ${SUB}`,
-    path: "/properties",
+    description: `${heading}${pageSuffix}. ${SUB}`,
+    path,
     ogDescription: SUB,
   });
 }

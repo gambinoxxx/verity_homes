@@ -117,6 +117,9 @@ describe("propertyJsonLd", () => {
     publishedAt: new Date("2026-11-01T00:00:00Z"),
     priceKobo: 25_000_000_000,
     priceOnRequest: false,
+    latitude: 6.4474,
+    longitude: 3.4723,
+    showExactLocation: false,
   } as const;
 
   it("is a RealEstateListing with area and city only, absolute URLs and a public price", () => {
@@ -127,15 +130,41 @@ describe("propertyJsonLd", () => {
       image: [`${SITE}/samples/villa.jpg`],
       datePosted: "2026-11-01T00:00:00.000Z",
       contentLocation: { address: { addressLocality: "Lekki", addressRegion: "Lagos" } },
-      offers: { price: 250_000_000, priceCurrency: "NGN" },
+      offers: {
+        "@type": "Offer",
+        price: 250_000_000,
+        priceCurrency: "NGN",
+        availability: "https://schema.org/InStock",
+      },
     });
     expect(JSON.stringify(ld)).not.toMatch(/streetAddress|postalCode/);
   });
 
-  it("omits the price when it is on request", () => {
+  it("approximate location: no geo coordinates even when lat/lng are stored", () => {
+    const ld = propertyJsonLd({ ...p, images: [...p.images] }, SITE);
+    expect(JSON.stringify(ld)).not.toMatch(/geo|latitude|longitude|6\.4474/i);
+  });
+
+  it("exact location on: geo coordinates, still no street address", () => {
+    const ld = propertyJsonLd({ ...p, images: [...p.images], showExactLocation: true }, SITE);
+    expect(ld.contentLocation).toMatchObject({
+      geo: { "@type": "GeoCoordinates", latitude: 6.4474, longitude: 3.4723 },
+    });
+    expect(JSON.stringify(ld)).not.toMatch(/streetAddress|postalCode/);
+    // Switched on but no pin set: nothing to show.
+    const noPin = propertyJsonLd(
+      { ...p, images: [], showExactLocation: true, latitude: null, longitude: null },
+      SITE,
+    );
+    expect(noPin.contentLocation).not.toHaveProperty("geo");
+  });
+
+  it("price on request: availability only, no price; off-plan is PreOrder", () => {
     const ld = propertyJsonLd({ ...p, images: [], priceOnRequest: true }, SITE);
-    expect(ld.offers).toBeUndefined();
+    expect(ld.offers).toEqual({ "@type": "Offer", availability: "https://schema.org/InStock" });
     expect(ld.image).toBeUndefined();
+    const offPlan = propertyJsonLd({ ...p, images: [], listingType: "OFF_PLAN" }, SITE);
+    expect(offPlan.offers).toMatchObject({ availability: "https://schema.org/PreOrder" });
   });
 
   it("escapes < so content cannot close the script tag", () => {

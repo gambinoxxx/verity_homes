@@ -24,12 +24,22 @@ function parseOrThrow<T extends z.ZodType>(feature: string, schema: T, source: S
 
 // ---------------------------------------------------------------- core (every page)
 
-const coreSchema = z.object({
-  DATABASE_URL: z.url(),
-  DIRECT_URL: z.url().optional(), // Prisma migrations only
-  NEXT_PUBLIC_SITE_URL: z.url(),
-  IP_HASH_SALT: z.string().min(16),
-});
+const coreSchema = z
+  .object({
+    DATABASE_URL: z.url(),
+    DIRECT_URL: z.url().optional(), // Prisma migrations only
+    NEXT_PUBLIC_SITE_URL: z.url(),
+    IP_HASH_SALT: z.string().min(16),
+    VERCEL_ENV: z.string().optional(), // set by Vercel: production | preview | development
+  })
+  // Canonicals, og:url, the sitemap and JSON-LD all use NEXT_PUBLIC_SITE_URL. In production it
+  // must be the real domain (https://www.verityhomes.ng), never a *.vercel.app address.
+  .refine(
+    (e) =>
+      e.VERCEL_ENV !== "production" ||
+      !new URL(e.NEXT_PUBLIC_SITE_URL).hostname.endsWith(".vercel.app"),
+    { path: ["NEXT_PUBLIC_SITE_URL"], message: "must be the real domain in production" },
+  );
 
 export type CoreEnv = z.infer<typeof coreSchema>;
 

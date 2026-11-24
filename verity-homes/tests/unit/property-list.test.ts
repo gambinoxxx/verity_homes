@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { pageNumbers, priceOptions, propertiesListTitle, resultsLabel } from "@/lib/property-list";
+import {
+  pageNumbers,
+  priceOptions,
+  propertiesCanonical,
+  propertiesListTitle,
+  resultsLabel,
+} from "@/lib/property-list";
 
 describe("propertiesListTitle", () => {
   it("describes the listing type and the area", () => {
@@ -51,5 +57,19 @@ describe("pageNumbers", () => {
     expect(pageNumbers(1, 3)).toEqual([1, 2, 3]);
     expect(pageNumbers(5, 12)).toEqual([1, null, 4, 5, 6, null, 12]);
     expect(pageNumbers(1, 12)).toEqual([1, 2, null, 12]);
+  });
+});
+
+describe("propertiesCanonical", () => {
+  it("filters and sort point at the clean /properties", () => {
+    expect(propertiesCanonical({})).toBe("/properties");
+    expect(propertiesCanonical({ type: "rent" })).toBe("/properties");
+    expect(propertiesCanonical({ sort: "price-asc" })).toBe("/properties");
+    expect(propertiesCanonical({ area: "lekki", beds: 3, page: 2 })).toBe("/properties");
+  });
+
+  it("an unfiltered page 2+ is self-canonical; page 1 is the clean URL", () => {
+    expect(propertiesCanonical({ page: 2 })).toBe("/properties?page=2");
+    expect(propertiesCanonical({ page: 1 })).toBe("/properties");
   });
 });

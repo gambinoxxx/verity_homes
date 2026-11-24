@@ -71,6 +71,43 @@ test("every public page: unique title + description, canonical, og:image, Organi
   }
 });
 
+test("/properties: filters and sort canonicalise to /properties; page 2 is self-canonical", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "head tags are the same on every viewport");
+  for (const q of ["?type=rent", "?sort=price-asc", "?area=lekki&page=2"]) {
+    await page.goto(`/properties${q}`);
+    const c = new URL((await head(page)).canonical);
+    expect(`${c.pathname}${c.search}`, q).toBe("/properties");
+  }
+  await page.goto("/properties?page=2");
+  const p2 = await head(page);
+  const c = new URL(p2.canonical);
+  expect(`${c.pathname}${c.search}`).toBe("/properties?page=2");
+  expect(p2.title).toMatch(/page 2/);
+});
+
+test("property JSON-LD is a RealEstateListing with an offer; plan pages have no financial data", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "head tags are the same on every viewport");
+  await page.goto(`/properties/${PROPERTY}`);
+  const listing = (await head(page)).ld.find((l) => l["@type"] === "RealEstateListing");
+  expect(listing).toMatchObject({ offers: { "@type": "Offer", availability: expect.any(String) } });
+  expect(JSON.stringify(listing)).not.toMatch(/streetAddress/);
+  // Legal review pending (open question 54): plan pages carry normal metadata only.
+  await page.goto(`/invest/${PLAN}`);
+  const types = (await head(page)).ld.map((l) => l["@type"]);
+  expect(types).toEqual(["Organization"]);
+});
+
+test("not-found pages are noindex", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "head tags are the same on every viewport");
+  const res = await page.goto("/no-such-page-e2e");
+  expect(res?.status()).toBe(404);
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+});
+
 test("pages without a cover use the brand image; covers are used when present", async ({
   page,
   request,
@@ -102,14 +139,16 @@ test("social bots get /properties metadata in the server HTML <head>", async ({
   expect(headHtml).toMatch(/<link rel="canonical" href="https?:\/\/[^"]+\/properties"/);
 });
 
-test("robots.txt disallows /admin and points at the sitemap", async ({ request }, info) => {
+// Outside Vercel production (this server: no VERCEL_ENV) robots.txt blocks everything; the
+// production rules are unit-tested (tests/unit/seo.test.ts).
+test("robots.txt outside production disallows everything", async ({ request }, info) => {
   test.skip(info.project.name !== "desktop", "no browser needed");
   const res = await request.get("/robots.txt");
   expect(res.status()).toBe(200);
   const body = await res.text();
   expect(body).toMatch(/User-Agent: \*/i);
-  expect(body).toMatch(/^Disallow: \/admin$/m);
-  expect(body).toMatch(/^Sitemap: https?:\/\/\S+\/sitemap\.xml$/m);
+  expect(body).toMatch(/^Disallow: \/$/m);
+  expect(body).not.toMatch(/^Allow:/m);
 });
 
 test("sitemap.xml: static pages + published properties, posts and plans; no drafts", async ({

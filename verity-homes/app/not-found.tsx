@@ -7,6 +7,7 @@ import styles from "./not-found.module.css";
 export const metadata: Metadata = {
   title: "Page not found — Verity Homes and Properties",
   description: "Page not found.",
+  robots: { index: false, follow: true },
 };
 
 // design/404.html. Outside the (site) group, so it wraps itself in the shared chrome.

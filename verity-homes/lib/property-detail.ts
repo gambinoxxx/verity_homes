@@ -94,34 +94,51 @@ type JsonLdSource = Pick<
   | "publishedAt"
   | "priceKobo"
   | "priceOnRequest"
+  | "latitude"
+  | "longitude"
+  | "showExactLocation"
 >;
 
 /**
- * schema.org RealEstateListing. Location is area + city only (never the address); the price is
- * included only when it is public (not "price on request").
+ * schema.org RealEstateListing. Location is area + city, plus geo coordinates ONLY when the
+ * owner switched on "Show exact location" — never the private address, and never the pin of a
+ * listing whose location is meant to stay approximate. The offer carries the availability
+ * (off-plan → PreOrder, everything published otherwise → InStock) and the price in naira (from
+ * kobo) only when it is public (not "price on request").
  */
 export function propertyJsonLd(p: JsonLdSource, siteUrl: string): Record<string, unknown> {
+  const place: Record<string, unknown> = {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: p.area,
+      addressRegion: p.city,
+      addressCountry: "NG",
+    },
+  };
+  if (p.showExactLocation && p.latitude != null && p.longitude != null) {
+    place.geo = { "@type": "GeoCoordinates", latitude: p.latitude, longitude: p.longitude };
+  }
   const ld: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     name: p.title,
     description: metaDescription(p),
     url: absoluteUrl(`/properties/${p.slug}`, siteUrl),
-    contentLocation: {
-      "@type": "Place",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: p.area,
-        addressRegion: p.city,
-        addressCountry: "NG",
-      },
-    },
+    contentLocation: place,
   };
   if (p.images.length > 0) ld.image = p.images.map((i) => absoluteUrl(i.url, siteUrl));
   if (p.publishedAt) ld.datePosted = p.publishedAt.toISOString();
+  const offer: Record<string, unknown> = {
+    "@type": "Offer",
+    availability:
+      p.listingType === "OFF_PLAN" ? "https://schema.org/PreOrder" : "https://schema.org/InStock",
+  };
   if (!p.priceOnRequest && p.priceKobo != null) {
-    ld.offers = { "@type": "Offer", price: p.priceKobo / 100, priceCurrency: "NGN" };
+    offer.price = p.priceKobo / 100;
+    offer.priceCurrency = "NGN";
   }
+  ld.offers = offer;
   return ld;
 }
 

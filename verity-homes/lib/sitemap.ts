@@ -25,10 +25,16 @@ export function sitemapEntries(
   ];
 }
 
-/** robots.txt rules: everything public is crawlable; the admin panel and APIs are not. */
-export function robotsRules(siteUrl: string) {
+/**
+ * robots.txt rules. Only the production deployment (`VERCEL_ENV === "production"`, the live
+ * domain) is crawlable, and never the admin panel, APIs or sign-in. Everything else — preview
+ * deploys, `*-git-main-*` URLs, local dev — disallows everything, so no copy of the site is
+ * indexed under another host.
+ */
+export function robotsRules(siteUrl: string, vercelEnv: string | undefined) {
+  if (vercelEnv !== "production") return { rules: [{ userAgent: "*", disallow: "/" }] };
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/", "/sign-in"] }],
     sitemap: new URL("/sitemap.xml", siteUrl).toString(),
     host: new URL(siteUrl).origin,
   };

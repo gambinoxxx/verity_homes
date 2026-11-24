@@ -132,11 +132,17 @@ describe("sitemap and robots", () => {
     ]);
   });
 
-  it("robots: crawl the site, not /admin or /api; points at the sitemap", () => {
-    expect(robotsRules(SITE)).toEqual({
-      rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }],
+  it("robots (production): crawl the site, not /admin, /api or /sign-in; links the sitemap", () => {
+    expect(robotsRules(SITE, "production")).toEqual({
+      rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/", "/sign-in"] }],
       sitemap: `${SITE}/sitemap.xml`,
       host: SITE,
     });
+  });
+
+  it("robots (preview, development, local): disallow everything, no sitemap", () => {
+    for (const vercelEnv of ["preview", "development", undefined]) {
+      expect(robotsRules(SITE, vercelEnv)).toEqual({ rules: [{ userAgent: "*", disallow: "/" }] });
+    }
   });
 });

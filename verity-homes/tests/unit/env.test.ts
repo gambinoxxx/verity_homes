@@ -32,6 +32,21 @@ describe("core env", () => {
     expect(env.DIRECT_URL).toBeUndefined();
   });
 
+  it("refuses a *.vercel.app site URL in production only", async () => {
+    const { parseCoreEnv } = await loadWithCoreOnly();
+    expect(() => parseCoreEnv({ ...CORE, VERCEL_ENV: "production" })).toThrow(
+      /NEXT_PUBLIC_SITE_URL/,
+    );
+    expect(() => parseCoreEnv({ ...CORE, VERCEL_ENV: "preview" })).not.toThrow();
+    expect(
+      parseCoreEnv({
+        ...CORE,
+        VERCEL_ENV: "production",
+        NEXT_PUBLIC_SITE_URL: "https://www.verityhomes.ng",
+      }).NEXT_PUBLIC_SITE_URL,
+    ).toBe("https://www.verityhomes.ng");
+  });
+
   it("names a missing core variable", async () => {
     const { parseCoreEnv } = await loadWithCoreOnly();
     expect(() => parseCoreEnv({ ...CORE, IP_HASH_SALT: undefined })).toThrow(/IP_HASH_SALT/);

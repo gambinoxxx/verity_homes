@@ -61,6 +61,17 @@ export function priceOptions(f: PropertyFilters): { options: PriceOption[]; sele
   };
 }
 
+/**
+ * Canonical URL for /properties. Any filter or sort points at the clean `/properties` (those
+ * views are not separate pages for search engines); an unfiltered page 2+ is its own canonical
+ * (`/properties?page=2`) so the listings deeper in the list stay discoverable.
+ */
+export function propertiesCanonical(f: PropertyFilters): string {
+  const { page, ...rest } = f;
+  const filtered = Object.values(rest).some((v) => v !== undefined);
+  return !filtered && page && page > 1 ? `/properties?page=${page}` : "/properties";
+}
+
 /** "Showing 6 properties" or, past one page, "Showing 13–24 of 30 properties". */
 export function resultsLabel(total: number, page: number, perPage: number): string {
   const noun = total === 1 ? "property" : "properties";
