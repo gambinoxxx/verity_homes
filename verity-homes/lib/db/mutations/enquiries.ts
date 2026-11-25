@@ -1,5 +1,6 @@
 // Writes and lookups for the public enquiry and newsletter actions (lib/actions/*).
 import "server-only";
+import type { LeadSource } from "@/lib/lead-source";
 import { db } from "@/lib/db/client";
 import type { EnquiryInterest, EnquirySource, EnquiryStatus } from "@/lib/generated/prisma/client";
 
@@ -56,7 +57,7 @@ export type NewEnquiry = {
   wantsInspection: boolean;
   amountKobo: bigint | null;
   ipHash: string;
-};
+} & LeadSource;
 
 export function saveEnquiry(data: NewEnquiry) {
   return db.enquiry.create({ data, select: { id: true, createdAt: true } });

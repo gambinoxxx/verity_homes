@@ -17,6 +17,7 @@ import {
   saveEnquiry,
 } from "@/lib/db/mutations/enquiries";
 import { sendEnquiryEmail } from "@/lib/email/enquiry";
+import { LEAD_SOURCE_FIELDS, describeSource, type LeadSource } from "@/lib/lead-source";
 import { enquirySchema } from "@/lib/validation/enquiry";
 
 const RATE_LIMIT = 5;
@@ -95,8 +96,13 @@ export async function createEnquiry(
       input.packageId && input.planId ? findPackageRef(input.packageId, input.planId) : null,
     ]);
 
+    const lead: LeadSource = Object.fromEntries(
+      LEAD_SOURCE_FIELDS.map((k) => [k, input[k] ?? null]),
+    );
+
     // 3. Save first.
     const saved = await saveEnquiry({
+      ...lead,
       name: input.name,
       phone: input.phone,
       email: input.email ?? null,
@@ -126,6 +132,7 @@ export async function createEnquiry(
       amountKobo,
       property,
       plan,
+      leadSource: describeSource(lead),
     });
     if (sent) {
       await markEnquiryEmailSent(saved.id).catch((e: unknown) =>

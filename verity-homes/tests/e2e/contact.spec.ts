@@ -5,7 +5,13 @@
 // "nothing set" state is covered on the same component in tests/unit/contact-cards.test.ts.
 import { randomUUID } from "node:crypto";
 import { test, expect } from "@playwright/test";
-import { cleanUpE2eRows, findEnquirySource, getSettingsRow, type SettingsRow } from "./helpers/db";
+import {
+  cleanUpE2eRows,
+  findEnquiryLead,
+  findEnquirySource,
+  getSettingsRow,
+  type SettingsRow,
+} from "./helpers/db";
 
 let settings: SettingsRow;
 const created: string[] = [];
@@ -96,6 +102,36 @@ test("the form submits with source CONTACT_PAGE", async ({ page }) => {
   const name = `Contact ${last}`; // first + last name are sent together as `name`
   created.push(name);
   expect(await findEnquirySource(name)).toBe("CONTACT_PAGE");
+});
+
+test("an enquiry keeps the visit's first-touch source (UTM tags, click ID, landing page)", async ({
+  page,
+}) => {
+  const n = () => Math.floor(Math.random() * 250) + 1;
+  await page.setExtraHTTPHeaders({ "x-forwarded-for": `192.0.2.${n()}` });
+  // Land with ad tags, browse to another page, then enquire: the FIRST page is what counts.
+  await page.goto("/about?utm_source=google&utm_medium=cpc&utm_campaign=land-lekki&gclid=E2Etest");
+  await page.goto("/contact#message");
+  const form = page.getByRole("form", { name: "Contact form" });
+  const last = `[E2E] ${randomUUID().slice(0, 8)}`;
+  await form.getByLabel(/First name/).fill("Source");
+  await form.getByLabel("Last name").fill(last);
+  await form.getByLabel(/Phone \/ WhatsApp/).fill("08030000000");
+  await form.getByLabel("Message").fill("E2E lead source test — please ignore.");
+  await page.waitForTimeout(3_100);
+  await form.getByRole("button", { name: "Get a call back" }).click();
+  await expect(form.getByRole("status")).toContainText(/thank you/i, { timeout: 20_000 });
+
+  const name = `Source ${last}`;
+  created.push(name);
+  expect(await findEnquiryLead(name)).toMatchObject({
+    utmSource: "google",
+    utmMedium: "cpc",
+    utmCampaign: "land-lekki",
+    gclid: "E2Etest",
+    landingPage: "/about?utm_source=google&utm_medium=cpc&utm_campaign=land-lekki&gclid=E2Etest",
+    referrer: null,
+  });
 });
 
 test("empty submit shows errors on the first-name and phone fields", async ({ page }) => {

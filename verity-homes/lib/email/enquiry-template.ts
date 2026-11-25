@@ -15,6 +15,8 @@ export type EnquiryEmailData = {
   amountKobo?: bigint | null;
   property?: { title: string; slug: string } | null;
   plan?: { name: string } | null;
+  /** Unit 21: describeSource() of the visit, e.g. "Google Ads · land-lekki". */
+  leadSource?: string | null;
   createdAt: Date;
 };
 
@@ -88,6 +90,7 @@ export function buildEnquiryEmail(d: EnquiryEmailData, siteUrl: string) {
       "Yes, wants to book an inspection",
       "Yes, wants to book an inspection",
     ]);
+  if (d.leadSource) rows.push(["Source", d.leadSource, esc(d.leadSource)]);
   rows.push([
     "From",
     `${SOURCE_LABEL[d.source]}, ${when}`,

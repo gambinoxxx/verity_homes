@@ -79,12 +79,12 @@ describe("enquiriesCsv", () => {
     const lines = csv.slice(1).split("\r\n");
     expect(lines[0]).toBe(CSV_COLUMNS.join(","));
     expect(lines[0]).toBe(
-      "Received (Lagos),Name,Phone,Email,Interest,Property / plan,Status,Message,Note",
+      "Received (Lagos),Name,Phone,Email,Interest,Property / plan,Status,Message,Note,Source,Campaign,Landing page,Referrer",
     );
     expect(lines[1]).toBe(
-      '2026-11-13 09:05,"Ada, Okafor",2348030000000,,Buying,4-Bed Duplex,New,"\'=cmd|""/c calc""!A1\nsecond line",',
+      '2026-11-13 09:05,"Ada, Okafor",2348030000000,,Buying,4-Bed Duplex,New,"\'=cmd|""/c calc""!A1\nsecond line",,,,,',
     );
-    expect(csv).toContain("Tunde,2348030000000,,Buying,Plan: Starter,Closed,Hi,Called\r\n");
+    expect(csv).toContain("Tunde,2348030000000,,Buying,Plan: Starter,Closed,Hi,Called,,,,\r\n");
     expect(csv.endsWith("\r\n")).toBe(true);
   });
 

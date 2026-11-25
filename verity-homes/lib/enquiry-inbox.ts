@@ -93,6 +93,10 @@ export const CSV_COLUMNS = [
   "Status",
   "Message",
   "Note",
+  "Source",
+  "Campaign",
+  "Landing page",
+  "Referrer",
 ] as const;
 
 export type CsvEnquiry = {
@@ -106,6 +110,11 @@ export type CsvEnquiry = {
   status: "NEW" | "CONTACTED" | "CLOSED";
   message: string;
   note: string | null;
+  /** Unit 21: describeSource(); the raw values follow in their own columns. */
+  leadSource?: string | null;
+  utmCampaign?: string | null;
+  landingPage?: string | null;
+  referrer?: string | null;
 };
 
 const STATUS_TEXT = { NEW: "New", CONTACTED: "Contacted", CLOSED: "Closed" } as const;
@@ -125,6 +134,10 @@ export function enquiriesCsv(rows: readonly CsvEnquiry[]): string {
         STATUS_TEXT[r.status],
         r.message,
         r.note,
+        r.leadSource,
+        r.utmCampaign,
+        r.landingPage,
+        r.referrer,
       ]
         .map(csvCell)
         .join(","),

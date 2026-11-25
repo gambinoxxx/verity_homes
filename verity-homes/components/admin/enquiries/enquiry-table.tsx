@@ -7,6 +7,7 @@ import type { EnquiryList } from "@/lib/db/queries/admin-enquiries";
 import { packageName } from "@/lib/packages";
 import { plotName } from "@/lib/plots";
 import { lagosLongDate } from "@/lib/enquiry-inbox";
+import { describeSource } from "@/lib/lead-source";
 import { INTEREST_LABEL, SOURCE_LABEL, timeAgo } from "@/lib/format";
 import {
   ENQUIRY_TABS,
@@ -71,6 +72,7 @@ export function EnquiryTable({
             <th scope="col">Name</th>
             <th scope="col">Interested in</th>
             <th scope="col">About</th>
+            <th scope="col">Source</th>
             <th scope="col">Status</th>
             <th scope="col">Received</th>
           </tr>
@@ -131,6 +133,9 @@ export function EnquiryTable({
                   ) : (
                     <span className={styles.muted}>—</span>
                   )}
+                </td>
+                <td data-testid="enquiry-row-source">
+                  {describeSource(e) ?? <span className={styles.muted}>—</span>}
                 </td>
                 <td>
                   <StatusBadge status={e.status} />

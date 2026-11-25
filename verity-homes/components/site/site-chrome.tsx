@@ -1,5 +1,6 @@
 import { getSiteSettings } from "@/lib/db/queries/settings";
 import { Analytics } from "./analytics";
+import { LeadSourceCapture } from "./lead-source-capture";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { Preloader } from "./preloader";
@@ -29,6 +30,7 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       <BackToTop />
       {/* Cookie banner + GA4/Meta Pixel; nothing renders until an ID is set in the env. */}
       <Analytics />
+      <LeadSourceCapture />
     </>
   );
 }

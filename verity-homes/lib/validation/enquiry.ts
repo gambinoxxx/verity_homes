@@ -1,5 +1,6 @@
 // Shared by the enquiry form (client) and the createEnquiry server action.
 import { z } from "zod";
+import { LEAD_SOURCE_LIMITS, clipValue, type LeadSource } from "@/lib/lead-source";
 
 const MIN_FILL_MS = 3_000;
 
@@ -33,7 +34,7 @@ export const enquirySchema = z.object({
     ])
     .default("OTHER"),
   message: z.string().trim().max(2000, "Keep your message under 2000 characters").default(""),
-  source: z.enum(["HOME_PAGE", "PROPERTY_PAGE", "INVEST_PAGE", "CONTACT_PAGE"]),
+  source: z.enum(["HOME_PAGE", "PROPERTY_PAGE", "INVEST_PAGE", "CONTACT_PAGE", "LANDING_PAGE"]),
   propertyId: z.string().optional(),
   planId: z.string().optional(),
   plotId: z.string().max(40).optional(), // Unit 17b: the plot chosen on an estate page
@@ -44,6 +45,22 @@ export const enquirySchema = z.object({
   startedAt: z.coerce
     .number()
     .refine((t) => Date.now() - t >= MIN_FILL_MS, "Please take a moment before submitting"),
+  // Unit 21 step 4: where the visit came from (hidden fields). Never rejects an enquiry:
+  // anything odd is trimmed, cleaned and cut to length, or dropped.
+  ...leadSourceShape(),
 });
+
+function leadSourceShape() {
+  const field = (max: number) =>
+    z
+      .unknown()
+      .transform((v) => clipValue(v, max))
+      .optional();
+  const shape = {} as Record<keyof LeadSource, ReturnType<typeof field>>;
+  for (const [key, max] of Object.entries(LEAD_SOURCE_LIMITS) as [keyof LeadSource, number][]) {
+    shape[key] = field(max);
+  }
+  return shape;
+}
 
 export type EnquiryInput = z.infer<typeof enquirySchema>;

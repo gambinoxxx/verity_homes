@@ -17,6 +17,7 @@ const SOURCE_TEXT = {
   PROPERTY_PAGE: "property page",
   INVEST_PAGE: "invest page",
   CONTACT_PAGE: "contact page",
+  LANDING_PAGE: "landing page",
 } as const;
 
 /** Nigerian numbers are stored as 234…; show them the way she'd dial: +234 803 000 0000. */
@@ -147,6 +148,19 @@ export function EnquiryDetailPanel({
           </>
         ) : null}
         <dt>Source</dt>
+        <dd data-testid="enquiry-source">
+          {e.leadSource ?? <span className={styles.muted}>Not recorded</span>}
+          {e.leadDetails.length ? (
+            <small className={styles.sourceDetails}>
+              {e.leadDetails.map(([label, value]) => (
+                <span key={label}>
+                  {label}: {value}
+                </span>
+              ))}
+            </small>
+          ) : null}
+        </dd>
+        <dt>Form</dt>
         <dd>{SOURCE_LABEL[e.source]}</dd>
         <dt>Received</dt>
         <dd>{lagosLongDate(e.createdAt)}</dd>

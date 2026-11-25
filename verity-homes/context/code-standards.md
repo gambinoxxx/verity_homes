@@ -82,7 +82,9 @@
 - Every schema change goes through `npx prisma migrate dev --name <change>`,
   and the migration is committed.
   - Production runs `npx prisma migrate deploy`, as part of the Vercel
-    build command.
+    build command: `npm run build` calls `scripts/migrate-on-deploy.mjs`,
+    which migrates only when `VERCEL_ENV=production` (never for previews or
+    local builds) and stops the build if `DIRECT_URL` is missing.
   - `prisma db push` is never used.
 - Prisma 7 uses two connection strings:
   - `DIRECT_URL` (unpooled), in `prisma.config.ts`, for migrations

@@ -79,6 +79,7 @@ enum EnquirySource {
   PROPERTY_PAGE
   INVEST_PAGE
   CONTACT_PAGE
+  LANDING_PAGE // Unit 21: /buy-house-lagos and the other search/ad landing pages
 }
 
 enum EnquiryStatus {
@@ -345,6 +346,16 @@ model Enquiry {
   note            String?            @db.Text // private admin note
   ipHash          String? // sha256(ip + salt) for rate limiting, never the raw IP
   emailSentAt     DateTime? // null = notification email failed / pending
+  // Unit 21 step 4: first touch of the visit (lib/lead-source.ts); null on older enquiries
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmTerm         String?
+  utmContent      String?
+  gclid           String?
+  fbclid          String?
+  landingPage     String?
+  referrer        String?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 

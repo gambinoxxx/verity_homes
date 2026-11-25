@@ -6,6 +6,7 @@ import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { leadParams, track } from "@/lib/analytics";
+import { readFirstTouch } from "@/lib/lead-source";
 import { ArrowIcon } from "./icons";
 import { MarqueeEyebrow } from "./marquee-eyebrow";
 import styles from "./enquiry-form.module.css";
@@ -35,7 +36,7 @@ const FIELD_ORDER: EnquiryField[] = ["name", "phone", "email", "amount", "messag
 
 type EnquiryFormProps = {
   /** EnquirySource for lib/validation/enquiry.ts. */
-  source: "HOME_PAGE" | "PROPERTY_PAGE" | "INVEST_PAGE" | "CONTACT_PAGE";
+  source: "HOME_PAGE" | "PROPERTY_PAGE" | "INVEST_PAGE" | "CONTACT_PAGE" | "LANDING_PAGE";
   id?: string;
   /**
    * "full" (home/contact): name, phone, email, interest chips, message.
@@ -187,6 +188,8 @@ export function EnquiryForm({
         submitting.current = true;
         const data = new FormData(e.currentTarget);
         data.set("startedAt", String(startedAt.current));
+        // Unit 21: where this visit came from (lib/lead-source.ts).
+        for (const [k, v] of Object.entries(readFirstTouch())) if (v) data.set(k, v);
         if (contact) {
           const full = `${data.get("firstName") ?? ""} ${data.get("lastName") ?? ""}`.trim();
           data.set("name", full);

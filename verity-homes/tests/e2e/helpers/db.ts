@@ -77,6 +77,15 @@ export async function findEnquirySource(name: string): Promise<string | null> {
   return rows[0]?.source ?? null;
 }
 
+/** Unit 21 step 4: the lead-source columns of an enquiry. */
+export async function findEnquiryLead(name: string): Promise<Record<string, string | null> | null> {
+  const rows = (await sql()`
+    SELECT "utmSource", "utmMedium", "utmCampaign", "utmTerm", "utmContent", gclid, fbclid,
+           "landingPage", referrer
+    FROM "Enquiry" WHERE name = ${name}`) as Record<string, string | null>[];
+  return rows[0] ?? null;
+}
+
 export type PlanRow = {
   id: string;
   name: string;

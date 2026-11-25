@@ -221,7 +221,7 @@ test.describe("signed-in admin", () => {
     const csv = await res.text();
     const lines = csv.replace(/^﻿/, "").trim().split("\r\n");
     expect(lines[0]).toBe(
-      "Received (Lagos),Name,Phone,Email,Interest,Property / plan,Status,Message,Note",
+      "Received (Lagos),Name,Phone,Email,Interest,Property / plan,Status,Message,Note,Source,Campaign,Landing page,Referrer",
     );
     expect(lines).toHaveLength(3); // header + the two NEW ones (Chi is contacted)
     expect(csv).toContain(`[SAMPLE] E2E ${f.token} Ada Obi`);

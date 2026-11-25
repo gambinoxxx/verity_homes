@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import type { CsvEnquiry } from "@/lib/enquiry-inbox";
+import { describeSource, leadSourceDetails } from "@/lib/lead-source";
 import { packageName, packageSummary } from "@/lib/packages";
 import { plotName } from "@/lib/plots";
 import {
@@ -43,7 +44,21 @@ const ORDER = [
   { id: "desc" },
 ] satisfies Prisma.EnquiryOrderByWithRelationInput[];
 
+/** The Unit 21 lead-source columns. */
+const leadSelect = {
+  utmSource: true,
+  utmMedium: true,
+  utmCampaign: true,
+  utmTerm: true,
+  utmContent: true,
+  gclid: true,
+  fbclid: true,
+  landingPage: true,
+  referrer: true,
+} satisfies Prisma.EnquirySelect;
+
 const rowSelect = {
+  ...leadSelect,
   id: true,
   name: true,
   interest: true,
@@ -122,6 +137,10 @@ export type EnquiryDetail = {
   plot: { name: string; priceKobo: bigint; initialDepositKobo: bigint | null } | null;
   /** Unit 17c: the package chosen on a plan page. */
   package: { name: string; summary: string } | null;
+  /** Unit 21: "Google Ads · land-lekki"; null when not recorded. */
+  leadSource: string | null;
+  /** The raw values behind it, as [label, value] pairs. */
+  leadDetails: [string, string][];
 };
 
 export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null> {
@@ -172,6 +191,8 @@ export async function getAdminEnquiry(id: string): Promise<EnquiryDetail | null>
     package: e.package
       ? { name: packageName(e.package), summary: packageSummary(e.package) }
       : null,
+    leadSource: describeSource(e),
+    leadDetails: leadSourceDetails(e),
   };
 }
 
@@ -191,6 +212,7 @@ export async function exportAdminEnquiries(f: EnquiryFilters): Promise<CsvEnquir
       status: true,
       message: true,
       note: true,
+      ...leadSelect,
       property: { select: { title: true } },
       plan: { select: { name: true } },
       plot: { select: { label: true, sizeSqm: true } },
@@ -201,6 +223,7 @@ export async function exportAdminEnquiries(f: EnquiryFilters): Promise<CsvEnquir
   });
   return rows.map(({ property, plan, plot, package: pkg, ...r }) => ({
     ...r,
+    leadSource: describeSource(r),
     propertyTitle: property
       ? plot
         ? `${property.title} — ${plotName(plot)}`

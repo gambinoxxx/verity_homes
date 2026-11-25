@@ -73,7 +73,13 @@ export function PrivacyNotice({
           </li>
           <li>the property or investment plan you are asking about, if any;</li>
           <li>the amount you are thinking of investing, if you enter one;</li>
-          <li>whether you would like to arrange an inspection.</li>
+          <li>whether you would like to arrange an inspection;</li>
+          <li>
+            how you found us: the first page you opened on this visit and the website or ad that
+            sent you there (for example a Google search or an Instagram ad). This is kept in your
+            browser only for the visit (until you close the tab) and sent to us only with an
+            enquiry, so we know which adverts and pages work.
+          </li>
         </ul>
         <h3>When you sign up for new listings</h3>
         <p>Your email address.</p>

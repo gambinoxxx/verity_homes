@@ -147,6 +147,7 @@ export const SOURCE_LABEL = {
   PROPERTY_PAGE: "Property page",
   INVEST_PAGE: "Invest page",
   CONTACT_PAGE: "Contact page",
+  LANDING_PAGE: "Landing page",
 } as const;
 
 /**
