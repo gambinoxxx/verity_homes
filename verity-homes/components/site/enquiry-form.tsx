@@ -7,8 +7,7 @@ import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { leadParams, track } from "@/lib/analytics";
 import { readFirstTouch } from "@/lib/lead-source";
-import { HONEYPOT_LABEL, honeypotInputProps } from "@/lib/honeypot";
-import { MIN_FILL_MS } from "@/lib/validation/enquiry";
+import { HONEYPOT_LABEL, MIN_FILL_MS, honeypotInputProps } from "@/lib/honeypot";
 import { ArrowIcon } from "./icons";
 import { MarqueeEyebrow } from "./marquee-eyebrow";
 import styles from "./enquiry-form.module.css";
@@ -64,6 +63,8 @@ type EnquiryFormProps = {
   interest?: EnquiryInterest;
   /** Prefilled message. */
   defaultMessage?: string;
+  /** Heading level of the form title (default h3; h2 where it follows the page's h1). */
+  headingLevel?: 2 | 3;
   /** "card" variant: show "I'd like to book an inspection" (default true). */
   inspection?: boolean;
 };
@@ -87,7 +88,9 @@ export function EnquiryForm({
   interest,
   defaultMessage,
   inspection = true,
+  headingLevel = 3,
 }: EnquiryFormProps) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const uid = useId();
   const f = (name: string) => `${uid}-${name}`;
   const card = variant === "card";
@@ -221,7 +224,7 @@ export function EnquiryForm({
           <h2 id={f("h")}>{heading}</h2>
         </>
       ) : (
-        <h3 id={f("h")}>{heading}</h3>
+        <Heading id={f("h")}>{heading}</Heading>
       )}
       <input type="hidden" name="source" value={source} />
       {propertyId ? <input type="hidden" name="propertyId" value={propertyId} /> : null}

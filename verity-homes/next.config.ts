@@ -27,6 +27,11 @@ const codespacesOrigins =
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  // Unit 21 step 8: always put <title>/<meta> in the <head>. By default Next streams metadata
+  // into the body for pages that read the URL (here /properties, whose title and canonical
+  // follow the filters); Lighthouse and some crawlers then miss the description. /properties'
+  // metadata only parses the query string, so waiting for it costs nothing.
+  htmlLimitedBots: /.*/,
   ...(codespacesOrigins
     ? { experimental: { serverActions: { allowedOrigins: codespacesOrigins } } }
     : {}),

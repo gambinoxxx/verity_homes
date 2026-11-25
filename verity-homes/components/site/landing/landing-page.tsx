@@ -101,6 +101,7 @@ export async function LandingPageView({ page }: { page: LandingPage }) {
               interest={page.interest}
               defaultMessage={page.formMessage}
               inspection={page.interest !== "INVESTING" && page.interest !== "MANAGEMENT"}
+              headingLevel={2}
             />
           </div>
         }

@@ -177,6 +177,7 @@ fieldset.fg {
   display: flex;
   flex-direction: column;
 }
+.card h2,
 .card h3 {
   margin: 0 0 16px;
   font-size: 18px;

@@ -21,3 +21,10 @@ export const honeypotInputProps = {
 
 /** The label text: meaningless to autofill heuristics, clear to a screen-reader user who lands on it. */
 export const HONEYPOT_LABEL = "Leave this field empty";
+
+/**
+ * Minimum time between the form appearing and sending (anti-bot), checked by the enquiry
+ * schema; the form waits it out for a complete form. Kept here, not in lib/validation, so the
+ * browser bundle doesn't pull in Zod just for this number.
+ */
+export const MIN_FILL_MS = 3_000;

@@ -13,30 +13,35 @@ const SERVICES = [
   {
     title: "Property sales",
     href: "/buy-house-lagos",
+    linkText: "Buy a house in Lagos",
     text: "Homes for sale with support through inspection, documentation and handover.",
     img: "/samples/dusk.jpg",
   },
   {
     title: "Rentals",
     href: "/rent-apartment-lagos",
+    linkText: "Apartments for rent in Lagos",
     text: "Residential and commercial lettings with clear terms for landlords and tenants.",
     img: "/samples/tower.jpg",
   },
   {
     title: "Land",
     href: "/land-for-sale-lagos",
+    linkText: "Land for sale in Lagos",
     text: "Plots for homes and investment, with title documents reviewed before you commit.",
     img: "/samples/aerial.jpg",
   },
   {
     title: "Property management",
     href: "/property-management-lagos",
+    linkText: "Property management in Lagos",
     text: "Rent collection, maintenance and tenant care, so your property runs smoothly.",
     img: "/samples/villa.jpg",
   },
   {
     title: "Development",
     href: null,
+    linkText: null,
     text: "Planning and delivering new residential projects with trusted partners.",
     img: "/samples/building.jpg",
   },
@@ -115,7 +120,7 @@ export function Services() {
                     {/* Unit 21: each service links to its landing page. */}
                     {s.href ? (
                       <Link className={styles.more} href={s.href} tabIndex={on ? undefined : -1}>
-                        Learn more
+                        {s.linkText}
                         <ArrowIcon />
                       </Link>
                     ) : null}

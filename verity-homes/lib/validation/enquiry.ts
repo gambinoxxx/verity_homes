@@ -1,10 +1,9 @@
 // Shared by the enquiry form (client) and the createEnquiry server action.
 import { z } from "zod";
-import { HONEYPOT_FIELD } from "@/lib/honeypot";
+import { HONEYPOT_FIELD, MIN_FILL_MS } from "@/lib/honeypot";
 import { LEAD_SOURCE_LIMITS, clipValue, type LeadSource } from "@/lib/lead-source";
 
-/** Minimum time between the form appearing and sending (anti-bot). The form waits it out. */
-export const MIN_FILL_MS = 3_000;
+export { MIN_FILL_MS };
 
 export const enquirySchema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(100),

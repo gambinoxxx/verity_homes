@@ -80,7 +80,7 @@
   font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent-text);
+  color: var(--text-primary); /* gold on cream was 4.39:1 */
 }
 .guides a {
   display: inline-flex;
