@@ -1,4 +1,5 @@
 // Pure sitemap/robots helpers (Unit 20), unit-tested in tests/unit/seo.test.ts.
+import { LANDING_PATHS } from "./landing-pages";
 
 /** Public pages that always exist. Detail pages come from the database. */
 export const STATIC_SITEMAP_PATHS = [
@@ -9,7 +10,9 @@ export const STATIC_SITEMAP_PATHS = [
   "/blog",
   "/contact",
   "/privacy",
-] as const;
+  // Unit 21 step 6b: the SEO / ad landing pages
+  ...LANDING_PATHS,
+];
 
 export type SitemapEntry = { url: string; lastModified?: Date };
 

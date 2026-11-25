@@ -209,3 +209,26 @@
     font-size: 20px;
   }
 }
+
+/* Unit 21: links from a guide to the matching landing pages ("Land for Sale in Lagos →") */
+.landingLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 36px;
+}
+.landingLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--bg-cream);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 14.5px;
+  text-decoration: none;
+}
+.landingLinks a:hover {
+  background: var(--accent-soft);
+}

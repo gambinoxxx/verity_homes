@@ -2,6 +2,8 @@ import { questionMessage } from "@/lib/whatsapp";
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { landingPagesForPost } from "@/lib/landing-pages";
 import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -123,6 +125,15 @@ async function PostContent({ params }: { params: PageProps<"/blog/[slug]">["para
           ) : null}
           <article className={styles.article}>
             <Markdown source={post.content} siteUrl={SITE} className={`prose ${styles.body}`} />
+            {landingPagesForPost(post.slug).length ? (
+              <nav className={styles.landingLinks} aria-label="Related pages">
+                {landingPagesForPost(post.slug).map((l) => (
+                  <Link key={l.path} href={l.path} prefetch={false}>
+                    {l.phrase} →
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
             <PostShare title={post.title} url={url} />
             <AuthorBox name={post.authorName} ceoBio={settings.ceoBio} siteUrl={SITE} />
             <HelpCta

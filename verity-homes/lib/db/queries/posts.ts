@@ -120,6 +120,21 @@ export async function getPublishedPostSlugs(): Promise<string[]> {
   return rows.map((r) => r.slug);
 }
 
+/** Titles of the given posts that are published, in the order asked. Cached (tag "posts"). */
+export async function getPublishedPostLinks(
+  slugs: string[],
+): Promise<{ slug: string; title: string }[]> {
+  "use cache";
+  cacheTag(POSTS_TAG);
+  cacheLife("max");
+  if (slugs.length === 0) return [];
+  const rows = await db.post.findMany({
+    where: { ...PUBLISHED, slug: { in: slugs } },
+    select: { slug: true, title: true },
+  });
+  return slugs.flatMap((s) => rows.filter((r) => r.slug === s));
+}
+
 /** Published post by slug, or null (drafts and unknown slugs). Cached (tag "posts"). */
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   "use cache";

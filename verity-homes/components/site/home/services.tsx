@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useId, useState } from "react";
 import { ArrowIcon } from "../icons";
 import { Reveal } from "../reveal";
@@ -11,26 +12,31 @@ import styles from "./services.module.css";
 const SERVICES = [
   {
     title: "Property sales",
+    href: "/buy-house-lagos",
     text: "Homes for sale with support through inspection, documentation and handover.",
     img: "/samples/dusk.jpg",
   },
   {
     title: "Rentals",
+    href: "/rent-apartment-lagos",
     text: "Residential and commercial lettings with clear terms for landlords and tenants.",
     img: "/samples/tower.jpg",
   },
   {
     title: "Land",
+    href: "/land-for-sale-lagos",
     text: "Plots for homes and investment, with title documents reviewed before you commit.",
     img: "/samples/aerial.jpg",
   },
   {
     title: "Property management",
+    href: "/property-management-lagos",
     text: "Rent collection, maintenance and tenant care, so your property runs smoothly.",
     img: "/samples/villa.jpg",
   },
   {
     title: "Development",
+    href: null,
     text: "Planning and delivering new residential projects with trusted partners.",
     img: "/samples/building.jpg",
   },
@@ -106,6 +112,13 @@ export function Services() {
                     className={styles.panel}
                   >
                     <p>{s.text}</p>
+                    {/* Unit 21: each service links to its landing page. */}
+                    {s.href ? (
+                      <Link className={styles.more} href={s.href} tabIndex={on ? undefined : -1}>
+                        Learn more
+                        <ArrowIcon />
+                      </Link>
+                    ) : null}
                   </div>
                 </Reveal>
               );

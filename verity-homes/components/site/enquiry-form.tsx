@@ -62,6 +62,8 @@ type EnquiryFormProps = {
   interest?: EnquiryInterest;
   /** Prefilled message. */
   defaultMessage?: string;
+  /** "card" variant: show "I'd like to book an inspection" (default true). */
+  inspection?: boolean;
 };
 
 /**
@@ -82,6 +84,7 @@ export function EnquiryForm({
   plans = [],
   interest,
   defaultMessage,
+  inspection = true,
 }: EnquiryFormProps) {
   const uid = useId();
   const f = (name: string) => `${uid}-${name}`;
@@ -339,10 +342,12 @@ export function EnquiryForm({
             <textarea {...field("message")} rows={3} defaultValue={defaultMessage} />
             {errorText("message")}
           </div>
-          <label className={styles.check}>
-            <input type="checkbox" name="wantsInspection" value="true" defaultChecked />
-            I&apos;d like to book an inspection
-          </label>
+          {inspection ? (
+            <label className={styles.check}>
+              <input type="checkbox" name="wantsInspection" value="true" defaultChecked />
+              I&apos;d like to book an inspection
+            </label>
+          ) : null}
         </>
       ) : (
         <>

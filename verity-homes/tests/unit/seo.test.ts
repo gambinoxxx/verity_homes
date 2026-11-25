@@ -129,6 +129,11 @@ describe("sitemap and robots", () => {
       "/blog",
       "/contact",
       "/privacy",
+      "/buy-house-lagos",
+      "/land-for-sale-lagos",
+      "/property-investment-lagos",
+      "/rent-apartment-lagos",
+      "/property-management-lagos",
     ]);
   });
 

@@ -210,6 +210,25 @@ export async function getFeaturedProperties(limit = 6): Promise<PropertyCard[]> 
   return rows.map(toCard);
 }
 
+/**
+ * Newest published listings of the given types (the SEO / ad landing pages, Unit 21) and how
+ * many there are in total. Cached (tag "properties").
+ */
+export async function getListingsByType(
+  types: ListingType[],
+  limit = 6,
+): Promise<{ items: PropertyCard[]; total: number }> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const where = { ...PUBLISHED, listingType: { in: types } };
+  const [rows, total] = await Promise.all([
+    db.property.findMany({ where, orderBy: newestFirst, take: limit, select: cardSelect }),
+    db.property.count({ where }),
+  ]);
+  return { items: rows.map(toCard), total };
+}
+
 /** Home "Signature projects" showcase. Cached until a property changes (tag "properties"). */
 export async function getShowcaseProperties(limit = 4): Promise<PropertyCard[]> {
   "use cache";

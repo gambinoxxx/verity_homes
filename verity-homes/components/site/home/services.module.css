@@ -140,3 +140,22 @@
     order: -1;
   }
 }
+
+/* Unit 21: "Learn more" → the service's landing page */
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+.more svg {
+  width: 16px;
+  height: 16px;
+}
+.more:hover {
+  text-decoration: underline;
+}

@@ -6,6 +6,7 @@ import type { SiteSettingsView } from "@/lib/db/queries/settings";
 import { Brand } from "./brand";
 import { NewsletterForm } from "./newsletter-form";
 import { CookieSettingsButton } from "./analytics";
+import { LANDING_LINKS } from "@/lib/landing-pages";
 import styles from "./footer.module.css";
 
 type FooterProps = { settings: SiteSettingsView };
@@ -138,6 +139,19 @@ export async function Footer({ settings }: FooterProps) {
             ) : null}
           </div>
         </div>
+        {/* Unit 21: links to the SEO / ad landing pages */}
+        <nav className={styles.popular} aria-label="Popular searches">
+          <h2>Popular searches</h2>
+          <ul>
+            {LANDING_LINKS.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} prefetch={false}>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <div className={styles.bottom}>
           <span>
             © {year} {settings.companyName}. All rights reserved.

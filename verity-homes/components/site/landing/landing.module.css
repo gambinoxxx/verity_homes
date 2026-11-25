@@ -1,0 +1,165 @@
+/* SEO / ad landing pages (Unit 21 step 6b). No design file: built from the site's existing
+   pieces (split page hero, .sheet, .prose, property grid, invest FAQ, contact-box navy band). */
+
+/* Hero: buttons under the intro, the enquiry form in a white card beside the title */
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+.ctas :global(.btn) svg {
+  width: 18px;
+  height: 18px;
+}
+.wa {
+  background: var(--whatsapp-button);
+  color: var(--text-on-navy);
+}
+.wa:hover {
+  background: var(--whatsapp-button-hover);
+}
+.formCard {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  border-radius: 24px;
+  padding: 26px 24px 22px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.28);
+}
+
+/* "Why Verity" */
+.why {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 2fr);
+  gap: 24px 56px;
+  align-items: start;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--border-default);
+}
+.why ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.why li {
+  background: var(--bg-subtle);
+  border-radius: 20px;
+  padding: 24px;
+}
+.why h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+}
+.why p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Guide copy */
+.copy {
+  max-width: 780px;
+  margin: 56px auto 0;
+}
+.guides {
+  margin-top: 40px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: var(--bg-cream);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.guides b {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.guides a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.guides a svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+/* Listings */
+.listings {
+  background: var(--bg-subtle);
+}
+.listings :global(.link-arrow) {
+  flex: none;
+  white-space: nowrap;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+/* Closing call to action (navy band, contact-box language) */
+.ctaBox {
+  background: var(--bg-navy);
+  color: var(--text-on-navy);
+  border-radius: 32px;
+  padding: 56px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px 48px;
+  align-items: center;
+}
+.ctaBox .ctas {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+.ctaBox :global(.lead) {
+  margin-top: 14px;
+  max-width: 560px;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ctaBox {
+    grid-template-columns: 1fr;
+  }
+  .ctaBox .ctas {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 900px) {
+  .why {
+    grid-template-columns: 1fr;
+  }
+  .why ul {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .ctaBox {
+    padding: 36px 22px;
+    border-radius: 24px;
+  }
+  .ctas :global(.btn) {
+    flex: 1 1 100%;
+  }
+  .formCard {
+    padding: 22px 18px 18px;
+  }
+}

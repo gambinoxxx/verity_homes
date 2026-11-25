@@ -31,6 +31,8 @@ type PageHeroProps = {
   overlap?: boolean;
   /** "split": the right-hand column. */
   aside?: React.ReactNode;
+  /** "split": shown under the subtitle (the landing pages' WhatsApp / call buttons). */
+  after?: React.ReactNode;
 };
 
 function Crumbs({ crumbs }: { crumbs: readonly Crumb[] }) {
@@ -66,6 +68,7 @@ export function PageHero({
   kicker,
   details,
   aside,
+  after,
   overlap = false,
 }: PageHeroProps) {
   const post = variant === "post";
@@ -88,6 +91,7 @@ export function PageHero({
             </h1>
             {details}
             {sub ? <p className={styles.sub}>{sub}</p> : null}
+            {after}
           </div>
           {aside ? <div className={styles.splitAside}>{aside}</div> : null}
         </div>
