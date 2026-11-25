@@ -6,6 +6,8 @@ import { InvestDisclaimer, PlanGrid } from "./plans";
 
 /** "Choose your plan": published plans, highlighted one gold, disclaimer directly under them. */
 export function PlansSection({ plans }: { plans: PlanView[] }) {
+  // No published plans (e.g. before the legal review, open question 54): no empty section.
+  if (plans.length === 0) return null;
   return (
     <section className={`sec ${styles.plansSection} on-navy`} aria-labelledby="plans-h">
       <div className="container">

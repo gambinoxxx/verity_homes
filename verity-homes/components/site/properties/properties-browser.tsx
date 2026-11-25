@@ -1,5 +1,6 @@
 import { getPublishedAreas, listProperties } from "@/lib/db/queries/properties";
 import { parsePropertyFilters, type SearchParamsInput } from "@/lib/validation/property-filters";
+import { ComingSoon } from "../coming-soon";
 import { FilterNavProvider } from "./filter-nav";
 import { FilterSidebar } from "./filter-sidebar";
 import { ListingPills } from "./listing-pills";
@@ -18,6 +19,10 @@ export async function PropertiesBrowser({
 }) {
   const filters = parsePropertyFilters(await searchParams);
   const [result, areas] = await Promise.all([listProperties(filters), getPublishedAreas()]);
+  // Nothing published at all (an unfiltered search found nothing): no pills, filters or
+  // "Showing 0" — just "New listings coming soon". A filtered search keeps its own empty state.
+  const filtered = Object.entries(filters).some(([k, v]) => k !== "page" && v !== undefined);
+  if (result.total === 0 && !filtered) return <ComingSoon path="/properties" />;
   return (
     <FilterNavProvider>
       <ListingPills filters={filters} />

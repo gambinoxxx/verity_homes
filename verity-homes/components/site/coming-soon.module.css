@@ -1,0 +1,29 @@
+/* "New listings coming soon" — shown where a list would be empty (Unit 21). Same card language
+   as the /properties empty state. */
+.card {
+  text-align: center;
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle, rgba(10, 26, 51, 0.08));
+  border-radius: 20px;
+  padding: 48px 24px;
+}
+.card h2,
+.card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.card p {
+  margin: 10px auto 24px;
+  max-width: 440px;
+  color: var(--text-muted);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}

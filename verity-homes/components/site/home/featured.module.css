@@ -63,3 +63,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Unit 21: heading spacing above the "coming soon" card when there are no listings yet. */
+.emptyHead {
+  margin-bottom: 32px;
+}
