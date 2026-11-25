@@ -1,6 +1,7 @@
 import { interestMessage } from "@/lib/whatsapp";
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
+import { TrackView } from "@/components/site/track-view";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -79,6 +80,7 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
 
   return (
     <>
+      <TrackView event="view_plan" params={{ plan_slug: plan.slug, item_name: plan.name }} />
       <PageHero
         variant="split"
         title={plan.name}

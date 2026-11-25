@@ -5,6 +5,7 @@ import { prefetchFor } from "@/lib/nav";
 import type { SiteSettingsView } from "@/lib/db/queries/settings";
 import { Brand } from "./brand";
 import { NewsletterForm } from "./newsletter-form";
+import { CookieSettingsButton } from "./analytics";
 import styles from "./footer.module.css";
 
 type FooterProps = { settings: SiteSettingsView };
@@ -142,6 +143,7 @@ export async function Footer({ settings }: FooterProps) {
             © {year} {settings.companyName}. All rights reserved.
           </span>
           <span>RC {settings.rcNumber}</span>
+          <CookieSettingsButton className={styles.cookieBtn} />
         </div>
       </div>
     </footer>

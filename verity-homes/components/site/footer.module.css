@@ -148,3 +148,17 @@
     padding-bottom: 110px;
   }
 }
+
+/* "Cookie settings" (Unit 21): reopens the cookie banner; only when analytics is configured. */
+.cookieBtn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cookieBtn:hover {
+  color: var(--text-on-navy);
+}

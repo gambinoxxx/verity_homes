@@ -4,10 +4,11 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { prefetchFor } from "@/lib/nav";
+import { CookieSettingsButton } from "../analytics";
 import styles from "./privacy.module.css";
 
 /** Change this whenever the notice text changes. */
-export const PRIVACY_LAST_UPDATED = new Date("2026-11-12T12:00:00+01:00");
+export const PRIVACY_LAST_UPDATED = new Date("2026-11-25T12:00:00+01:00");
 
 export type PrivacyNoticeProps = {
   companyName: string;
@@ -46,7 +47,7 @@ export function PrivacyNotice({
       )}
       <div className="prose">
         <p className={styles.updated}>
-          Last updated: <time dateTime="2026-11-12">{formatDate(PRIVACY_LAST_UPDATED)}</time>
+          Last updated: <time dateTime="2026-11-25">{formatDate(PRIVACY_LAST_UPDATED)}</time>
         </p>
 
         <p>
@@ -91,9 +92,46 @@ export function PrivacyNotice({
         <h3>Technical information</h3>
         <p>
           Like any website, our hosting provider handles technical information such as your IP
-          address and browser type in order to deliver the pages to you. This website does not use
-          advertising or analytics cookies. Pages with a map load it from Google Maps, and Google
-          may set its own cookies when the map loads.
+          address and browser type in order to deliver the pages to you. Pages with a map load it
+          from Google Maps, and Google may set its own cookies when the map loads.
+        </p>
+
+        {/* DRAFT (Unit 21 step 2) — owner/legal to review with the rest of this notice. */}
+        <h2 id="cookies">Cookies and analytics</h2>
+        <p>
+          The first time you visit, a banner asks whether we may use cookies to understand which
+          pages and ads help people find us. Nothing for analytics or advertising loads unless you
+          click <strong>Accept</strong>. If you click <strong>Decline</strong>, or ignore the
+          banner, those tools stay off.
+        </p>
+        <p>If you accept, we may use:</p>
+        <ul>
+          <li>
+            <strong>Google Analytics</strong> (Google) — counts visits and shows which pages,
+            searches and ads bring people to the site, and which buttons they tap (for example
+            &ldquo;WhatsApp&rdquo; or &ldquo;Send enquiry&rdquo;);
+          </li>
+          <li>
+            <strong>Meta Pixel</strong> (Meta, for Facebook and Instagram ads) — tells us whether
+            our ads led to an enquiry.
+          </li>
+        </ul>
+        <p>
+          These tools receive technical details such as your device, browser, approximate location
+          and the pages you visit. They do not receive the name, phone number, email or message you
+          type into our forms. This is based on your consent, which you can change at any time.{" "}
+          <Placeholder>
+            which of these tools are switched on, and for how long their cookies last — owner to
+            confirm
+          </Placeholder>
+        </p>
+        <p>
+          We remember your choice in your browser&apos;s storage on your device. To change it, use
+          the &ldquo;Cookie settings&rdquo; link at the bottom of every page or the button below, or
+          clear this site&apos;s data in your browser.
+        </p>
+        <p>
+          <CookieSettingsButton className="btn btn-outline-dark" />
         </p>
 
         <h2>Why we use it</h2>
@@ -108,6 +146,10 @@ export function PrivacyNotice({
             withdraw at any time.
           </li>
           <li>To protect our forms from spam and abuse — our legitimate interest.</li>
+          <li>
+            To measure which pages and ads help people find us — only with your consent (the cookie
+            banner).
+          </li>
         </ul>
         <p>We do not sell your personal information.</p>
 
@@ -126,6 +168,10 @@ export function PrivacyNotice({
           </li>
           <li>
             <strong>Google Maps</strong> — the maps shown on property and contact pages.
+          </li>
+          <li>
+            <strong>Google Analytics and Meta</strong> — only if you accept cookies (see
+            &ldquo;Cookies and analytics&rdquo; above).
           </li>
         </ul>
         <p>

@@ -2,6 +2,7 @@
 
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import { subscribe, type SubscribeState } from "@/lib/actions/subscribe";
+import { track } from "@/lib/analytics";
 import styles from "./footer.module.css";
 
 /** Footer email capture (design/index.html), saved by the subscribe server action. */
@@ -10,8 +11,10 @@ export function NewsletterForm() {
   const [state, formAction, pending] = useActionState<SubscribeState, FormData>(subscribe, null);
 
   useEffect(() => {
-    if (state?.ok) formRef.current?.reset();
-    else if (state && !state.ok) formRef.current?.querySelector<HTMLInputElement>("#nl")?.focus();
+    if (state?.ok) {
+      formRef.current?.reset();
+      track("newsletter_signup", { page_path: window.location.pathname });
+    } else if (state && !state.ok) formRef.current?.querySelector<HTMLInputElement>("#nl")?.focus();
   }, [state]);
 
   const error = state && !state.ok ? state.error : undefined;

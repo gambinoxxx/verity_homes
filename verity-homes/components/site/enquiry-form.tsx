@@ -5,6 +5,7 @@ import { onPlanSelected } from "@/lib/invest-plan-select";
 import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
+import { leadParams, track } from "@/lib/analytics";
 import { ArrowIcon } from "./icons";
 import { MarqueeEyebrow } from "./marquee-eyebrow";
 import styles from "./enquiry-form.module.css";
@@ -140,6 +141,7 @@ export function EnquiryForm({
     const form = formRef.current;
     if (!state || !form) return;
     if (state.ok) {
+      track("generate_lead", leadParams(source, window.location.pathname));
       form.reset();
       startedAt.current = Date.now();
       return;

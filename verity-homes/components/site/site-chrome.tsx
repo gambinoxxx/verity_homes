@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/lib/db/queries/settings";
+import { Analytics } from "./analytics";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { Preloader } from "./preloader";
@@ -26,6 +27,8 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       <Footer settings={settings} />
       <WhatsAppFloat number={settings.whatsapp} />
       <BackToTop />
+      {/* Cookie banner + GA4/Meta Pixel; nothing renders until an ID is set in the env. */}
+      <Analytics />
     </>
   );
 }

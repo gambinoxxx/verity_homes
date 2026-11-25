@@ -10,6 +10,7 @@ import type { PackageView } from "@/lib/db/queries/invest";
 import { formatNaira, nairaInputFromKobo } from "@/lib/format";
 import { annualisedPercent, formatPercent, packageGainKobo } from "@/lib/invest";
 import { selectPackage } from "@/lib/package-select";
+import { pageSlugs, track } from "@/lib/analytics";
 import { packageEnquiryMessage, packageName, packageWhatsappMessage } from "@/lib/packages";
 import { useHydrated } from "@/lib/use-hydrated";
 import styles from "./plan-page.module.css";
@@ -30,6 +31,12 @@ export function PackageOptions({ planId, planName, url, packages }: Props) {
       amount: nairaInputFromKobo(BigInt(p.amountKobo)),
       message: packageEnquiryMessage(p, planName),
       whatsappText: packageWhatsappMessage(p, planName, url),
+    });
+    track("plan_package_select", {
+      ...pageSlugs(window.location.pathname),
+      package_name: packageName(p),
+      value: Number(BigInt(p.amountKobo) / 100n),
+      currency: "NGN",
     });
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.getElementById("start")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
