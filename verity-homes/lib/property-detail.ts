@@ -1,6 +1,7 @@
 // Pure helpers for the property detail page (/properties/[slug]): facts strip, description
 // paragraphs, enquiry interest, WhatsApp text, meta description and JSON-LD.
 // Privacy: nothing here accepts or emits the private `address` — location is area + city only.
+import { interestMessage } from "@/lib/whatsapp";
 import type { PropertyDetail } from "@/lib/db/queries/properties";
 import { LISTING_LABEL, TITLE_LABEL, formatMonthYear } from "@/lib/format";
 
@@ -58,8 +59,7 @@ export function enquiryInterest(
   return "BUYING";
 }
 
-export const propertyWhatsappMessage = (title: string, url: string) =>
-  `Hi Verity, I'm interested in ${title} (${url})`;
+export const propertyWhatsappMessage = (title: string, url: string) => interestMessage(title, url);
 
 /** Absolute URL for a path or URL, against the public site URL. */
 export const absoluteUrl = (pathOrUrl: string, siteUrl: string) =>

@@ -49,7 +49,13 @@ export function PlotAwareWhatsApp({
       </a>
     );
   return (
-    <a className={className} href={href} target="_blank" rel="noopener noreferrer">
+    <a
+      className={className}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-contact="whatsapp"
+    >
       {children}
     </a>
   );

@@ -47,10 +47,16 @@ test("email, call and WhatsApp buttons use the settings values", async ({ page }
   );
   // The card's button (exact name), not the header's "WhatsApp us" or the round float.
   const wa = page.getByRole("link", { name: "WhatsApp", exact: true });
+  // The pre-filled message names this page (Unit 21 step 7), rebuilt after hydration.
   await expect(wa).toHaveAttribute(
     "href",
-    `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent("Hi Verity, I'd like to make an enquiry")}`,
+    new RegExp(`^https://wa\\.me/${settings.whatsapp}\\?text=`),
   );
+  await expect
+    .poll(async () => decodeURIComponent((await wa.getAttribute("href")) ?? ""))
+    .toMatch(
+      /^.*Hello Verity, I have a question about "Contact us" \(https?:\/\/[^)]+\/contact\)$/,
+    );
   // The header button goes straight to WhatsApp when a number is set. (CSS locator: on mobile
   // the button is hidden by design, which getByRole would skip.)
   await expect(page.locator("header a", { hasText: "WhatsApp us" })).toHaveAttribute(

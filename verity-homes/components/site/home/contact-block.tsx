@@ -1,12 +1,11 @@
 import { getSiteSettings } from "@/lib/db/queries/settings";
-import { whatsappLink } from "@/lib/whatsapp";
+import { telHref } from "@/lib/contact-links";
+import { PageWhatsAppLink } from "../page-whatsapp-link";
 import { EnquiryForm } from "../enquiry-form";
 import { MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "../icons";
 import { MarqueeEyebrow } from "../marquee-eyebrow";
 import { Reveal } from "../reveal";
 import styles from "./contact-block.module.css";
-
-const WHATSAPP_MESSAGE = "Hello Verity Homes and Properties, I would like to make an enquiry.";
 
 /**
  * "Ready to buy, rent or invest?": contact details from site settings (placeholders while
@@ -15,7 +14,6 @@ const WHATSAPP_MESSAGE = "Hello Verity Homes and Properties, I would like to mak
  */
 export async function ContactBlock() {
   const settings = await getSiteSettings();
-  const wa = whatsappLink(settings.whatsapp, WHATSAPP_MESSAGE);
   const { phone, email } = settings;
 
   return (
@@ -31,14 +29,14 @@ export async function ContactBlock() {
               Send a message or chat with us directly on WhatsApp. We&apos;ll get back to you as
               soon as we can.
             </p>
-            <a
+            <PageWhatsAppLink
+              number={settings.whatsapp}
               className={`btn btn-gold ${styles.wa}`}
-              href={wa ?? "#enquiry"}
-              {...(wa ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              fallbackHref="#enquiry"
             >
               <WhatsAppIcon />
               Chat on WhatsApp
-            </a>
+            </PageWhatsAppLink>
             <ul className={styles.list}>
               <li>
                 <span className={styles.ci}>
@@ -47,7 +45,9 @@ export async function ContactBlock() {
                 <span>
                   <small>Phone / WhatsApp</small>
                   {phone ? (
-                    <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>{phone}</a>
+                    <a href={telHref(phone)} data-contact="phone">
+                      {phone}
+                    </a>
                   ) : (
                     <span className="ph">Phone number</span>
                   )}
@@ -60,7 +60,9 @@ export async function ContactBlock() {
                 <span>
                   <small>Email</small>
                   {email ? (
-                    <a href={`mailto:${email}`}>{email}</a>
+                    <a href={`mailto:${email}`} data-contact="email">
+                      {email}
+                    </a>
                   ) : (
                     <span className="ph">Email address</span>
                   )}

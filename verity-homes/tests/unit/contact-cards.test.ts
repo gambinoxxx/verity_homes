@@ -44,9 +44,14 @@ describe("ContactCards", () => {
     });
     expect(html).toContain('href="mailto:hello@example.com"');
     expect(html).toContain('href="tel:+2348030000000"');
+    // Tagged for the analytics click events (Unit 21 step 3).
+    expect(html).toContain('data-contact="phone"');
+    expect(html).toContain('data-contact="email"');
+    expect(html).toContain('data-contact="whatsapp"');
     expect(html).toContain(
       `href="https://wa.me/2348030000000?text=${encodeURIComponent(
-        "Hi Verity, I'd like to make an enquiry",
+        // Server-rendered text; in the browser it is rebuilt to name the page (PageWhatsAppLink).
+        "Hello Verity, I'd like to make an enquiry",
       ).replace(/'/g, "&#x27;")}"`,
     );
   });

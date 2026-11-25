@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/db/queries/settings";
 import { env } from "@/lib/env";
-import { whatsappLink } from "@/lib/whatsapp";
+import { questionMessage, whatsappLink } from "@/lib/whatsapp";
 import styles from "./coming-soon.module.css";
 
 type Props = {
@@ -19,10 +19,7 @@ type Props = {
 export async function ComingSoon({ path, headingLevel = 2 }: Props) {
   const { whatsapp } = await getSiteSettings();
   const url = new URL(path, env.NEXT_PUBLIC_SITE_URL).toString();
-  const wa = whatsappLink(
-    whatsapp,
-    `Hello Verity, I'm looking for a property. Please tell me about new listings (${url})`,
-  );
+  const wa = whatsappLink(whatsapp, questionMessage("new listings", url));
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <div className={styles.card} data-testid="coming-soon">
@@ -33,7 +30,13 @@ export async function ComingSoon({ path, headingLevel = 2 }: Props) {
       </p>
       <div className={styles.actions}>
         {wa ? (
-          <a className="btn btn-gold" href={wa} target="_blank" rel="noopener noreferrer">
+          <a
+            className="btn btn-gold"
+            href={wa}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-contact="whatsapp"
+          >
             WhatsApp us
           </a>
         ) : null}

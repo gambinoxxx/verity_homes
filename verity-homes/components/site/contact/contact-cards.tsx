@@ -1,10 +1,9 @@
 import { mapsLink } from "@/lib/maps";
-import { whatsappLink } from "@/lib/whatsapp";
+import { telHref } from "@/lib/contact-links";
+import { PageWhatsAppLink } from "../page-whatsapp-link";
 import { MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "../icons";
 import { Reveal } from "../reveal";
 import styles from "./contact.module.css";
-
-export const CONTACT_WHATSAPP_MESSAGE = "Hi Verity, I'd like to make an enquiry";
 
 export type ContactDetails = {
   email: string | null;
@@ -15,12 +14,7 @@ export type ContactDetails = {
   mapQuery: string;
 };
 
-/** "0803 000 0000" / "+234 803…" → "+2348030000000" for tel: links. */
-export function telHref(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  const intl = digits.startsWith("0") && digits.length === 11 ? `234${digits.slice(1)}` : digits;
-  return `tel:+${intl}`;
-}
+export { telHref };
 
 /**
  * The three contact cards (design `.c-cards`). Every value comes from site settings; a missing
@@ -28,7 +22,7 @@ export function telHref(phone: string): string {
  */
 export function ContactCards({ details }: { details: ContactDetails }) {
   const { email, phone, whatsapp, officeDisplay, mapQuery } = details;
-  const wa = whatsappLink(whatsapp, CONTACT_WHATSAPP_MESSAGE);
+  const wa = Boolean(whatsapp?.replace(/\D/g, ""));
   return (
     <div className={styles.cards}>
       <Reveal className={styles.card}>
@@ -38,7 +32,7 @@ export function ContactCards({ details }: { details: ContactDetails }) {
         <h2>Email us</h2>
         <p>
           {email ? (
-            <a className={styles.value} href={`mailto:${email}`}>
+            <a className={styles.value} href={`mailto:${email}`} data-contact="email">
               {email}
             </a>
           ) : (
@@ -46,7 +40,7 @@ export function ContactCards({ details }: { details: ContactDetails }) {
           )}
         </p>
         {email ? (
-          <a className="btn btn-navy" href={`mailto:${email}`}>
+          <a className="btn btn-navy" href={`mailto:${email}`} data-contact="email">
             Send an email
           </a>
         ) : null}
@@ -61,15 +55,15 @@ export function ContactCards({ details }: { details: ContactDetails }) {
         {phone || wa ? (
           <div className={styles.actions}>
             {phone ? (
-              <a className="btn btn-navy" href={telHref(phone)}>
+              <a className="btn btn-navy" href={telHref(phone)} data-contact="phone">
                 Call us
               </a>
             ) : null}
             {wa ? (
-              <a className={`btn ${styles.wa}`} href={wa} target="_blank" rel="noopener noreferrer">
+              <PageWhatsAppLink number={whatsapp} className={`btn ${styles.wa}`}>
                 <WhatsAppIcon />
                 WhatsApp
-              </a>
+              </PageWhatsAppLink>
             ) : null}
           </div>
         ) : null}

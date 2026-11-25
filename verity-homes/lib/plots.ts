@@ -51,7 +51,7 @@ export function plotEnquiryMessage(title: string, p: PlotLike): string {
 
 /** WhatsApp text when a plot is picked (same style as propertyWhatsappMessage). */
 export function plotWhatsappMessage(title: string, p: PlotLike, url: string): string {
-  return `Hi Verity, I'm interested in the ${plotName(p)} at ${title}, ${formatNaira(BigInt(p.priceKobo))} (${url})`;
+  return `Hello Verity, I'm interested in the ${plotName(p)} at ${title}, ${formatNaira(BigInt(p.priceKobo))} (${url})`;
 }
 
 /** The offer note shows until offerEndsAt (no end date → always). */

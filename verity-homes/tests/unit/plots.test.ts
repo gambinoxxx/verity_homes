@@ -97,7 +97,7 @@ describe("plot labels and texts", () => {
       "I'm interested in the 500 sqm plot at Palm Estate (₦30,000,000). Please contact me.",
     );
     expect(plotWhatsappMessage("Palm Estate", estate[1]!, "https://x/p")).toBe(
-      "Hi Verity, I'm interested in the 500 sqm plot at Palm Estate, ₦30,000,000 (https://x/p)",
+      "Hello Verity, I'm interested in the 500 sqm plot at Palm Estate, ₦30,000,000 (https://x/p)",
     );
   });
   it("the offer shows until offerEndsAt", () => {

@@ -5,17 +5,18 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Brand } from "./brand";
 import { prefetchFor } from "@/lib/nav";
 import { NavLinkList, NavLinks } from "./nav-links";
+import { PageWhatsAppLink } from "./page-whatsapp-link";
 import styles from "./header.module.css";
 
 type HeaderProps = {
-  /** wa.me link when a WhatsApp number is set, otherwise the contact page. */
-  whatsappHref: string;
+  /** WhatsApp digits from site settings; null → the button goes to the contact form. */
+  whatsappNumber: string | null;
 };
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** Fixed header: transparent over the hero, navy + blur after 40px. Owns the mobile drawer. */
-export function Header({ whatsappHref }: HeaderProps) {
+export function Header({ whatsappNumber }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
@@ -95,10 +96,14 @@ export function Header({ whatsappHref }: HeaderProps) {
             </Suspense>
           </nav>
           <div className={styles.cta}>
-            <a className={`btn btn-outline ${styles.waBtn}`} href={whatsappHref}>
+            <PageWhatsAppLink
+              number={whatsappNumber}
+              className={`btn btn-outline ${styles.waBtn}`}
+              newTab={false}
+            >
               <WhatsAppIcon />
               WhatsApp us
-            </a>
+            </PageWhatsAppLink>
             <Link
               className={`btn btn-gold ${styles.investBtn}`}
               href="/invest"

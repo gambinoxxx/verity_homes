@@ -1,3 +1,4 @@
+import { interestMessage } from "@/lib/whatsapp";
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
@@ -71,7 +72,7 @@ async function PlanContent({ params }: { params: PageProps<"/invest/[slug]">["pa
 
   const actions = {
     whatsapp: settings.whatsapp,
-    whatsappText: `Hi Verity, I'm interested in ${plan.name} (${url})`,
+    whatsappText: interestMessage(plan.name, url),
     ownerId: plan.id,
     callBackHref: "#start",
   };

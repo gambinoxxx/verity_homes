@@ -1,12 +1,9 @@
 import { getSiteSettings } from "@/lib/db/queries/settings";
-import { whatsappLink } from "@/lib/whatsapp";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { Preloader } from "./preloader";
 import { BackToTop, ScrollProgress } from "./scroll-ui";
 import { WhatsAppFloat } from "./whatsapp-float";
-
-const WHATSAPP_GREETING = "Hello Verity Homes and Properties, I would like to make an enquiry.";
 
 /**
  * Header, footer and floating buttons around a public page. Shared by app/(site)/layout.tsx
@@ -14,7 +11,6 @@ const WHATSAPP_GREETING = "Hello Verity Homes and Properties, I would like to ma
  */
 export async function SiteChrome({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
-  const wa = whatsappLink(settings.whatsapp, WHATSAPP_GREETING);
 
   return (
     <>
@@ -23,11 +19,12 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       </a>
       <ScrollProgress />
       <Preloader />
-      {/* No WhatsApp number yet: the button goes to the contact form instead. */}
-      <Header whatsappHref={wa ?? "/contact#message"} />
+      {/* WhatsApp buttons name the current page (PageWhatsAppLink); with no number set the
+          header button goes to the contact form and the float is hidden. */}
+      <Header whatsappNumber={settings.whatsapp} />
       <main id="main">{children}</main>
       <Footer settings={settings} />
-      <WhatsAppFloat href={wa} />
+      <WhatsAppFloat number={settings.whatsapp} />
       <BackToTop />
     </>
   );

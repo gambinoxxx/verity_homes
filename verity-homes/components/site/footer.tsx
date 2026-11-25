@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cacheLife } from "next/cache";
+import { telHref } from "@/lib/contact-links";
 import { prefetchFor } from "@/lib/nav";
 import type { SiteSettingsView } from "@/lib/db/queries/settings";
 import { Brand } from "./brand";
@@ -89,13 +90,17 @@ export async function Footer({ settings }: FooterProps) {
             <h2>Get in touch</h2>
             <p className={styles.contact}>
               {phone ? (
-                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>{phone}</a>
+                <a href={telHref(phone)} data-contact="phone">
+                  {phone}
+                </a>
               ) : (
                 <span className="ph">Phone number</span>
               )}
               <br />
               {email ? (
-                <a href={`mailto:${email}`}>{email}</a>
+                <a href={`mailto:${email}`} data-contact="email">
+                  {email}
+                </a>
               ) : (
                 <span className="ph">Email address</span>
               )}

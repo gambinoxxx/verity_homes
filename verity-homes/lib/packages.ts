@@ -19,7 +19,7 @@ export function packageEnquiryMessage(p: Pkg, planName: string): string {
 
 /** WhatsApp text naming the package (same style as the property messages). */
 export function packageWhatsappMessage(p: Pkg, planName: string, url: string): string {
-  return `Hi Verity, I'm interested in the ${packageName(p)} of ${planName}: receive ${formatNaira(BigInt(p.returnAmountKobo))} after ${months(p.tenureMonths)} (${url})`;
+  return `Hello Verity, I'm interested in the ${packageName(p)} of ${planName}: receive ${formatNaira(BigInt(p.returnAmountKobo))} after ${months(p.tenureMonths)} (${url})`;
 }
 
 /** Inbox line: "₦20,000,000 package — receive ₦21,000,000 after 12 months". */

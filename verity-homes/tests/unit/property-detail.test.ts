@@ -72,7 +72,7 @@ describe("enquiry helpers", () => {
 
   it("builds the WhatsApp message naming the property and its URL", () => {
     expect(propertyWhatsappMessage("Duplex", `${SITE}/properties/duplex`)).toBe(
-      "Hi Verity, I'm interested in Duplex (https://www.verityhomes.ng/properties/duplex)",
+      "Hello Verity, I'm interested in Duplex (https://www.verityhomes.ng/properties/duplex)",
     );
   });
 });

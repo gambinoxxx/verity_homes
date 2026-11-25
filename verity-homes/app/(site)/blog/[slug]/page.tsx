@@ -1,3 +1,4 @@
+import { questionMessage } from "@/lib/whatsapp";
 import { Suspense } from "react";
 import { SlugPageFallback } from "@/components/site/slug-page-fallback";
 import type { Metadata } from "next";
@@ -128,7 +129,7 @@ async function PostContent({ params }: { params: PageProps<"/blog/[slug]">["para
               title="Have questions about this? Talk to Verity"
               text="Chat with us on WhatsApp, or ask for a call back."
               whatsapp={settings.whatsapp}
-              whatsappText={`Hi Verity, I have a question about "${post.title}" (${url})`}
+              whatsappText={questionMessage(post.title, url)}
               ownerId={post.id}
               callBackHref="/contact#message"
             />
