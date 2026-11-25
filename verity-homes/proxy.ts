@@ -17,7 +17,7 @@ import { adminApiProxy, adminProxy } from "@/lib/auth/proxy";
 import { isAdminApiPath, isAdminPath } from "@/lib/auth/roles";
 import { resolvePostSlug } from "@/lib/db/queries/posts";
 import { resolvePlanSlug } from "@/lib/db/queries/invest";
-import { resolvePropertySlug } from "@/lib/db/queries/properties";
+import { resolveAreaSlug, resolvePropertySlug } from "@/lib/db/queries/properties";
 
 const NOT_FOUND_PATH = "/__not-found";
 
@@ -30,6 +30,21 @@ const SLUG_ROUTES = [
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   if (isAdminPath(request.nextUrl.pathname)) return adminProxy(request, event);
   if (isAdminApiPath(request.nextUrl.pathname)) return adminApiProxy(request, event);
+
+  // Unit 21 step 6: /properties/in/<area> exists only while the area has published listings.
+  const area = /^\/properties\/in\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
+  if (area?.[1]) {
+    let slug = "";
+    try {
+      slug = decodeURIComponent(area[1]);
+    } catch {
+      return NextResponse.rewrite(new URL(NOT_FOUND_PATH, request.url));
+    }
+    const status = await resolveAreaSlug(slug);
+    return status.kind === "published"
+      ? NextResponse.next()
+      : NextResponse.rewrite(new URL(NOT_FOUND_PATH, request.url));
+  }
 
   const match = /^\/(properties|blog|invest)\/([^/]+)\/?$/.exec(request.nextUrl.pathname);
   const route = SLUG_ROUTES.find((r) => r.base === `/${match?.[1]}`);
@@ -59,6 +74,7 @@ export const config = {
     "/api/blob/:path*",
     "/api/admin/:path*",
     "/properties/:slug",
+    "/properties/in/:area",
     "/blog/:slug",
     "/invest/:slug",
   ],

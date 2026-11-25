@@ -12,6 +12,7 @@ import {
   propertyFacts,
   type FactKey,
 } from "@/lib/property-detail";
+import { areaPath } from "@/lib/areas";
 import { EnquiryForm } from "../enquiry-form";
 import { OfferNote } from "./plots";
 import { PlotAwareWhatsApp } from "./whatsapp-link";
@@ -87,6 +88,10 @@ export function PropertyHead({ property: p, url }: P & { url: string }) {
         <p className={styles.loc}>
           <PinIcon />
           {p.area}, {p.city}
+          {/* Unit 21 step 6: the area page (exists while this listing is published) */}
+          <Link className={styles.moreIn} href={areaPath(p.area)} prefetch={false}>
+            More in {p.area}
+          </Link>
         </p>
         {p.developerName ? (
           <p className={styles.dev} data-testid="developer">

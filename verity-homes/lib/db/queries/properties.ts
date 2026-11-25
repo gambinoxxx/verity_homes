@@ -10,6 +10,7 @@ import type {
   PropertyType,
   TitleDocument,
 } from "@/lib/generated/prisma/client";
+import { areaSlug, groupAreas, type AreaGroup } from "@/lib/areas";
 import { formatListingPrice } from "@/lib/format";
 import { depositLabel, plotSizeRange } from "@/lib/plots";
 import {
@@ -353,6 +354,49 @@ export async function getPublishedAreas(): Promise<string[]> {
     select: { area: true },
   });
   return rows.map((r) => r.area);
+}
+
+/**
+ * Area pages (Unit 21 step 6): every area with ≥ 1 published property, grouped by slug.
+ * Cached (tag "properties").
+ */
+export async function getAreaGroups(): Promise<AreaGroup[]> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const rows = await db.property.findMany({
+    where: PUBLISHED,
+    select: { area: true, city: true, listingType: true, updatedAt: true },
+  });
+  return groupAreas(rows);
+}
+
+/** One area page: the group and its published listings (newest first), or null. */
+export async function getAreaPage(
+  slug: string,
+): Promise<{ group: AreaGroup; items: PropertyCard[] } | null> {
+  "use cache";
+  cacheTag(PROPERTIES_TAG);
+  cacheLife("max");
+  const group = (await getAreaGroups()).find((g) => g.slug === slug);
+  if (!group) return null;
+  const rows = await db.property.findMany({
+    where: { ...PUBLISHED, area: { in: group.names } },
+    orderBy: newestFirst,
+    take: 48,
+    select: cardSelect,
+  });
+  return { group, items: rows.map(toCard) };
+}
+
+/** proxy.ts: does /properties/in/<slug> have published listings? Not cached (like the others). */
+export async function resolveAreaSlug(slug: string): Promise<SlugStatus> {
+  const rows = await db.property.findMany({
+    where: PUBLISHED,
+    distinct: ["area"],
+    select: { area: true },
+  });
+  return rows.some((r) => areaSlug(r.area) === slug) ? { kind: "published" } : { kind: "missing" };
 }
 
 /** Every published slug, for generateStaticParams. Cached (tag "properties"). */

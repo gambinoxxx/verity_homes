@@ -1,4 +1,5 @@
-import { getPublishedAreas, listProperties } from "@/lib/db/queries/properties";
+import Link from "next/link";
+import { getAreaGroups, getPublishedAreas, listProperties } from "@/lib/db/queries/properties";
 import { parsePropertyFilters, type SearchParamsInput } from "@/lib/validation/property-filters";
 import { ComingSoon } from "../coming-soon";
 import { FilterNavProvider } from "./filter-nav";
@@ -18,7 +19,11 @@ export async function PropertiesBrowser({
   searchParams: Promise<SearchParamsInput>;
 }) {
   const filters = parsePropertyFilters(await searchParams);
-  const [result, areas] = await Promise.all([listProperties(filters), getPublishedAreas()]);
+  const [result, areas, areaGroups] = await Promise.all([
+    listProperties(filters),
+    getPublishedAreas(),
+    getAreaGroups(),
+  ]);
   // Nothing published at all (an unfiltered search found nothing): no pills, filters or
   // "Showing 0" — just "New listings coming soon". A filtered search keeps its own empty state.
   const filtered = Object.entries(filters).some(([k, v]) => k !== "page" && v !== undefined);
@@ -30,6 +35,21 @@ export async function PropertiesBrowser({
         <FilterSidebar filters={filters} areas={areas} />
         <Results filters={filters} result={result} />
       </div>
+      {/* Unit 21 step 6: one page per area with published listings */}
+      {areaGroups.length ? (
+        <nav className={styles.areaLinks} aria-label="Browse by area">
+          <h2>Browse by area</h2>
+          <ul>
+            {areaGroups.map((g) => (
+              <li key={g.slug}>
+                <Link href={`/properties/in/${g.slug}`} prefetch={false}>
+                  {g.name} <span>({g.count})</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
     </FilterNavProvider>
   );
 }

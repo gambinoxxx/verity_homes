@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/lib/db/client";
+import { groupAreas } from "@/lib/areas";
 import { PLANS_TAG } from "./invest";
 import { POSTS_TAG } from "./posts";
 import { PROPERTIES_TAG } from "./properties";
@@ -26,8 +27,16 @@ export async function getSitemapRows(): Promise<SitemapRow[]> {
       select,
     }),
   ]);
+  const areas = groupAreas(
+    await db.property.findMany({
+      where: published,
+      select: { area: true, city: true, listingType: true, updatedAt: true },
+    }),
+  );
   return [
     ...properties.map((r) => ({ path: `/properties/${r.slug}`, lastModified: r.updatedAt })),
+    // Unit 21 step 6: area pages
+    ...areas.map((g) => ({ path: `/properties/in/${g.slug}`, lastModified: g.lastModified })),
     ...posts.map((r) => ({ path: `/blog/${r.slug}`, lastModified: r.updatedAt })),
     ...plans.flatMap((r) =>
       r.slug ? [{ path: `/invest/${r.slug}`, lastModified: r.updatedAt }] : [],

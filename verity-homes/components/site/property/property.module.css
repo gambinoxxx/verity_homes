@@ -671,3 +671,13 @@
     transform: none;
   }
 }
+
+/* Unit 21 step 6: "More in Lekki" → the area page */
+.moreIn {
+  margin-left: 12px;
+  color: var(--accent-text);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

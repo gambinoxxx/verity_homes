@@ -205,7 +205,9 @@ export function EnquiryForm({
         }
         // Autofill + an instant tap can beat the anti-bot minimum fill time: wait out the rest
         // (the button already says "Sending…") instead of refusing a real person.
-        const wait = Math.max(0, startedAt.current + MIN_FILL_MS + 150 - Date.now());
+        // Only a complete form waits: an incomplete one gets its field errors straight away.
+        const complete = ["name", "phone"].every((k) => String(data.get(k) ?? "").trim());
+        const wait = complete ? Math.max(0, startedAt.current + MIN_FILL_MS + 150 - Date.now()) : 0;
         setWaiting(wait > 0);
         window.setTimeout(() => {
           setWaiting(false);
