@@ -1,6 +1,11 @@
 // Unit 20: page metadata, Organization JSON-LD, sitemap entries and robots rules.
 import { describe, expect, it } from "vitest";
-import { DEFAULT_OG_IMAGE, organizationJsonLd, pageMetadata } from "@/lib/seo";
+import {
+  DEFAULT_OG_IMAGE,
+  organizationJsonLd,
+  pageMetadata,
+  verificationMetadata,
+} from "@/lib/seo";
 import { STATIC_SITEMAP_PATHS, robotsRules, sitemapEntries } from "@/lib/sitemap";
 
 const SITE = "https://www.verityhomes.ng";
@@ -149,5 +154,23 @@ describe("sitemap and robots", () => {
     for (const vercelEnv of ["preview", "development", undefined]) {
       expect(robotsRules(SITE, vercelEnv)).toEqual({ rules: [{ userAgent: "*", disallow: "/" }] });
     }
+  });
+});
+
+describe("search engine verification (Unit 21 step 5)", () => {
+  it("is left out entirely when neither ID is set", () => {
+    expect(verificationMetadata(undefined, undefined)).toBeUndefined();
+    expect(verificationMetadata("", "  ")).toBeUndefined();
+  });
+  it("adds only the IDs that are set", () => {
+    expect(verificationMetadata("abcDEF123_-xyz", undefined)).toEqual({ google: "abcDEF123_-xyz" });
+    expect(verificationMetadata(undefined, "0123456789ABCDEF")).toEqual({
+      other: { "msvalidate.01": "0123456789ABCDEF" },
+    });
+  });
+  it("ignores a pasted whole tag or junk instead of printing it", () => {
+    expect(
+      verificationMetadata('<meta name="google-site-verification" content="x" />', undefined),
+    ).toBeUndefined();
   });
 });

@@ -3,7 +3,7 @@ import { Manrope, Playfair_Display } from "next/font/google";
 import { getSiteSettings } from "@/lib/db/queries/settings";
 import { env } from "@/lib/env";
 import { jsonLdScript } from "@/lib/property-detail";
-import { DEFAULT_OG_IMAGE, SITE_NAME, organizationJsonLd } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_NAME, organizationJsonLd, verificationMetadata } from "@/lib/seo";
 import "./globals.css";
 
 // Weights match the design's Google Fonts link (design/index.html).
@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   description: "Verity Homes and Properties Ltd, Lagos real estate.",
   openGraph: { siteName: SITE_NAME, locale: "en_NG", type: "website", images: [DEFAULT_OG_IMAGE] },
   twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE.url] },
+  // Unit 21 step 5: <meta name="google-site-verification"> / "msvalidate.01", only when set.
+  verification: verificationMetadata(
+    process.env.NEXT_PUBLIC_GSC_VERIFICATION,
+    process.env.NEXT_PUBLIC_BING_VERIFICATION,
+  ),
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

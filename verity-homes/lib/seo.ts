@@ -114,3 +114,25 @@ export function organizationJsonLd(s: OrganizationSettings, siteUrl: string) {
   if (sameAs.length) ld.sameAs = sameAs;
   return ld;
 }
+
+/**
+ * Search Console / Bing Webmaster ownership tags (Unit 21 step 5), only for the IDs that are set.
+ * The owner will probably verify Google with a DNS TXT record instead; this is the fallback.
+ * Pass the raw env values; a value is trimmed and anything that isn't a plain token is ignored.
+ */
+export function verificationMetadata(
+  google: string | undefined,
+  bing: string | undefined,
+): Metadata["verification"] {
+  const token = (v: string | undefined) => {
+    const t = v?.trim() ?? "";
+    return /^[A-Za-z0-9_-]{8,128}$/.test(t) ? t : undefined;
+  };
+  const g = token(google);
+  const b = token(bing);
+  if (!g && !b) return undefined;
+  return {
+    ...(g ? { google: g } : {}),
+    ...(b ? { other: { "msvalidate.01": b } } : {}),
+  };
+}
