@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
     ? { experimental: { serverActions: { allowedOrigins: codespacesOrigins } } }
     : {}),
   images: {
+    // 60: page-hero backgrounds (under a dark overlay); 75: everything else (Next's default).
+    qualities: [60, 75],
     // Property photos uploaded to Vercel Blob (Unit 15); /samples/ seed images are local.
     remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
   },

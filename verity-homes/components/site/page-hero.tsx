@@ -74,7 +74,8 @@ export function PageHero({
   const post = variant === "post";
   const background = (
     <div className={`${styles.image} media`} aria-hidden="true">
-      <Image src={image} alt="" fill priority sizes="100vw" />
+      {/* Under a dark overlay: quality 60 is indistinguishable and much lighter (Unit 21). */}
+      <Image src={image} alt="" fill priority sizes="100vw" quality={60} />
     </div>
   );
 
