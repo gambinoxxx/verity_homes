@@ -17,7 +17,7 @@ const { createEnquiry } = await import("@/lib/actions/enquiry");
 const { hashIp } = await import("@/lib/ip-hash");
 
 const TAG = "[TEST] enquiry";
-const RATE_LIMITED = /several messages already/;
+const RATE_LIMITED = /several enquiries in the last hour — please WhatsApp us/;
 
 function form(fields: Record<string, string>): FormData {
   const fd = new FormData();
@@ -26,7 +26,7 @@ function form(fields: Record<string, string>): FormData {
     interest: "BUYING",
     phone: "08030000000",
     startedAt: String(Date.now() - 10_000),
-    company: "",
+    vh_trap: "",
     ...fields,
   };
   for (const [k, v] of Object.entries(all)) fd.set(k, v);
@@ -74,12 +74,60 @@ describe("createEnquiry", () => {
     expect(row.emailSentAt).toBeNull();
   });
 
-  it("rejects a filled honeypot without saving or emailing", async () => {
+  it("rejects a filled honeypot without saving or emailing, and logs why (no personal data)", async () => {
     const name = uniqueName();
-    const result = await createEnquiry(null, form({ name, company: "Acme Bots Ltd" }));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await createEnquiry(null, form({ name, vh_trap: "Acme Bots Ltd" }));
     expect(result?.ok).toBe(false);
     expect(await db.enquiry.count({ where: { name } })).toBe(0);
     expect(sendEnquiryEmail).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith("enquiry refused: honeypot filled (form HOME_PAGE)");
+    expect(JSON.stringify(warn.mock.calls)).not.toMatch(/Acme|0803|TEST\] enquiry/);
+    warn.mockRestore();
+  });
+
+  // 25 Nov 2026 incident: a real visitor on /buy-house-lagos saw "Sorry, we couldn't send your
+  // enquiry" and nothing was logged or saved. Browser/phone autofill had filled the old
+  // honeypot, a hidden field named "company". That field is now ignored.
+  it("REGRESSION: an autofilled 'company' field on a landing-page lead is saved, not refused", async () => {
+    const name = uniqueName();
+    sendEnquiryEmail.mockResolvedValue(true);
+    const result = await createEnquiry(
+      null,
+      form({
+        name,
+        source: "LANDING_PAGE",
+        interest: "BUYING",
+        wantsInspection: "true",
+        message: "I'd like help buying a house in Lagos. Please contact me.",
+        company: "Acme Ltd", // what autofill put in the old honeypot
+        utmSource: "google",
+        landingPage: "/buy-house-lagos?utm_source=google",
+      }),
+    );
+    expect(result).toEqual({ ok: true, message: expect.stringMatching(/thank you/i) });
+    const row = await db.enquiry.findFirstOrThrow({ where: { name } });
+    expect(row.source).toBe("LANDING_PAGE");
+    expect(row.wantsInspection).toBe(true);
+    expect(row.utmSource).toBe("google");
+  });
+
+  it("a rejected hidden field is logged as an error with the field name only", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await createEnquiry(null, form({ name: uniqueName(), source: "NOPE" }));
+    expect(result?.ok).toBe(false);
+    expect(error.mock.calls[0]?.[0]).toMatch(/^enquiry refused: hidden field rejected source:/);
+    error.mockRestore();
+  });
+
+  it("once saved, the visitor sees success even if the email step throws", async () => {
+    const name = uniqueName();
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    sendEnquiryEmail.mockRejectedValue(new Error("boom"));
+    const result = await createEnquiry(null, form({ name }));
+    expect(result?.ok).toBe(true);
+    expect(await db.enquiry.count({ where: { name } })).toBe(1);
+    error.mockRestore();
   });
 
   it("rate-limits after 5 enquiries per IP per hour, with the friendly message", async () => {

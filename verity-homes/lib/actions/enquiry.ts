@@ -18,7 +18,8 @@ import {
 } from "@/lib/db/mutations/enquiries";
 import { sendEnquiryEmail } from "@/lib/email/enquiry";
 import { LEAD_SOURCE_FIELDS, describeSource, type LeadSource } from "@/lib/lead-source";
-import { enquirySchema } from "@/lib/validation/enquiry";
+import { HONEYPOT_FIELD } from "@/lib/honeypot";
+import { enquirySchema, type EnquiryInput } from "@/lib/validation/enquiry";
 
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
@@ -36,9 +37,20 @@ const MESSAGES = {
   check: "Please check the highlighted fields.",
   tooFast: "That was quick! Please check your details and press send again.",
   rateLimited:
-    "You've sent several messages already — please try again in an hour or chat with us on WhatsApp.",
+    "You've sent several enquiries in the last hour — please WhatsApp us and we'll reply there.",
   failed: "Sorry, we couldn't send your enquiry. Please try again or chat with us on WhatsApp.",
 } as const;
+
+/**
+ * Every refusal is logged with a short reason and the form type — never names, phones, emails,
+ * messages or IP — so a failed enquiry is visible in the Vercel logs (25 Nov 2026: a refused
+ * enquiry left no trace). Expected refusals (bot checks, rate limit, typos) are warnings;
+ * anything unexpected is an error.
+ */
+function refused(level: "warn" | "error", reason: string, source: unknown): void {
+  const form = typeof source === "string" ? source.slice(0, 20) : "unknown";
+  console[level](`enquiry refused: ${reason} (form ${form})`);
+}
 
 export async function createEnquiry(
   _prev: EnquiryState,
@@ -53,7 +65,10 @@ export async function createEnquiry(
     if (!parsed.success) {
       const issues = parsed.error.issues;
       // Honeypot filled: a bot. Nothing is saved.
-      if (issues.some((i) => i.path[0] === "company")) return { ok: false, error: MESSAGES.failed };
+      if (issues.some((i) => i.path[0] === HONEYPOT_FIELD)) {
+        refused("warn", "honeypot filled", raw.source);
+        return { ok: false, error: MESSAGES.failed };
+      }
       const fieldErrors: Partial<Record<EnquiryField, string>> = {};
       for (const issue of issues) {
         const key = issue.path[0];
@@ -61,12 +76,18 @@ export async function createEnquiry(
           fieldErrors[key as EnquiryField] ??= issue.message;
         }
       }
-      if (Object.keys(fieldErrors).length) return { ok: false, error: MESSAGES.check, fieldErrors };
-      // Only the minimum fill time (or a tampered hidden field) failed.
-      return {
-        ok: false,
-        error: issues.some((i) => i.path[0] === "startedAt") ? MESSAGES.tooFast : MESSAGES.failed,
-      };
+      if (Object.keys(fieldErrors).length) {
+        refused("warn", `invalid ${Object.keys(fieldErrors).join(", ")}`, raw.source);
+        return { ok: false, error: MESSAGES.check, fieldErrors };
+      }
+      // Only the minimum fill time (or a hidden field) failed.
+      if (issues.some((i) => i.path[0] === "startedAt")) {
+        refused("warn", "sent too fast", raw.source);
+        return { ok: false, error: MESSAGES.tooFast };
+      }
+      const hidden = [...new Set(issues.map((i) => `${String(i.path[0])}:${i.code}`))].join(", ");
+      refused("error", `hidden field rejected ${hidden.slice(0, 200)}`, raw.source);
+      return { ok: false, error: MESSAGES.failed };
     }
     const input = parsed.data;
 
@@ -75,6 +96,7 @@ export async function createEnquiry(
       try {
         amountKobo = koboFromNaira(input.amount);
       } catch {
+        refused("warn", "invalid amount", input.source);
         return {
           ok: false,
           error: MESSAGES.check,
@@ -86,7 +108,10 @@ export async function createEnquiry(
     // 2. Rate limit: 5 saved enquiries per IP hash per hour.
     const ipHash = hashIp(clientIp(await headers()));
     const recent = await countEnquiriesSince(ipHash, new Date(Date.now() - RATE_WINDOW_MS));
-    if (recent >= RATE_LIMIT) return { ok: false, error: MESSAGES.rateLimited };
+    if (recent >= RATE_LIMIT) {
+      refused("warn", "rate limited", input.source);
+      return { ok: false, error: MESSAGES.rateLimited };
+    }
 
     // Links must point at published content; anything else is dropped, the enquiry still counts.
     const [property, plan, plot, pkg] = await Promise.all([
@@ -118,32 +143,51 @@ export async function createEnquiry(
       ipHash,
     });
 
-    // 4. Then email. A failure is logged inside sendEnquiryEmail; the enquiry is kept.
-    const sent = await sendEnquiryEmail({
-      id: saved.id,
-      createdAt: saved.createdAt,
-      name: input.name,
-      phone: input.phone,
-      email: input.email,
-      interest: input.interest,
-      source: input.source,
-      message: input.message,
-      wantsInspection: input.wantsInspection,
-      amountKobo,
-      property,
-      plan,
-      leadSource: describeSource(lead),
-    });
-    if (sent) {
-      await markEnquiryEmailSent(saved.id).catch((e: unknown) =>
-        console.error(
-          `Enquiry ${saved.id}: could not record emailSentAt (${e instanceof Error ? e.message : e})`,
-        ),
+    // 4. Then email. Once the enquiry is saved the visitor ALWAYS sees success: an email
+    // problem (or anything else from here on) is logged and the enquiry stays in the inbox
+    // with emailSentAt = null.
+    try {
+      await notify(saved, input, amountKobo, property, plan, describeSource(lead));
+    } catch (e) {
+      console.error(
+        `Enquiry ${saved.id}: saved, but the notification step failed (${e instanceof Error ? e.message : "unknown error"})`,
       );
     }
     return { ok: true, message: MESSAGES.sent };
   } catch (e) {
     console.error(`createEnquiry failed: ${e instanceof Error ? e.message : "unknown error"}`);
     return { ok: false, error: MESSAGES.failed };
+  }
+}
+
+async function notify(
+  saved: { id: string; createdAt: Date },
+  input: EnquiryInput,
+  amountKobo: bigint | null,
+  property: Awaited<ReturnType<typeof findPublishedPropertyRef>>,
+  plan: Awaited<ReturnType<typeof findPublishedPlanRef>>,
+  leadSource: string | null,
+): Promise<void> {
+  const sent = await sendEnquiryEmail({
+    id: saved.id,
+    createdAt: saved.createdAt,
+    name: input.name,
+    phone: input.phone,
+    email: input.email,
+    interest: input.interest,
+    source: input.source,
+    message: input.message,
+    wantsInspection: input.wantsInspection,
+    amountKobo,
+    property,
+    plan,
+    leadSource,
+  });
+  if (sent) {
+    await markEnquiryEmailSent(saved.id).catch((e: unknown) =>
+      console.error(
+        `Enquiry ${saved.id}: could not record emailSentAt (${e instanceof Error ? e.message : e})`,
+      ),
+    );
   }
 }

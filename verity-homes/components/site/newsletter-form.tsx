@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import { subscribe, type SubscribeState } from "@/lib/actions/subscribe";
 import { track } from "@/lib/analytics";
+import { HONEYPOT_LABEL, honeypotInputProps } from "@/lib/honeypot";
 import styles from "./footer.module.css";
 
 /** Footer email capture (design/index.html), saved by the subscribe server action. */
@@ -45,8 +46,8 @@ export function NewsletterForm() {
         />
         {/* Honeypot: must stay empty. */}
         <div className={styles.hp} aria-hidden="true">
-          <label htmlFor="nl-company">Company</label>
-          <input id="nl-company" name="company" tabIndex={-1} autoComplete="off" />
+          <label htmlFor="nl-hp">{HONEYPOT_LABEL}</label>
+          <input id="nl-hp" {...honeypotInputProps} />
         </div>
         <button className="btn btn-gold" type="submit" disabled={pending}>
           {pending ? "Subscribing…" : "Subscribe"}

@@ -1,8 +1,10 @@
 // Shared by the enquiry form (client) and the createEnquiry server action.
 import { z } from "zod";
+import { HONEYPOT_FIELD } from "@/lib/honeypot";
 import { LEAD_SOURCE_LIMITS, clipValue, type LeadSource } from "@/lib/lead-source";
 
-const MIN_FILL_MS = 3_000;
+/** Minimum time between the form appearing and sending (anti-bot). The form waits it out. */
+export const MIN_FILL_MS = 3_000;
 
 export const enquirySchema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(100),
@@ -41,7 +43,9 @@ export const enquirySchema = z.object({
   packageId: z.string().max(40).optional(), // Unit 17c: the package chosen on a plan page
   wantsInspection: z.coerce.boolean().default(false),
   amount: z.string().optional(), // naira text from the invest form; convert with koboFromNaira
-  company: z.string().max(0, "Spam detected").optional().default(""), // honeypot: must stay empty
+  // Honeypot (lib/honeypot.ts): must stay empty. The old "company" field is ignored: autofill
+  // filled it and real enquiries were refused.
+  [HONEYPOT_FIELD]: z.string().max(0, "Spam detected").optional().default(""),
   startedAt: z.coerce
     .number()
     .refine((t) => Date.now() - t >= MIN_FILL_MS, "Please take a moment before submitting"),

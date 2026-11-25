@@ -111,6 +111,8 @@ test("an enquiry keeps the visit's first-touch source (UTM tags, click ID, landi
   await page.setExtraHTTPHeaders({ "x-forwarded-for": `192.0.2.${n()}` });
   // Land with ad tags, browse to another page, then enquire: the FIRST page is what counts.
   await page.goto("/about?utm_source=google&utm_medium=cpc&utm_campaign=land-lekki&gclid=E2Etest");
+  // The first touch is recorded once the page's JavaScript has started.
+  await page.waitForFunction(() => sessionStorage.getItem("verity:first-touch") !== null);
   await page.goto("/contact#message");
   const form = page.getByRole("form", { name: "Contact form" });
   const last = `[E2E] ${randomUUID().slice(0, 8)}`;

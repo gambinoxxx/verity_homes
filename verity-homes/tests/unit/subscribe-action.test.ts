@@ -12,7 +12,7 @@ const DOMAIN = "subscribe-test.example";
 const fd = (email: string, company = "") => {
   const f = new FormData();
   f.set("email", email);
-  f.set("company", company);
+  f.set("vh_trap", company); // honeypot (lib/honeypot.ts)
   return f;
 };
 

@@ -83,3 +83,31 @@ test("a lead from a landing page is saved as LANDING_PAGE with its ad source", a
     landingPage: `${lp.path}?utm_source=google&utm_medium=cpc&utm_campaign=land-lekki`,
   });
 });
+
+// 25 Nov 2026 incident: autofill filled the old "company" honeypot and the visitor saw "Sorry,
+// we couldn't send your enquiry". Simulate autofill: every field filled at once, straight away,
+// and sent immediately — the form must wait out the anti-bot minimum itself and succeed.
+test("REGRESSION: an instant, autofill-style submit on a landing page succeeds", async ({
+  page,
+}) => {
+  const lp = LANDING_PAGES[0]; // buy a house
+  const n = () => Math.floor(Math.random() * 250) + 1;
+  await page.setExtraHTTPHeaders({ "x-forwarded-for": `192.0.2.${n()}` });
+  await page.goto(lp.path);
+  const form = page.getByRole("form", { name: lp.formHeading });
+  await expect(form.locator('input[name="company"]')).toHaveCount(0);
+  const name = `[E2E] Autofill ${randomUUID().slice(0, 8)}`;
+  await form.evaluate((el, who) => {
+    // What a browser's autofill does: set every text field it recognises, in one go.
+    const set = (sel: string, v: string) => {
+      const input = el.querySelector<HTMLInputElement>(sel);
+      if (input) input.value = v;
+    };
+    set('input[autocomplete="name"]', who);
+    set('input[autocomplete="tel"]', "08030000000");
+  }, name);
+  await form.getByRole("button", { name: "Send enquiry" }).click(); // no waiting
+  await expect(form.getByRole("status")).toContainText(/thank you/i, { timeout: 20_000 });
+  created.push(name);
+  expect(await findEnquirySource(name)).toBe("LANDING_PAGE");
+});

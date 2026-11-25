@@ -11,7 +11,7 @@ const valid = {
   source: "PROPERTY_PAGE",
   propertyId: "clx123",
   wantsInspection: true,
-  company: "", // honeypot
+  vh_trap: "", // honeypot (lib/honeypot.ts)
   startedAt: Date.now() - 10_000,
 };
 
@@ -41,7 +41,10 @@ describe("enquirySchema", () => {
     expect(enquirySchema.safeParse({ ...valid, email: undefined }).success).toBe(true);
   });
   it("rejects bots: filled honeypot", () => {
-    expect(enquirySchema.safeParse({ ...valid, company: "Acme" }).success).toBe(false);
+    expect(enquirySchema.safeParse({ ...valid, vh_trap: "Acme" }).success).toBe(false);
+  });
+  it("accepts an autofilled company name (the old honeypot that refused real enquiries)", () => {
+    expect(enquirySchema.safeParse({ ...valid, company: "Acme Ltd" }).success).toBe(true);
   });
   it("rejects bots: form submitted faster than 3 seconds", () => {
     expect(enquirySchema.safeParse({ ...valid, startedAt: Date.now() - 500 }).success).toBe(false);

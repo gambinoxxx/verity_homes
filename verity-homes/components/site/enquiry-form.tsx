@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef, startTransition } from "react";
+import { useActionState, useEffect, useId, useRef, useState, startTransition } from "react";
 import { onPlanSelected } from "@/lib/invest-plan-select";
 import { onPackageSelected } from "@/lib/package-select";
 import { onPlotSelected } from "@/lib/plot-select";
 import { createEnquiry, type EnquiryField, type EnquiryState } from "@/lib/actions/enquiry";
 import { leadParams, track } from "@/lib/analytics";
 import { readFirstTouch } from "@/lib/lead-source";
+import { HONEYPOT_LABEL, honeypotInputProps } from "@/lib/honeypot";
+import { MIN_FILL_MS } from "@/lib/validation/enquiry";
 import { ArrowIcon } from "./icons";
 import { MarqueeEyebrow } from "./marquee-eyebrow";
 import styles from "./enquiry-form.module.css";
@@ -70,7 +72,7 @@ type EnquiryFormProps = {
  * Enquiry form, connected to the createEnquiry server action (lib/actions/enquiry.ts).
  * Errors sit under their fields (aria-describedby) and focus moves to the first invalid one;
  * the success message is announced from a role="status" region; the button is disabled while
- * sending, so it can't be double-submitted. Hidden fields: a `company` honeypot and the time
+ * sending, so it can't be double-submitted. Hidden fields: a honeypot (lib/honeypot.ts) and the time
  * the form was first shown (`startedAt`, minimum fill time).
  */
 export function EnquiryForm({
@@ -133,7 +135,9 @@ export function EnquiryForm({
   const formRef = useRef<HTMLFormElement>(null);
   const startedAt = useRef(0);
   const submitting = useRef(false);
-  const [state, formAction, pending] = useActionState<EnquiryState, FormData>(createEnquiry, null);
+  const [state, formAction, sending] = useActionState<EnquiryState, FormData>(createEnquiry, null);
+  const [waiting, setWaiting] = useState(false);
+  const pending = sending || waiting;
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -199,7 +203,14 @@ export function EnquiryForm({
           data.delete("firstName");
           data.delete("lastName");
         }
-        startTransition(() => formAction(data));
+        // Autofill + an instant tap can beat the anti-bot minimum fill time: wait out the rest
+        // (the button already says "Sending…") instead of refusing a real person.
+        const wait = Math.max(0, startedAt.current + MIN_FILL_MS + 150 - Date.now());
+        setWaiting(wait > 0);
+        window.setTimeout(() => {
+          setWaiting(false);
+          startTransition(() => formAction(data));
+        }, wait);
       }}
     >
       {contact ? (
@@ -228,8 +239,8 @@ export function EnquiryForm({
       {interest && !contact ? <input type="hidden" name="interest" value={interest} /> : null}
       {/* Honeypot: invisible to people, tempting to bots. Must stay empty. */}
       <div className={styles.hp} aria-hidden="true">
-        <label htmlFor={f("company")}>Company</label>
-        <input id={f("company")} name="company" tabIndex={-1} autoComplete="off" />
+        <label htmlFor={f("hp")}>{HONEYPOT_LABEL}</label>
+        <input id={f("hp")} {...honeypotInputProps} />
       </div>
 
       {contact ? (
