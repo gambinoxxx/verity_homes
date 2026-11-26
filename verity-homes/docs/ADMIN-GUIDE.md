@@ -1,6 +1,7 @@
 # Verity website: admin guide
 
 For Esther and anyone who updates www.verityhomes.ng. Short sections; read the one you need.
+The screenshots use sample data and example names.
 
 **The golden rules**
 
@@ -18,6 +19,8 @@ For Esther and anyone who updates www.verityhomes.ng. Short sections; read the o
 3. You land on the **Dashboard**: new enquiries, a checklist of things still to do, and quick
    buttons for common jobs.
 
+![The dashboard: new enquiries, listings, quick actions](admin-guide/01-dashboard.png)
+
 If it says **"You don't have access"**, your account isn't set up as an admin yet. Ask your
 web developer to add the admin role to your account.
 
@@ -32,6 +35,8 @@ settings**.
 **Properties**, then **Add property**. The page is split into panels; fill them from top to
 bottom.
 
+![The Properties list](admin-guide/02-properties.png)
+
 | Panel | What to enter |
 | --- | --- |
 | **Basics** | Title (e.g. "4-Bedroom Detached Duplex"), listing type (sale, rent, land, off-plan), property type, the description |
@@ -43,6 +48,8 @@ bottom.
 | **Location & map** | Area (e.g. Lekki), city, the private address and the map pin |
 | **Documents** | The documents the property has (names only, e.g. "Survey plan") |
 
+![Editing a property: the panels on the left, Publish and Google preview on the right](admin-guide/03-property-editor.png)
+
 **Photos**
 
 - Drag photos onto the box, or tap it to choose them. Up to **20 photos**.
@@ -50,6 +57,8 @@ bottom.
   to change the order.
 - Use bright, sharp, landscape photos. No watermarks from other agents.
 - If an upload fails, try again; if it keeps failing, tell your web developer.
+
+![The Photos box and the private address field](admin-guide/04-property-photos.png)
 
 **The map and the address**
 
@@ -85,6 +94,8 @@ Every area with at least one published property automatically gets its own page 
 4. Press **Preview** and read the whole post there before publishing.
 5. **Publish.**
 
+![Writing a new blog post](admin-guide/06-post-editor.png)
+
 **How headings and bullets work.** The post box uses simple symbols:
 
 | Type this | You get |
@@ -113,6 +124,8 @@ for each one.
 - Mark it **Contacted** when you've replied and **Closed** when it's finished, so the **New**
   tab only shows what still needs attention.
 - **Private note**: only admins can see it (e.g. "Called, inspection Saturday").
+
+![The Enquiries list with the Source column (example names)](admin-guide/07-enquiries.png)
 
 **Where did this lead come from?** The **Source** column tells you how the person found the
 website:
@@ -159,6 +172,8 @@ Open it in Excel or Google Sheets.
 ## 7. Site settings
 
 **Site settings** controls the details shown all over the website:
+
+![Site settings (test values shown)](admin-guide/08-settings.png)
 
 - **Contact**: phone, WhatsApp number, email. These appear in the header, footer, contact page
   and every WhatsApp button. *(The email currently shows `into@verityhomes.ng`. Please check
