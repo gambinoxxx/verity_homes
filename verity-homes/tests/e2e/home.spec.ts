@@ -106,6 +106,25 @@ test("the enquiry form is live: submit enabled, no 'goes live soon' note", async
 test.describe("with motion on", () => {
   test.use({ reducedMotion: "no-preference" });
 
+  // Unit 21 step 8 (owner option A): the ~1s intro plays on the first page of a visit only.
+  test("preloader plays on the first page of a visit, not on later full loads", async ({
+    page,
+  }) => {
+    const preloader = page.locator('[role="status"][aria-label^="Loading Verity"]');
+    // Check straight after the HTML parses: the ~1s intro can be over by the "load" event.
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(preloader).toBeVisible();
+    await expect(preloader).toHaveCount(0, { timeout: 5000 });
+
+    await page.goto("/about");
+    // Hidden before the first paint by the inline script, then unmounted.
+    await expect(preloader).toBeHidden();
+    await expect(page.locator("#main h1")).toBeVisible();
+    await page.reload();
+    await expect(preloader).toBeHidden();
+    await expect(page.locator("#main h1")).toBeVisible();
+  });
+
   test("statement words fill on scroll and are all filled by mid-viewport", async ({ page }) => {
     await page.goto("/");
     await page.waitForTimeout(3000); // preloader releases the scroll lock
@@ -188,7 +207,7 @@ test.describe("intro photos, animations on", () => {
 
   test("both photos show after scrolling to the intro", async ({ page }) => {
     await page.goto("/");
-    // The preloader covers the page for up to 5s on a full load.
+    // The preloader covers the page for up to 3.5s on the first full load of a visit.
     await expect(page.locator('[role="status"][aria-label^="Loading Verity"]')).toHaveCount(0, {
       timeout: 7000,
     });

@@ -1,22 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PRELOADER_ID, PRELOADER_SEEN_KEY } from "@/lib/preloader";
 import { markSiteLoaded } from "@/lib/site-loaded";
 import styles from "./preloader.module.css";
 
 type Phase = "show" | "leaving" | "done" | "gone";
 
-// Timings from design/index.html. The curtain must be fully up within MAX_TOTAL_MS.
-const MIN_SHOW_MS = 2400;
+// Unit 21 step 8 (owner decision, option A): the design's 2.4s intro is shortened to ~1s and
+// plays only on the first page of a visit (PRELOADER_SEEN_KEY in sessionStorage). The
+// animation keyframes in preloader.module.css are compressed to match.
+const MIN_SHOW_MS = 1000;
 const LEAVE_MS = 550; // logo fades up, gold line sweeps
 const CURTAIN_MS = 1100; // curtain slides up (1s transition) before removal
-const MAX_TOTAL_MS = 5000;
+const MAX_TOTAL_MS = 3500;
 const MAX_WAIT_MS = MAX_TOTAL_MS - LEAVE_MS - CURTAIN_MS;
+
+function seenThisVisit(): boolean {
+  try {
+    return window.sessionStorage.getItem(PRELOADER_SEEN_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function rememberSeen(): void {
+  try {
+    window.sessionStorage.setItem(PRELOADER_SEEN_KEY, "1");
+  } catch {
+    // Private mode / storage blocked: the intro simply plays again next full load.
+  }
+}
 
 // Module state survives client-side navigation, so the preloader only plays on a full load.
 let hasPlayed = false;
 
-/** Branded preloader: plays once per full page load, skipped for reduced motion. */
+/** Branded preloader: plays on the first page of a visit only, skipped for reduced motion. */
 export function Preloader() {
   const [phase, setPhase] = useState<Phase>(() => (hasPlayed ? "gone" : "show"));
 
@@ -26,6 +45,13 @@ export function Preloader() {
       return;
     }
     hasPlayed = true;
+    if (seenThisVisit()) {
+      // Already hidden before paint by PRELOADER_SKIP_SCRIPT; unmount on the next tick.
+      markSiteLoaded();
+      const t = window.setTimeout(() => setPhase("gone"), 0);
+      return () => window.clearTimeout(t);
+    }
+    rememberSeen();
     const html = document.documentElement;
     const markLoaded = markSiteLoaded;
 
@@ -79,7 +105,7 @@ export function Preloader() {
   ].join(" ");
 
   return (
-    <div className={cls} role="status" aria-label="Loading Verity Homes and Properties">
+    <div id={PRELOADER_ID} className={cls} role="status" aria-label="Loading Verity Homes and Properties">
       <svg width="96" height="96" viewBox="0 0 48 48" aria-hidden="true">
         <path className={styles.roof} d="M8 18 L24 6 L40 18" />
         <path className={styles.v} d="M11 18 L24 42 L37 18" />

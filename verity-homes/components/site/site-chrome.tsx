@@ -3,6 +3,7 @@ import { Analytics } from "./analytics";
 import { LeadSourceCapture } from "./lead-source-capture";
 import { Footer } from "./footer";
 import { Header } from "./header";
+import { PRELOADER_SKIP_SCRIPT } from "@/lib/preloader";
 import { Preloader } from "./preloader";
 import { BackToTop, ScrollProgress } from "./scroll-ui";
 import { WhatsAppFloat } from "./whatsapp-float";
@@ -20,6 +21,8 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <ScrollProgress />
+      {/* Later full page loads in the same visit hide the preloader before the first paint. */}
+      <script dangerouslySetInnerHTML={{ __html: PRELOADER_SKIP_SCRIPT }} />
       <Preloader />
       {/* WhatsApp buttons name the current page (PageWhatsAppLink); with no number set the
           header button goes to the contact form and the float is hidden. */}
